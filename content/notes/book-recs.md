@@ -1,0 +1,50 @@
+---
+title: Book Recommendations
+tags:
+  - books
+---
+An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A constant work in progress. Open to suggestions if you think I'll like something based on what I've put here. Hit me up on [X](https://x.com/corpetty).
+
+- **The Enderverse (Ender's Game)** by Orson Scott Card
+	- A relatively short and entertaining read. This is and has always been a favorite of mine. It started with Ender's Game. While technically a children's novel, it has some very deep and mature themes that run through it: The potential for complete destruction comes can only come from complete understanding and love, the model of leadership and its associated burden, the struggle of greater duty than oneself. And it's space, and aliens, and wargames; which is always great. 
+	- The series then follows Ender and carries increasingly more mature themes as the series progresses. Grappling with concepts like humanity and how it perceives/reacts to an alien species, artificial super-intelligence, and much much more. I couldn't put any of them down. 
+- **The Shadowverse (Ender's Shadow)** by Orson Scott Card
+	- The first book in the series is the same story as Ender's Game, but through the eyes of a different character: Bean. The series then stays with Bean and is more focused on geopolitics and war games. it is also a fascinating read, fits nicely into the universe, and sufficiently differentiated from the themes tackled by the Enderverse series. 
+- **Quantum Questions** by Ken Wilber
+	- A religious/spiritual philosophy book that builds a framework about "mysticism" based off all the first-hand writings the founders of Quantum Questions. As a trained quantum physicist myself, I really enjoy the writings of the early founders and their views on religion, what lies beyond ourselves, and what (if anything) physics can tell us about it. I often find myself coming back to this book and just reading the excerpts from the various founders and thinking about their words more in depth. It is deep in philosophy and quantum physics concepts, but doesn't require any math. It is a slow read, but one that will leave you with lasting thoughts. 
+- **Ben Franklin** by Walter Isaacson
+	- I've found some interest in reading the biographies of great humans, and i think that Isaacson does a great job of capturing their essence in a very non-boarding way. I've read other biographies that somewhat bored me even though they were about fascinating people (Edison). This one was captivating, and I'm excited about the rest of his biographies. 
+- **Signals and Boundaries: Building Blocks for Complex Adaptive Systems** by John H. Holland
+	- a critical read (technical in depth) about complex adaptive systems and is a great precursor to studying the concept of emergence (also one of his other books). I have found that it has given me a solid framework to think about modular pieces and different abstractions and how they fit together, which has influenced my thoughts on organizational structure and how code should be written, among many other things. Not for the weary, take notes when you read it. It's basically a textbook.
+- **A Clockwork Orange** by Anthony Burgess
+	- A classic that everyone should read. 
+- **Radicalized** by Cory Doctorow
+	- I'm generally a fan of Doctorow, and have had the opportunity to have conversations with him about his stances in my podcasts. I think this anthology is a great encapsulation of dangers of our current issues within society. While it's a bit exaggerated, it's still great and captivating and something to consider. 
+- **Stealing Worlds** by Karl Schroeder
+	- I was introduced to Karl via Cory Doctorow and had the opportunity to interview Karl as well. This short science fiction novel is something I recommend to people when they want an easy and fun read that shows a world where digital communities and economies are real and influential to society and various groups of interest. I have yet to read a novel that paints the picture of that reality better than this one, all while also being entertained. 
+- **The Cuckoo's Egg** by Clifford Stoll
+	- Such a wonderful _true_ story of what life was like with the early internet, and one of the first cases (if not the first) of international digital espionage and how one man tracked it down through sheer grit. A great and entertaining novel on why you should care about digital security. 
+- **Dune** by Frank Herbert
+	- I mean, it's fucking Dune. Universe creation that is second to none. There is a reason they're throwing so much money behind their remakes. It's hailed as one of the greatest science fiction books of all time, for good reason. The movies are doing a good job of capturing it as well. 
+- **Hail Mary** by Andy Weir
+	- Another science fiction novel by the same author of The Martian. A beautiful story of realistic science fiction and a lonely survivor's attempts of getting home. Couldn't put it down, was upset when I was done with it. 
+- **Three Body Problem** series by Cixin Liu
+	- An outstanding science fiction series, don't want to give much away about it, but it's sparked an outstanding Netflix series adaptation off of it. Novel concepts of alien life, and created the concept of "The Dark Forrest". 
+- **Slaughterhouse-five**  by Kurt Vonnegut
+	- I mean, it's Vonnegut, and one of his masterpieces. He's just one of my favorites and this is a wonderful example of why. Short read, captivating. 
+- **The Brothers Karamazov**  by Dostoevsky
+	- Dostoevsky just does such a wonderful job of painting the human experience. This novel is considered one of the greatest achievements of world literature. Read it. It paints the picture of the human emotions we all grapple with, and the subtleties of the decisions we make. 
+- **What's Wrong With Us** by Tim Urban
+	- Tim is hilarious, and a genius. This short read gives me the best framework I've seen to think about the society and issues we face. Why we experience echo chambers, how to fight it, how to better the conversations and groups you interact with that trend towards a better, more beneficial society. 
+- **The Death of Ivan Ilych** by Tolstoy
+	- A classic that covers the ideas of death. Considered a masterpiece of literature. His characterization of the human experience leaves you walking away a better human.
+- **The Birth Partner** by Penny Simkin
+	- My wife has had kids, I'm trying to support her in the process. This was a good book to help do that. 
+- **Godel, Escher, Bach: An Eternal Golden Braid** by Douglas Hofstadter
+	- Hard to explain but beautiful. Not a simple read, but dives into a fascinating topic that is intertwined in places you wouldn't expect. If you walk away with a fraction of what the author wants you to experience and understand, you'll have an increased wonder of the beauty of the world we live in.  
+- **Amusing Ourselves to Death: Public Discourse in the Age of Show Business** by Neil Postman
+	- A poignant and cautionary tale of what happens to society when politics becomes entertainment. He clarifies the distinction between Orwell's dystopian future and Huxley's, then explains why we're moving quickly into the former (if not already there). 
+- **Hitchhiker's Guide to the Galaxy**  by Douglas Adams
+	- So long and thanks for all the fish. An enjoyable satire at its finest. 
+- **On Tyranny** by Timothy Snyder
+	- A man I greatly admire and look up to sent this to me unprovoked. I read it and it was well timed. A very short read that reminds you of the tell tale signs of what tyranny looks like. 
