@@ -14,13 +14,13 @@ An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A 
 - **Quantum Questions** by Ken Wilber
 	- A religious/spiritual philosophy book that builds a framework about "mysticism" based off all the first-hand writings the founders of Quantum Questions. As a trained quantum physicist myself, I really enjoy the writings of the early founders and their views on religion, what lies beyond ourselves, and what (if anything) physics can tell us about it. I often find myself coming back to this book and just reading the excerpts from the various founders and thinking about their words more in depth. It is deep in philosophy and quantum physics concepts, but doesn't require any math. It is a slow read, but one that will leave you with lasting thoughts. 
 - **Ben Franklin** by Walter Isaacson
-	- I've found some interest in reading the biographies of great humans, and i think that Isaacson does a great job of capturing their essence in a very non-boarding way. I've read other biographies that somewhat bored me even though they were about fascinating people (Edison). This one was captivating, and I'm excited about the rest of his biographies. 
+	- I've found some interest in reading the biographies of great humans, and I think that Isaacson does a great job of capturing their essence in a very non-boring way. I've read other biographies that somewhat bored me even though they were about fascinating people (Edison). This one was captivating, and I'm excited about the rest of his biographies. 
 - **Signals and Boundaries: Building Blocks for Complex Adaptive Systems** by John H. Holland
 	- a critical read (technical in depth) about complex adaptive systems and is a great precursor to studying the concept of emergence (also one of his other books). I have found that it has given me a solid framework to think about modular pieces and different abstractions and how they fit together, which has influenced my thoughts on organizational structure and how code should be written, among many other things. Not for the weary, take notes when you read it. It's basically a textbook.
 - **A Clockwork Orange** by Anthony Burgess
 	- A classic that everyone should read. 
 - **Radicalized** by Cory Doctorow
-	- I'm generally a fan of Doctorow, and have had the opportunity to have conversations with him about his stances in my podcasts. I think this anthology is a great encapsulation of dangers of our current issues within society. While it's a bit exaggerated, it's still great and captivating and something to consider. 
+	- I'm generally a fan of Doctorow, and have had the opportunity to have conversations with him about his stances in my podcasts. I think this anthology is a great encapsulation of dangers of our current issues within society and an appropriate introduction to Doctorow if you haven't read him. While it's a bit exaggerated, it's still great and captivating and something to consider. 
 - **Stealing Worlds** by Karl Schroeder
 	- I was introduced to Karl via Cory Doctorow and had the opportunity to interview Karl as well. This short science fiction novel is something I recommend to people when they want an easy and fun read that shows a world where digital communities and economies are real and influential to society and various groups of interest. I have yet to read a novel that paints the picture of that reality better than this one, all while also being entertained. 
 - **The Cuckoo's Egg** by Clifford Stoll
@@ -40,12 +40,12 @@ An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A 
 - **The Death of Ivan Ilych** by Tolstoy
 	- A classic that covers the ideas of death. Considered a masterpiece of literature. His characterization of the human experience leaves you walking away a better human.
 - **The Birth Partner** by Penny Simkin
-	- My wife has had kids, I'm trying to support her in the process. This was a good book to help do that. 
+	- My wife has had kids, I'm trying to support her in the process. This was a good book to help do that. If you are in a similar situation, be a good partner. 
 - **Godel, Escher, Bach: An Eternal Golden Braid** by Douglas Hofstadter
 	- Hard to explain but beautiful. Not a simple read, but dives into a fascinating topic that is intertwined in places you wouldn't expect. If you walk away with a fraction of what the author wants you to experience and understand, you'll have an increased wonder of the beauty of the world we live in.  
 - **Amusing Ourselves to Death: Public Discourse in the Age of Show Business** by Neil Postman
 	- A poignant and cautionary tale of what happens to society when politics becomes entertainment. He clarifies the distinction between Orwell's dystopian future and Huxley's, then explains why we're moving quickly into the former (if not already there). 
 - **Hitchhiker's Guide to the Galaxy**  by Douglas Adams
-	- So long and thanks for all the fish. An enjoyable satire at its finest. 
+	- So long and thanks for all the fish. An enjoyable satire at its finest. Why the number 42 is used in nerdy situations so much.
 - **On Tyranny** by Timothy Snyder
 	- A man I greatly admire and look up to sent this to me unprovoked. I read it and it was well timed. A very short read that reminds you of the tell tale signs of what tyranny looks like. 
