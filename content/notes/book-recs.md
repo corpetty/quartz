@@ -8,6 +8,7 @@ An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A 
 - **The Enderverse (Ender's Game)** by Orson Scott Card
 	- A relatively short and entertaining read. This is and has always been a favorite of mine. It started with Ender's Game. While technically a children's novel, it has some very deep and mature themes that run through it: The potential for complete destruction comes can only come from complete understanding and love, the model of leadership and its associated burden, the struggle of greater duty than oneself. And it's space, and aliens, and wargames; which is always great. 
 	- The series then follows Ender and carries increasingly more mature themes as the series progresses. Grappling with concepts like humanity and how it perceives/reacts to an alien species, artificial super-intelligence, and much much more. I couldn't put any of them down. 
+	- The second novel, Speaker for the Dead, had a drastic influence on my life and how I think about death and the stories we tell about those that leave us behind. Also, what the power of truth does vs artifice. 
 - **The Shadowverse (Ender's Shadow)** by Orson Scott Card
 	- The first book in the series is the same story as Ender's Game, but through the eyes of a different character: Bean. The series then stays with Bean and is more focused on geopolitics and war games. it is also a fascinating read, fits nicely into the universe, and sufficiently differentiated from the themes tackled by the Enderverse series. 
 - **Quantum Questions** by Ken Wilber
