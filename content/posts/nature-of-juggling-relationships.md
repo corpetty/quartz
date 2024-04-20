@@ -77,3 +77,14 @@ Think about how you're dividing your time and energy and maybe adjust it if some
 Now I have a shit load of derivative thoughts on how someone gets their needs met, and the relationships they rely on to get that done, and how that may differ from conventional wisdom, but I'll save that for another day. This seems like a reasonable place to stop. 
 
 Love y'all, hope it serves you as well as it's served me in trying to be a good person to those I care about (including myself). Hit me up on [X](https://x.com/corpetty) if you have thoughts and criticisms. If you know more more personally, hit me up how you already know how to. 
+
+---
+Addendum: After writing this and thinking a little bit, I realized that I left out a big piece for many people around the globe, that that's their relationship with their faith. I don't really have one, which is why I never really considered it. But this is a very important part of the majority of people's lives and it deserves to be included. A person's faith has a huge influence on their other relationships and also takes up time and attention which could be used elsewhere. So the actual (reasonably complete) set would be:
+- yourself
+- your family/friends
+- **your faith**
+- your spouse
+- your career
+- your children 
+
+Furthermore I would introduce it before a spouse or career comes in. While for many, a true faith doesn't come until adulthood, the influence and introduction to a faith brought on quite early in a child's life, if not immediately. In many circumstances, it completely shapes what the other relationships look like by the constraints the faith puts on a person's ethics and practice. Certainly, something to consider.
