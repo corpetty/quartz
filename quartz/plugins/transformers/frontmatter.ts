@@ -5,14 +5,15 @@ import yaml from "js-yaml"
 import toml from "toml"
 import { slugTag } from "../../util/path"
 import { QuartzPluginData } from "../vfile"
+import { i18n } from "../../i18n"
 
 export interface Options {
-  delims: string | string[]
+  delimiters: string | [string, string]
   language: "yaml" | "toml"
 }
 
 const defaultOptions: Options = {
-  delims: "---",
+  delimiters: "---",
   language: "yaml",
 }
 
@@ -39,11 +40,11 @@ function coerceToArray(input: string | string[]): string[] | undefined {
     .map((tag: string | number) => tag.toString())
 }
 
-export const FrontMatter: QuartzTransformerPlugin<Partial<Options> | undefined> = (userOpts) => {
+export const FrontMatter: QuartzTransformerPlugin<Partial<Options>> = (userOpts) => {
   const opts = { ...defaultOptions, ...userOpts }
   return {
     name: "FrontMatter",
-    markdownPlugins() {
+    markdownPlugins({ cfg }) {
       return [
         [remarkFrontmatter, ["yaml", "toml"]],
         () => {
@@ -56,10 +57,10 @@ export const FrontMatter: QuartzTransformerPlugin<Partial<Options> | undefined> 
               },
             })
 
-            if (data.title) {
+            if (data.title != null && data.title.toString() !== "") {
               data.title = data.title.toString()
-            } else if (data.title === null || data.title === undefined) {
-              data.title = file.stem ?? "Untitled"
+            } else {
+              data.title = file.stem ?? i18n(cfg.configuration.locale).propertyDefaults.title
             }
 
             const tags = coerceToArray(coalesceAliases(data, ["tags", "tag"]))
@@ -89,6 +90,7 @@ declare module "vfile" {
         description: string
         publish: boolean
         draft: boolean
+        lang: string
         enableToc: string
         cssclasses: string[]
       }>

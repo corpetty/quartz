@@ -16,6 +16,10 @@ const observer = new IntersectionObserver((entries) => {
 
 function toggleToc(this: HTMLElement) {
   this.classList.toggle("collapsed")
+  this.setAttribute(
+    "aria-expanded",
+    this.getAttribute("aria-expanded") === "true" ? "false" : "true",
+  )
   const content = this.nextElementSibling as HTMLElement | undefined
   if (!content) return
   content.classList.toggle("collapsed")
@@ -29,8 +33,8 @@ function setupToc() {
     const content = toc.nextElementSibling as HTMLElement | undefined
     if (!content) return
     content.style.maxHeight = collapsed ? "0px" : content.scrollHeight + "px"
-    toc.removeEventListener("click", toggleToc)
     toc.addEventListener("click", toggleToc)
+    window.addCleanup(() => toc.removeEventListener("click", toggleToc))
   }
 }
 
