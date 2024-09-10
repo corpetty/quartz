@@ -8,7 +8,7 @@ import * as Plugin from "./quartz/plugins"
  */
 const config: QuartzConfig = {
   configuration: {
-    pageTitle: "Corey's Personal Site",
+    pageTitle: "Bayesian Persuasion",
     enableSPA: true,
     enablePopovers: true,
     analytics: {

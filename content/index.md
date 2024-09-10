@@ -1,5 +1,5 @@
 ---
-title: Welcome to Corey's Stuff
+title: Welcome to Corey's Brain
 ---
 
 I've reset my website to be a "digital garden." It's basically just a bunch of linked notes with all of my migrated articles I've written. I use this mostly to just make it so my notes are linkable to other people and sharable / discoverable. Hope you enjoy. If you don't, doesn't really bother me. 
