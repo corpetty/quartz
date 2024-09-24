@@ -49,3 +49,5 @@ An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A 
 	- So long and thanks for all the fish. An enjoyable satire at its finest. Why the number 42 is used in nerdy situations so much.
 - **On Tyranny** by Timothy Snyder
 	- A man I greatly admire and look up to sent this to me unprovoked. I read it and it was well timed. A very short read that reminds you of the tell tale signs of what tyranny looks like. 
+- **Nexus: A Brief History of Information Networks from the Stone Age to AI** by Yuval Noah Harari
+	- [[nexus-book|Book Notes here]]
