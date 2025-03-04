@@ -17,6 +17,7 @@ const config: QuartzConfig = {
     baseUrl: "bayesianpersuasion.com",
     ignorePatterns: ["private", "templates", ".obsidian"],
     defaultDateType: "created",
+    generateSocialImages: false,
     theme: {
       fontOrigin: "googleFonts",
       cdnCaching: true,
