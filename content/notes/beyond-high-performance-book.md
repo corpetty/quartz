@@ -1,6 +1,6 @@
 ---
 title: Beyond High Performance Book Notes
-tags: book, notes
+tags: books, notes
 author: Jason Jaggard
 description: My thoughts on the executive coach handbook by Jason Jaggard, Beyond High Performance.
 ---
@@ -22,9 +22,27 @@ The idea of their firm and their goal is to get clients to express the words "I 
 As expected in any coaching recruiting literature, it is peppered with successful examples from their practice of highly successful and well known people/organizations that the reader should be impressed with. I mean, come on, they've had success and should relay the level of that success somehow. The examples are certainly impressive and appropriately illustrative of their respective context. I can't help but always wonder how much the positive is embellished vs the reality. I have no doubt they've had some serious wins and these are true stories, but I didn't see any of the failures of the organization's practice. It discusses failure as a requirement for growth, but doesn't go into many examples of how they've leveraged failure for their betterment, only some content on how that should be "designed" into someone's approach. 
 
 ## Meta-Performance
+The book starts by detailing how people differentiate themselves in how they relate to their work in any given moment, giving three main personas and adding an additional fourth that they feel is optimal: Prisoner, Mercenary, Missionary, and then they Athlete. I'll let the reader here guess how each persona relates to their work, it's somewhat obvious. That being said, I really like the idea of the Athlete as the optimum choice for a number of choices:
+- They put in work to hone their craft constantly, and most of it is not seen
+- They are not alone and work as a team
+- They have coaches and guidance
+
+An interesting additional point made in the beginning is how much you will work in your life in hours, and how that relates to the 10,000 hour concept popularized by Malcolm Gladwell. The answer is around _100,000 hours_. So the real question is "What do you do after you've acheived expertise?" Those additional 90,000 hours?
+
+Next comes the introduction of performance and their associated personas:
+- under-performance
+- performance
+- high-performance
+- _meta-performance_
+
+Most people attempt to attain the high-performance category, but the book details a number of downfalls of this category that lead to stagnation and burn-out. I think the term that I attached to most was the "It would be faster if I just do it myself" and all that's wrapped up into that statement. The "I vs them" mentality, the disappointment and "shoulder being" mentality that drags you down. Meta-performance, as stated in the beginning, is shifting yoru mentality of the high-performer from "How can I be the best?" to "What am I capable of?"
+
+The next section then explains the obvious conclusion of that mentality shift, and that is that you need a team to acheive the things you're capable of. You are already on a bunch of teams today (family, friends, who you work for, who works for you, etc). How you work with them (bettet yet, _for them_) dictates how far you can go. This book is about trying to help you figure that out. Once again, trying to get people to exclaim "I didn't know I could do that!"
+
+And the end of the first part of the book details that how you influence a team to go far is through _culture_. A proper culture within a team allows them to make correct choices themselves that move in the direction everyone wants to go. I think this is an incredibly important part. It is also _hard work_ to influence culture and set it correctly. 
 
 ## GO LIVE
-Each word of their GO LIVE value system is:
+The second part of the book goes through their acronym, but not in the order of how the acronym is said. Each word of their GO LIVE value system is:
 - Growth
 - Ownership
 - Love
