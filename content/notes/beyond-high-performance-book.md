@@ -6,13 +6,15 @@ description: My thoughts on the executive coach handbook by Jason Jaggard, Beyon
 ---
 
 > [!NOTE] This note will mostly be a summary of the book and some cursory personal thoughts. I intend to dive more in depth w.r.t. how these framework applies to my personal performance journey through linked notes, as that's a long and on-going journey and not necessarily relevant to anyone just wanting to know about the book for themselves.
+>
+> If you're personally looking for coaching, I have to say that having a book to read beforehand that details the framework being used is incredibly powerful. Giving a client the language up front streamlines the communication process. You're able to use the concepts explicitly with understanding between both parties. Even if you don't agree with the framework, you get to "play jazz" with the framework to find what works with you and your coach. Considering these types of services are incredibly expensive, you can see it as a large time (read as money) saver. 
 
 ## Intro to me finding the book
 I was sent a book from a high school friend (Hi Joe!) that I was reaquainted to through social media (??) that ended up being an executive coach (speculation here on him fishing for potential clients, good for him if he did). The book was his coaching firm's guidebook, Novus Global, that describes their practice and philosophy. It's called
 
 > Beyond High Performance: What Great Coaches Know About How the Best Get Better
 
-by Jason Jaggard. Seeing as at the time I happen to be shopping for an exective coach to help me through my feelings of stagnation and underperformance in my current position at the IFT, I've gone through it and have found it to be quite useful. Let's talk about it!
+by Jason Jaggard. Seeing as at the time I happen to be shopping for an exective coach to help me through my feelings of stagnation and underperformance in my current position at the [IFT](https://free.technology), I've gone through it and have found it to be quite useful. Let's talk about it!
 
 ## General book outline and thoughts
 Starting out, I recommend this book to anyone looking to find an easy to understand and reasonable framework to get past their blockades in personal development. It's a short read (I read it in two days or so during some off time) and has actionable advice without being too prescriptive in what you should do. I generally like the idea of asking good questions to push people into a correct mindset, and this book does this well. In addition, it isn't crazy with it's advice. Hard work is still required.
@@ -59,6 +61,9 @@ Let's put down some thoughts on each one.
 ### Love
 
 ### Integrity
+I loved this one in it's simplicity yet power. Integrity is what works. Do what you say, when you say you're going to do it. That's it. It's an incredibly powerful way to increase your satisfaction as a large portion of your burn-out comes from the work you do "covering your ass." It feels good to get things done that you said do, this gives energy and doesn't take it away. The more you are pushing things off and making excuses, the more you are feeling overburdened and negative.
+
+The book does a better job of explaining it, of course, but that's the jist. 
 
 ### Vision
 
