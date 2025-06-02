@@ -4,6 +4,8 @@ tags:
   - multisig
   - waku
   - chat
+  - future
+  - project
 date: 2024-01-18
 ---
 ## tl;dr
