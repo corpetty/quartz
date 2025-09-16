@@ -9,6 +9,7 @@ tags: AI, Resource, ML
 ## LLMs
 - claude.ai
 - openrouter
+- https://lmarena.ai/?mode=side-by-side - compare LLMs for free in side-by-side mode
 
 ## Automation tools
 - n8n.io
@@ -16,3 +17,7 @@ tags: AI, Resource, ML
 ## RAG
 - [Logos RAG](https://github.com/logos-co/logos-rag) - an organizational RAG I'm building for the #IFT
  
+## Youtube shows
+- https://www.youtube.com/@algorithmicsimplicity
+- https://www.youtube.com/@LangChain
+- https://www.youtube.com/@nateherk

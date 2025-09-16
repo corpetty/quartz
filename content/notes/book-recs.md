@@ -35,7 +35,7 @@ An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A 
 	- I mean, it's Vonnegut, and one of his masterpieces. He's just one of my favorites and this is a wonderful example of why. Short read, captivating. 
 - **The Brothers Karamazov**  by Dostoevsky
 	- Dostoevsky just does such a wonderful job of painting the human experience. This novel is considered one of the greatest achievements of world literature. Read it. It paints the picture of the human emotions we all grapple with, and the subtleties of the decisions we make. 
-- **What's Wrong With Us** by Tim Urban
+- **What's Our Problem** by Tim Urban
 	- Tim is hilarious, and a genius. This short read gives me the best framework I've seen to think about the society and issues we face. Why we experience echo chambers, how to fight it, how to better the conversations and groups you interact with that trend towards a better, more beneficial society. 
 - **The Death of Ivan Ilych** by Tolstoy
 	- A classic that covers the ideas of death. Considered a masterpiece of literature. His characterization of the human experience leaves you walking away a better human.
