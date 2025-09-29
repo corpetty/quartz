@@ -51,3 +51,21 @@ An incomplete list of books I've read and enjoyed, and why I've enjoyed them. A 
 	- A man I greatly admire and look up to sent this to me unprovoked. I read it and it was well timed. A very short read that reminds you of the tell tale signs of what tyranny looks like. 
 - **Nexus: A Brief History of Information Networks from the Stone Age to AI** by Yuval Noah Harari
 	- [[nexus-book|Book Notes here]]
+
+### Other's recs
+
+> Joseph
+
+Here is what I’m reading and a list of some books I wholeheartedly recommend.
+
+READING
+- The Count of Monte Cristo
+- The Answer to How is Yes by Peter Block
+
+BANGERS (an incomplete list)  
+- A Failure of Nerve by Edwin Friedman
+- Piranesi by Susanna Clarke
+- Lonesome Dove by Larry McMurtry
+- Laurus by Eugene Vodolozkhin
+- Saving the Appearances by Owen Barfield
+- The Abolition of Man by CS Lewis
