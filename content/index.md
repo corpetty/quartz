@@ -8,7 +8,7 @@ I've reset my website to be a "digital garden." It's basically just a bunch of l
 Why this domain name? It's a play words incorporating a philosophy of [Bayesian Inference](https://plato.stanford.edu/entries/epistemology-bayesian/), a core part of how I view the world and make decisions based in what I've experienced and understand and how it gets updated when I learn new things. 
 
 ## Navigating around
-Here are some [posts](/posts). These are longer formed content that is self contained and meant to drive home a specific thing. 
+Here are some [posts](/posts). These are longer formed content that is self contained and meant to drive home a specific thing. [Here is a note](/notes/future-articles.md) that lists things I'd like to write about.
 
 Here are [notes](/notes). These are all over the place, and the thoughts that hopefully grow up to be a post.  
 
