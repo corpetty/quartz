@@ -32,13 +32,23 @@ I'm not asking you to agree with me at the outset. I'm asking you to look at the
 
 ## Part I: The Question That Started This Inquiry
 
-I began this research after encountering comparisons between ICE and the Nazi Gestapo in public discourse. My initial assumption was that such comparisons were hyperbolic—useful perhaps as political rhetoric but analytically misleading. The structural differences seemed obvious: ICE operates under constitutional constraints, federal court supervision, and immigration statutes that create removable procedural violations rather than inherent criminality.
+Look, I'm going to be honest about where I started on this. When I first heard people comparing ICE to the Gestapo, my gut reaction was basically: "Oh come on." It felt like the kind of thing people say when they're angry but not thinking clearly—politically useful maybe, but analytically lazy. The structural differences seemed so obvious that the comparison felt almost insulting to historical reality.
 
-The Gestapo, by contrast, operated with explicit statutory immunity from judicial review. The 1936 Prussian Gestapo Law stated: "Orders in matters of the Secret State Police are not subject to the review of the administrative courts." This wasn't weak oversight—it was the deliberate legal abolition of oversight. When the Prussian High Court ruled Gestapo actions were beyond judicial review, the court was affirming that no reviewable rights existed.
+Here's what I thought I knew: ICE operates under constitutional constraints. Federal courts can review their actions. Detainees have rights—habeas corpus, due process, all the stuff that's supposed to distinguish us from the authoritarian nightmares of the 20th century. Immigration violations are civil matters, not inherent criminality. The whole system is designed with checks and balances.
 
-This seemed dispositive. The U.S. has habeas corpus. ICE detainees can file petitions in federal court. Over 400 Holocaust scholars had argued in 2019 that comparisons to early-stage Nazi practices could serve educational purposes, but the consensus was clear that comparing ICE to the fully operational Gestapo was historically inappropriate.
+The Gestapo? That was something else entirely. The 1936 Prussian Gestapo Law was explicit: "Orders in matters of the Secret State Police are not subject to the review of the administrative courts." Read that again. This wasn't weak oversight or underfunded enforcement of existing protections. It was the *deliberate legal abolition* of oversight. When the Prussian High Court ruled that Gestapo actions were beyond judicial review, the court wasn't admitting failure—it was affirming that no reviewable rights existed in the first place.
 
-*Then I asked a different question: What would have to happen for those structural distinctions to erode?*
+So I felt pretty confident. Yeah, over 400 Holocaust scholars had signed an open letter in 2019 arguing that comparisons to early-stage Nazi practices could serve educational purposes. But the consensus seemed clear: comparing ICE to the *fully operational* Gestapo was historically inappropriate. The structural safeguards were just fundamentally different.
+
+Case closed, right?
+
+Except I couldn't stop thinking about it. Not the comparison itself, but a different question—one that made me a lot less comfortable:
+
+*What would have to happen for those structural distinctions to stop mattering?*
+
+Not "are we the same as Nazi Germany?"—obviously we're not. But what if the question isn't about sameness? What if it's about trajectory? What if the safeguards I was pointing to as proof of our difference were actively being dismantled while I was busy feeling smug about their existence?
+
+That question wouldn't leave me alone. So I started digging.
 
 ---
 
