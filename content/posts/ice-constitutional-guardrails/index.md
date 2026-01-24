@@ -12,9 +12,6 @@ aliases:
   - ICE Analysis
   - Constitutional Guardrails
 ---
-
-# When Constitutional Guardrails Fail
-
 *A Framework for Understanding the Erosion of Democratic Immigration Enforcement*
 
 ## Executive Summary
