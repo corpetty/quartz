@@ -35,13 +35,19 @@ export async function getSatoriFont(headerFontName: string, bodyFontName: string
 async function fetchTtf(fontName: string, weight: FontWeight): Promise<ArrayBuffer> {
   try {
     // Get css file from google fonts
+    // Use a simple user agent to get ttf format (modern browsers get woff2 which satori doesn't support)
     const cssResponse = await fetch(
       `https://fonts.googleapis.com/css2?family=${fontName}:wght@${weight}`,
+      {
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; Googlebot/2.1)",
+        },
+      },
     )
     const css = await cssResponse.text()
 
     // Extract .ttf url from css file
-    const urlRegex = /url\((https:\/\/fonts.gstatic.com\/s\/.*?.ttf)\)/g
+    const urlRegex = /url\((https:\/\/fonts.gstatic.com\/s\/.*?\.ttf)\)/g
     const match = urlRegex.exec(css)
 
     if (!match) {
@@ -144,59 +150,98 @@ export const defaultImage: SocialImageOptions["imageStructure"] = (
   _fileData: QuartzPluginData,
 ) => {
   // How many characters are allowed before switching to smaller font
-  const fontBreakPoint = 22
+  const fontBreakPoint = 50
   const useSmallerFont = title.length > fontBreakPoint
 
   // Setup to access image
   const iconPath = `https://${cfg.baseUrl}/static/icon.png`
+
   return (
     <div
       style={{
         display: "flex",
         flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
         height: "100%",
         width: "100%",
         backgroundColor: cfg.theme.colors[colorScheme].light,
-        gap: "2rem",
-        paddingTop: "1.5rem",
-        paddingBottom: "1.5rem",
-        paddingLeft: "5rem",
-        paddingRight: "5rem",
       }}
     >
+      {/* Main content area */}
       <div
         style={{
           display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-start",
-          width: "100%",
-          flexDirection: "row",
-          gap: "2.5rem",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          flexGrow: 1,
+          padding: "48px 56px",
+          gap: "20px",
         }}
       >
-        <img src={iconPath} width={135} height={135} />
+        {/* Title */}
         <p
           style={{
-            color: cfg.theme.colors[colorScheme].dark,
-            fontSize: useSmallerFont ? 70 : 82,
+            color: cfg.theme.colors[colorScheme].secondary,
+            fontSize: useSmallerFont ? 48 : 56,
             fontFamily: fonts[0].name,
+            lineHeight: 1.2,
+            margin: 0,
           }}
         >
           {title}
         </p>
+        {/* Description */}
+        <p
+          style={{
+            color: cfg.theme.colors[colorScheme].darkgray,
+            fontSize: 28,
+            lineHeight: 1.4,
+            fontFamily: fonts[1].name,
+            margin: 0,
+          }}
+        >
+          {description}
+        </p>
       </div>
-      <p
+      {/* Footer with branding */}
+      <div
         style={{
-          color: cfg.theme.colors[colorScheme].dark,
-          fontSize: 44,
-          lineClamp: 3,
-          fontFamily: fonts[1].name,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "24px 56px",
+          borderTop: `1px solid ${cfg.theme.colors[colorScheme].lightgray}`,
         }}
       >
-        {description}
-      </p>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          <img src={iconPath} width={48} height={48} />
+          <p
+            style={{
+              color: cfg.theme.colors[colorScheme].dark,
+              fontSize: 24,
+              fontFamily: fonts[0].name,
+              margin: 0,
+            }}
+          >
+            {cfg.pageTitle}
+          </p>
+        </div>
+        <p
+          style={{
+            color: cfg.theme.colors[colorScheme].gray,
+            fontSize: 20,
+            fontFamily: fonts[1].name,
+            margin: 0,
+          }}
+        >
+          {cfg.baseUrl}
+        </p>
+      </div>
     </div>
   )
 }
