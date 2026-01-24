@@ -118,13 +118,21 @@ I think this acknowledgment matters for two reasons. First, transparency is simp
 
 I want to be honest about the costs of this approach.
 
-**Voice.** There's a "voice" I'm losing by allowing AI to string thoughts together via words. The prose that comes out is competent but not distinctively mine. For semi-educational material, this is acceptable. For personal essays or anything where my particular perspective is the point, this process probably isn't appropriate.
+**Voice.** ~~There's a "voice" I'm losing by allowing AI to string thoughts together via words. The prose that comes out is competent but not distinctively mine. For semi-educational material, this is acceptable. For personal essays or anything where my particular perspective is the point, this process probably isn't appropriate.~~
+
+**Update:** I've addressed this. After writing the original article, I analyzed a bunch of my previous writing—posts where I was genuinely frustrated, excited, or working through something hard—and distilled it into a voice profile. The profile captures the patterns that make my writing sound like *me*: the strategic profanity, the parenthetical asides, the willingness to say "I don't know" or "this pisses me off," the invitation for critique at the end.
+
+Now when I have AI generate drafts, I include the voice profile as context. It's not perfect, but it's *dramatically* better than generic AI prose. Compare the original version of this article (competent but flat) with something like [[ice-constitutional-guardrails|my ICE analysis]]—the latter has personality. It cusses when the situation warrants it. It admits uncertainty. It tells the reader to "shut the fuck up" if they won't engage with the evidence. That's me.
+
+The voice profile approach adds another constraint layer: after generating a draft, I check it against the anti-patterns list. If I see "It's worth noting that..." or "Furthermore" or any of the other AI-isms I've catalogued, those get rewritten. The profile also gives positive patterns to inject—opening with personal observation, clearly marking opinion sections, inviting dialogue at the end.
+
+Is it as good as writing everything myself? Probably not. But the gap is much smaller than I expected, and I'm still iterating.
 
 **Some cognitive benefit.** The research on writing-as-thinking suggests that the struggle of finding words, revising, and iterating is where deep understanding develops. Turing Award winner Leslie Lamport put it starkly: "If you're thinking without writing, you only think you're thinking." Paul Graham made a similar argument in his essay "Writes and Write-Nots," warning that a world divided into those who write and those who don't is really a world of "thinks and think-nots." By outsourcing the prose generation, I'm trading some of that cognitive workout for efficiency.
 
 I've tried to preserve the thinking by front-loading it into the outline, constraints, and critique steps. The jury's still out on whether that's sufficient. This is an ongoing experiment.
 
-**The boundaries aren't clear yet.** I haven't figured out where this process doesn't work. It probably isn't good for writing where your voice needs to be specifically yours. Personal essays, creative work, arguments you haven't fully worked out—these might need a different approach or no AI at all.
+**The boundaries aren't clear yet.** I haven't figured out where this process doesn't work. ~~It probably isn't good for writing where your voice needs to be specifically yours. Personal essays, creative work, arguments you haven't fully worked out—these might need a different approach or no AI at all.~~ The voice profile helps with this more than I expected—but I'm still not sure I'd use this process for something deeply personal. Analysis pieces, technical writing, arguments I've already worked out in my head? The process works well. The jury's still out on creative work.
 
 ## Why This Isn't Just "Let AI Do It"
 
