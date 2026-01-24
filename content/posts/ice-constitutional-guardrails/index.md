@@ -166,3 +166,5 @@ Stanton's warning echoes: preventive action must come early. By the time the com
 - [[warning-signs-framework|Appendix B: Scholarly Warning Signs Frameworks]]
 - [[documented-erosion|Appendix C: Documented Erosion of Constitutional Safeguards]]
 - [[bibliography|Appendix D: Complete Source Bibliography]]
+
+NOTE: This was [[writing-with-ai|written with the aid of AI]]. I have a process that helps catch issues but it can still be wrong. Feel free to let me know if a source isn't available or outright wrong. Happy to fix things. 
