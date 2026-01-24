@@ -37,6 +37,24 @@ Content is written in Markdown and stored in the `/content/` directory. Quartz s
 - Code syntax highlighting (Shiki)
 - Citations (rehype-citation)
 
+## Writing Voice Profile
+
+When writing content (blog posts, articles, analysis) that represents Corey's voice:
+
+- **Profile:** `.claude/voice-profile.md`
+- **When to use:** Any content that will be published or represents Corey's voice
+- **Key principles:**
+  - Show the thinking process, admit uncertainty
+  - Data first, opinions clearly marked
+  - Invite dialogue and critique
+  - Strategic informality (cusses when warranted, not for shock)
+  - Avoid AI-isms: over-hedging, generic transitions, sanitized language
+
+Quick voice check - reject output that contains:
+- "It's worth noting that..."
+- "Furthermore" / "Moreover" / "Additionally"
+- "Incredibly" / "Absolutely" / "Remarkably"
+- Generic conclusions that could apply to anything
 
 ## grepai - Semantic Code Search
 
