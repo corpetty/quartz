@@ -16,7 +16,7 @@ aliases:
 
 # Appendix B: Scholarly Warning Signs Frameworks
 
-> This appendix supports the main analysis: [[index|When Constitutional Guardrails Fail]]
+> This appendix supports the main analysis: [[posts/ice-constitutional-guardrails/index|When Constitutional Guardrails Fail]]
 
 ---
 

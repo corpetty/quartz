@@ -19,7 +19,7 @@ aliases:
 
 *December 2025 – January 2026*
 
-> This appendix supports the main analysis: [[index|When Constitutional Guardrails Fail]]
+> This appendix supports the main analysis: [[posts/ice-constitutional-guardrails/index|When Constitutional Guardrails Fail]]
 
 This appendix documents specific evidence for each claim regarding the erosion of constitutional safeguards. Each entry provides the claim, supporting evidence, and source documentation.
 

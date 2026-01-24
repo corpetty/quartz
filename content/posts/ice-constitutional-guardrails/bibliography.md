@@ -14,7 +14,7 @@ aliases:
 
 # Appendix D: Complete Source Bibliography
 
-> This appendix supports the main analysis: [[index|When Constitutional Guardrails Fail]]
+> This appendix supports the main analysis: [[posts/ice-constitutional-guardrails/index|When Constitutional Guardrails Fail]]
 
 ---
 
