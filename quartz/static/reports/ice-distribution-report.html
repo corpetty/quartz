@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICE Distribution Across America | Interactive Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Sans+3:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #22222e;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-red: #e63946;
+            --accent-red-dim: #b82d38;
+            --accent-orange: #f4a261;
+            --accent-blue: #457b9d;
+            --accent-teal: #2a9d8f;
+            --accent-purple: #7b68ee;
+            --border-color: #2a2a3a;
+            --gradient-dark: linear-gradient(135deg, #0a0a0f 0%, #1a1a24 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Header */
+        .hero {
+            background: var(--gradient-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding: 4rem 2rem 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(230, 57, 70, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(69, 123, 157, 0.06) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent-red);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--accent-red);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h1 span {
+            color: var(--accent-red);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            font-weight: 300;
+        }
+
+        /* Key Stats Bar */
+        .stats-bar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem 2rem;
+        }
+
+        .stats-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            font-weight: 500;
+            color: var(--accent-red);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-change {
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            margin-top: 0.25rem;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        section {
+            margin-bottom: 4rem;
+        }
+
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 1rem;
+        }
+
+        /* Map Container */
+        .map-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        #us-map {
+            width: 100%;
+            height: 500px;
+        }
+
+        #us-map svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .legend-gradient {
+            width: 120px;
+            height: 12px;
+            border-radius: 2px;
+            background: linear-gradient(to right, #1a1a24, #e63946);
+        }
+
+        /* Map Controls */
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .map-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .map-btn:hover, .map-btn.active {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            color: white;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            min-width: 200px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tooltip-row:last-child {
+            border-bottom: none;
+        }
+
+        .tooltip-label {
+            color: var(--text-muted);
+        }
+
+        .tooltip-value {
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .chart-card:hover {
+            border-color: var(--accent-red-dim);
+        }
+
+        .chart-card h3 {
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+
+        .chart-full .chart-container {
+            height: 400px;
+        }
+
+        /* Data Tables */
+        .data-table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .highlight-cell {
+            color: var(--accent-red);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        /* Field Office Markers */
+        .office-marker {
+            fill: var(--accent-orange);
+            stroke: var(--bg-primary);
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .office-marker:hover {
+            fill: #fff;
+            r: 6;
+        }
+
+        .facility-marker {
+            fill: var(--accent-purple);
+            stroke: var(--bg-primary);
+            stroke-width: 1;
+            opacity: 0.7;
+        }
+
+        /* Timeline */
+        .timeline-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            border: 2px solid var(--bg-card);
+        }
+
+        .timeline-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        /* Comparison Cards */
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 900px) {
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .comparison-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .comparison-card h4 {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .comparison-values {
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .old-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        .arrow {
+            color: var(--accent-red);
+            font-size: 1.5rem;
+        }
+
+        .new-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.5rem;
+            color: var(--accent-red);
+            font-weight: 500;
+        }
+
+        .change-pct {
+            font-size: 0.9rem;
+            color: var(--accent-orange);
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .sources {
+            max-width: 1400px;
+            margin: 0 auto;
+            text-align: left;
+            padding: 1rem 0;
+        }
+
+        .sources h4 {
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .sources ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 2rem 1rem;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+
+            #us-map {
+                height: 350px;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <div class="eyebrow">Interactive Report • February 2026</div>
+            <h1>ICE Distribution <span>Across America</span></h1>
+            <p class="subtitle">A comprehensive analysis of Immigration and Customs Enforcement personnel, detention facilities, and enforcement patterns following the 2025 expansion.</p>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">22,000+</div>
+                <div class="stat-label">ICE Personnel</div>
+                <div class="stat-change">↑ 120% since Jan 2025</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">65,735</div>
+                <div class="stat-label">Current Detainees</div>
+                <div class="stat-change">↑ 65% since Jan 2025</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">$28.7B</div>
+                <div class="stat-label">FY2025 Budget</div>
+                <div class="stat-change">↑ 193% from FY2024</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">528</div>
+                <div class="stat-label">Active Facilities</div>
+                <div class="stat-change">Target: 107,759 beds</div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <!-- US Map Section -->
+        <section id="map-section">
+            <div class="section-header">
+                <h2>Geographic Distribution</h2>
+                <p class="section-desc">State-level detention populations, field office locations, and enforcement intensity across the United States.</p>
+            </div>
+
+            <div class="map-container">
+                <div class="map-controls">
+                    <button class="map-btn active" data-view="detention">Detention Population</button>
+                    <button class="map-btn" data-view="arrests">Arrest Rate (per 100k)</button>
+                    <button class="map-btn" data-view="facilities">Facility Count</button>
+                </div>
+                <div id="us-map"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-gradient"></div>
+                        <span>Low → High</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f4a261;"></div>
+                        <span>ERO Field Office</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #7b68ee;"></div>
+                        <span>Major Detention Facility</span>
+                    </div>
+                </div>
+            </div>
+            <div class="tooltip" id="tooltip"></div>
+        </section>
+
+        <!-- Before/After Comparison -->
+        <section>
+            <div class="section-header">
+                <h2>2025 Escalation: Before & After</h2>
+                <p class="section-desc">Key metrics comparing January 2025 to November 2025, documenting the scale of expansion.</p>
+            </div>
+
+            <div class="comparison-grid">
+                <div class="comparison-card">
+                    <h4>Total Personnel</h4>
+                    <div class="comparison-values">
+                        <span class="old-value">10,000</span>
+                        <span class="arrow">→</span>
+                        <span class="new-value">22,000</span>
+                    </div>
+                    <div class="change-pct">+120% increase</div>
+                </div>
+                <div class="comparison-card">
+                    <h4>Detention Population</h4>
+                    <div class="comparison-values">
+                        <span class="old-value">39,703</span>
+                        <span class="arrow">→</span>
+                        <span class="new-value">65,735</span>
+                    </div>
+                    <div class="change-pct">+65% increase</div>
+                </div>
+                <div class="comparison-card">
+                    <h4>Non-Criminal Detainees</h4>
+                    <div class="comparison-values">
+                        <span class="old-value">42%</span>
+                        <span class="arrow">→</span>
+                        <span class="new-value">73.6%</span>
+                    </div>
+                    <div class="change-pct">+75% shift</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section>
+            <div class="section-header">
+                <h2>Detention & Enforcement Data</h2>
+                <p class="section-desc">Breakdown of where detainees are held and who operates the facilities.</p>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Detention by State</h3>
+                    <p class="chart-subtitle">Top 10 states by current detainee population</p>
+                    <div class="chart-container">
+                        <canvas id="stateDetentionChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Facility Operators</h3>
+                    <p class="chart-subtitle">Breakdown by operator type (86% private)</p>
+                    <div class="chart-container">
+                        <canvas id="operatorChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card chart-full">
+                    <h3>Historical Detention Trends</h3>
+                    <p class="chart-subtitle">Monthly average daily population, 2020-2025</p>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Arrests by Region</h3>
+                    <p class="chart-subtitle">January-June 2025 arrest totals</p>
+                    <div class="chart-container">
+                        <canvas id="regionArrestChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Budget Allocation</h3>
+                    <p class="chart-subtitle">FY2025 funding breakdown ($28.7B total)</p>
+                    <div class="chart-container">
+                        <canvas id="budgetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Field Offices Table -->
+        <section>
+            <div class="section-header">
+                <h2>ERO Field Office Network</h2>
+                <p class="section-desc">25 ERO field offices covering all 50 states and U.S. territories.</p>
+            </div>
+
+            <div class="data-table-container">
+                <div class="table-header">
+                    <h3>Field Office Directory</h3>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Office</th>
+                                <th>Location</th>
+                                <th>States/Territories Covered</th>
+                                <th>Region</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Atlanta</td><td>Atlanta, GA</td><td>Georgia, North Carolina, South Carolina</td><td>Southeast</td></tr>
+                            <tr><td>Baltimore</td><td>Baltimore, MD</td><td>Maryland</td><td>Northeast</td></tr>
+                            <tr><td>Boston</td><td>Boston, MA</td><td>Connecticut, Maine, Massachusetts, New Hampshire, Rhode Island, Vermont</td><td>Northeast</td></tr>
+                            <tr><td>Buffalo</td><td>Buffalo, NY</td><td>Upstate New York</td><td>Northeast</td></tr>
+                            <tr><td>Chicago</td><td>Chicago, IL</td><td>Illinois, Indiana, Wisconsin, Missouri, Kansas, Kentucky</td><td>Midwest</td></tr>
+                            <tr><td>Dallas</td><td>Dallas, TX</td><td>North Texas, Oklahoma</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Denver</td><td>Denver, CO</td><td>Colorado, Wyoming</td><td>Mountain</td></tr>
+                            <tr><td>Detroit</td><td>Detroit, MI</td><td>Michigan, Ohio</td><td>Midwest</td></tr>
+                            <tr><td>El Paso</td><td>El Paso, TX</td><td>West Texas, New Mexico</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Harlingen</td><td>Harlingen, TX</td><td>Rio Grande Valley</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Houston</td><td>Houston, TX</td><td>Southeast Texas</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Los Angeles</td><td>Los Angeles, CA</td><td>Southern California (excl. San Diego area)</td><td>West</td></tr>
+                            <tr><td>Miami</td><td>Miami, FL</td><td>Florida, Puerto Rico, U.S. Virgin Islands</td><td>Southeast</td></tr>
+                            <tr><td>Newark</td><td>Newark, NJ</td><td>New Jersey</td><td>Northeast</td></tr>
+                            <tr><td>New Orleans</td><td>New Orleans, LA</td><td>Louisiana, Arkansas, Mississippi, Alabama, Tennessee</td><td>Southeast</td></tr>
+                            <tr><td>New York City</td><td>New York, NY</td><td>New York City metro area</td><td>Northeast</td></tr>
+                            <tr><td>Philadelphia</td><td>Philadelphia, PA</td><td>Pennsylvania, Delaware, West Virginia</td><td>Northeast</td></tr>
+                            <tr><td>Phoenix</td><td>Phoenix, AZ</td><td>Arizona</td><td>Southwest</td></tr>
+                            <tr><td>Salt Lake City</td><td>Salt Lake City, UT</td><td>Utah, Idaho, Montana, Nevada</td><td>Mountain</td></tr>
+                            <tr><td>San Antonio</td><td>San Antonio, TX</td><td>Central Texas</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>San Diego</td><td>San Diego, CA</td><td>San Diego and Imperial Counties</td><td>West</td></tr>
+                            <tr><td>San Francisco</td><td>San Francisco, CA</td><td>Northern California, Hawaii, Guam, Saipan</td><td>West</td></tr>
+                            <tr><td>Seattle</td><td>Seattle, WA</td><td>Washington, Oregon, Alaska</td><td>Northwest</td></tr>
+                            <tr><td>St. Paul</td><td>St. Paul, MN</td><td>Minnesota, North Dakota, South Dakota, Iowa, Nebraska</td><td>Midwest</td></tr>
+                            <tr><td>Washington DC</td><td>Washington, DC</td><td>District of Columbia, Virginia</td><td>Northeast</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Major Facilities Table -->
+        <section>
+            <div class="section-header">
+                <h2>Major Detention Facilities</h2>
+                <p class="section-desc">Top 15 facilities by average daily population, accounting for majority of ICE detainees.</p>
+            </div>
+
+            <div class="data-table-container">
+                <div class="table-header">
+                    <h3>Facility Details</h3>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Facility Name</th>
+                                <th>Location</th>
+                                <th>Operator</th>
+                                <th>Avg. Daily Pop.</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Camp East Montana</td><td>El Paso, TX</td><td>ICE/DOD</td><td class="highlight-cell">2,774</td><td>Tent Facility</td></tr>
+                            <tr><td>Adams County Detention Center</td><td>Natchez, MS</td><td>CoreCivic</td><td class="highlight-cell">2,224</td><td>Private Prison</td></tr>
+                            <tr><td>Stewart Detention Center</td><td>Lumpkin, GA</td><td>CoreCivic</td><td class="highlight-cell">2,044</td><td>Private Prison</td></tr>
+                            <tr><td>California City Detention Center</td><td>California City, CA</td><td>CoreCivic</td><td class="highlight-cell">2,560</td><td>Private Prison</td></tr>
+                            <tr><td>South Texas Family Residential Center</td><td>Dilley, TX</td><td>CoreCivic</td><td class="highlight-cell">2,400</td><td>Family Facility</td></tr>
+                            <tr><td>South Texas ICE Processing Center</td><td>Pearsall, TX</td><td>GEO Group</td><td class="highlight-cell">1,904</td><td>Private Prison</td></tr>
+                            <tr><td>Adelanto ICE Processing Center</td><td>Adelanto, CA</td><td>GEO Group</td><td class="highlight-cell">1,940</td><td>Private Prison</td></tr>
+                            <tr><td>Northwest ICE Processing Center</td><td>Tacoma, WA</td><td>GEO Group</td><td class="highlight-cell">1,575</td><td>Private Prison</td></tr>
+                            <tr><td>Winn Correctional Center</td><td>Winnfield, LA</td><td>LaSalle Corrections</td><td class="highlight-cell">1,576</td><td>Private Prison</td></tr>
+                            <tr><td>Port Isabel Service Processing Center</td><td>Los Fresnos, TX</td><td>ICE-owned</td><td class="highlight-cell">1,200</td><td>Government</td></tr>
+                            <tr><td>Karnes County Residential Center</td><td>Karnes City, TX</td><td>GEO Group</td><td class="highlight-cell">830</td><td>Family Facility</td></tr>
+                            <tr><td>Otay Mesa Detention Center</td><td>San Diego, CA</td><td>CoreCivic</td><td class="highlight-cell">1,482</td><td>Private Prison</td></tr>
+                            <tr><td>Krome North Service Processing Center</td><td>Miami, FL</td><td>ICE-owned</td><td class="highlight-cell">1,000</td><td>Government</td></tr>
+                            <tr><td>Delaney Hall</td><td>Newark, NJ</td><td>GEO Group</td><td class="highlight-cell">400</td><td>Private Prison</td></tr>
+                            <tr><td>Broward Transitional Center</td><td>Pompano Beach, FL</td><td>GEO Group</td><td class="highlight-cell">700</td><td>Private Prison</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Policy Timeline -->
+        <section>
+            <div class="section-header">
+                <h2>Policy Timeline: 2025 Escalation</h2>
+                <p class="section-desc">Key policy changes that reshaped ICE enforcement geography and operations.</p>
+            </div>
+
+            <div class="timeline-section">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">January 20, 2025</div>
+                        <div class="timeline-title">Executive Orders Signed</div>
+                        <div class="timeline-desc">Multiple immigration-focused executive orders signed on inauguration day, declaring a "national emergency" at the border and directing agency expansion.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">January 21, 2025</div>
+                        <div class="timeline-title">Sensitive Locations Policy Rescinded</div>
+                        <div class="timeline-desc">ICE ends decade-old protections limiting enforcement at schools, churches, hospitals, and courthouses. New policy relies on "agent discretion."</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">January 29, 2025</div>
+                        <div class="timeline-title">Laken Riley Act Signed</div>
+                        <div class="timeline-desc">Mandates detention for undocumented immigrants charged with theft, shoplifting, burglary, assault on law enforcement, or violent offenses.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">March 2025</div>
+                        <div class="timeline-title">Expedited Removal Expanded Nationwide</div>
+                        <div class="timeline-desc">Expedited removal now applies anywhere in the U.S. to anyone who cannot prove 2+ years of continuous presence, eliminating the 100-mile border zone limit.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">July 4, 2025</div>
+                        <div class="timeline-title">"One Big Beautiful Bill" Signed</div>
+                        <div class="timeline-desc">Allocates $75 billion over four years for immigration enforcement, including $45 billion for detention expansion and $8 billion for hiring.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">July-November 2025</div>
+                        <div class="timeline-title">ICE Hiring Surge</div>
+                        <div class="timeline-desc">12,000+ officers hired in under 5 months through $50,000 signing bonuses, shortened 6-week training, and removed age requirements.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">October 2025</div>
+                        <div class="timeline-title">Interior Removals Exceed Border Deportations</div>
+                        <div class="timeline-desc">For the first time since 2014, removals from the U.S. interior outnumber border deportations, reflecting the shift toward internal enforcement.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workforce Chart -->
+        <section>
+            <div class="section-header">
+                <h2>Workforce & Resource Growth</h2>
+                <p class="section-desc">Personnel expansion and budget growth through 2025.</p>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3>Workforce Composition</h3>
+                    <p class="chart-subtitle">Estimated personnel by division (2025-2026)</p>
+                    <div class="chart-container">
+                        <canvas id="workforceChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Hiring Surge Timeline</h3>
+                    <p class="chart-subtitle">Cumulative new hires, July-November 2025</p>
+                    <div class="chart-container">
+                        <canvas id="hiringChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="sources">
+            <h4>Data Sources</h4>
+            <ul>
+                <li><a href="https://tracreports.org" target="_blank">TRAC Immigration Reports</a></li>
+                <li><a href="https://www.ice.gov/statistics" target="_blank">ICE Official Statistics</a></li>
+                <li><a href="https://www.vera.org" target="_blank">Vera Institute</a></li>
+                <li><a href="https://www.brennancenter.org" target="_blank">Brennan Center for Justice</a></li>
+                <li><a href="https://www.americanimmigrationcouncil.org" target="_blank">American Immigration Council</a></li>
+            </ul>
+        </div>
+        <p style="margin-top: 1rem;">Report generated February 2026 • Data as of November 2025</p>
+    </footer>
+
+    <script>
+        // Chart.js Global Config
+        Chart.defaults.color = '#a0a0b0';
+        Chart.defaults.borderColor = '#2a2a3a';
+        Chart.defaults.font.family = "'Source Sans 3', sans-serif";
+
+        // State Data
+        const stateData = {
+            'TX': { detention: 17696, arrests: 26341, arrestRate: 86.6, facilities: 69, name: 'Texas' },
+            'LA': { detention: 7096, arrests: 3200, arrestRate: 68.5, facilities: 12, name: 'Louisiana' },
+            'CA': { detention: 5711, arrests: 8460, arrestRate: 21.5, facilities: 8, name: 'California' },
+            'FL': { detention: 4217, arrests: 12982, arrestRate: 55.9, facilities: 6, name: 'Florida' },
+            'GA': { detention: 3973, arrests: 4500, arrestRate: 41.2, facilities: 5, name: 'Georgia' },
+            'AZ': { detention: 3200, arrests: 3000, arrestRate: 46.8, facilities: 7, name: 'Arizona' },
+            'NJ': { detention: 1800, arrests: 2100, arrestRate: 22.8, facilities: 3, name: 'New Jersey' },
+            'CO': { detention: 1650, arrests: 1800, arrestRate: 30.5, facilities: 4, name: 'Colorado' },
+            'NM': { detention: 1400, arrests: 1200, arrestRate: 56.2, facilities: 3, name: 'New Mexico' },
+            'PA': { detention: 1200, arrests: 1500, arrestRate: 11.5, facilities: 3, name: 'Pennsylvania' },
+            'MS': { detention: 2500, arrests: 800, arrestRate: 26.8, facilities: 2, name: 'Mississippi' },
+            'AL': { detention: 800, arrests: 1200, arrestRate: 23.5, facilities: 2, name: 'Alabama' },
+            'WA': { detention: 1575, arrests: 1100, arrestRate: 14.2, facilities: 2, name: 'Washington' },
+            'NC': { detention: 900, arrests: 2800, arrestRate: 26.1, facilities: 3, name: 'North Carolina' },
+            'NY': { detention: 600, arrests: 1800, arrestRate: 9.2, facilities: 2, name: 'New York' },
+            'IL': { detention: 400, arrests: 1600, arrestRate: 12.5, facilities: 2, name: 'Illinois' },
+            'VA': { detention: 700, arrests: 1400, arrestRate: 16.1, facilities: 2, name: 'Virginia' },
+            'TN': { detention: 600, arrests: 3200, arrestRate: 45.9, facilities: 2, name: 'Tennessee' },
+            'OK': { detention: 500, arrests: 1800, arrestRate: 44.7, facilities: 2, name: 'Oklahoma' },
+            'UT': { detention: 450, arrests: 1600, arrestRate: 47.0, facilities: 2, name: 'Utah' }
+        };
+
+        // Field Offices coordinates (approximate)
+        const fieldOffices = [
+            { name: 'Dallas', lat: 32.78, lon: -96.80 },
+            { name: 'Houston', lat: 29.76, lon: -95.37 },
+            { name: 'San Antonio', lat: 29.42, lon: -98.49 },
+            { name: 'El Paso', lat: 31.76, lon: -106.49 },
+            { name: 'Harlingen', lat: 26.19, lon: -97.69 },
+            { name: 'Los Angeles', lat: 34.05, lon: -118.24 },
+            { name: 'San Diego', lat: 32.72, lon: -117.16 },
+            { name: 'San Francisco', lat: 37.77, lon: -122.42 },
+            { name: 'Phoenix', lat: 33.45, lon: -112.07 },
+            { name: 'Denver', lat: 39.74, lon: -104.99 },
+            { name: 'Salt Lake City', lat: 40.76, lon: -111.89 },
+            { name: 'Seattle', lat: 47.61, lon: -122.33 },
+            { name: 'Chicago', lat: 41.88, lon: -87.63 },
+            { name: 'Detroit', lat: 42.33, lon: -83.05 },
+            { name: 'St. Paul', lat: 44.95, lon: -93.09 },
+            { name: 'Atlanta', lat: 33.75, lon: -84.39 },
+            { name: 'Miami', lat: 25.76, lon: -80.19 },
+            { name: 'New Orleans', lat: 29.95, lon: -90.07 },
+            { name: 'Boston', lat: 42.36, lon: -71.06 },
+            { name: 'New York City', lat: 40.71, lon: -74.01 },
+            { name: 'Newark', lat: 40.74, lon: -74.17 },
+            { name: 'Philadelphia', lat: 39.95, lon: -75.17 },
+            { name: 'Baltimore', lat: 39.29, lon: -76.61 },
+            { name: 'Washington DC', lat: 38.91, lon: -77.04 },
+            { name: 'Buffalo', lat: 42.89, lon: -78.88 }
+        ];
+
+        // Major Facilities coordinates
+        const facilities = [
+            { name: 'Camp East Montana', lat: 31.76, lon: -106.49, pop: 2774 },
+            { name: 'Adams County DC', lat: 31.56, lon: -91.39, pop: 2224 },
+            { name: 'Stewart DC', lat: 32.00, lon: -85.05, pop: 2044 },
+            { name: 'California City DC', lat: 35.13, lon: -117.99, pop: 2560 },
+            { name: 'South Texas FRC', lat: 28.67, lon: -99.17, pop: 2400 },
+            { name: 'South Texas IPC', lat: 28.89, lon: -99.10, pop: 1904 },
+            { name: 'Adelanto IPC', lat: 34.58, lon: -117.43, pop: 1940 },
+            { name: 'Northwest IPC', lat: 47.25, lon: -122.44, pop: 1575 },
+            { name: 'Winn CC', lat: 31.92, lon: -92.64, pop: 1576 },
+            { name: 'Port Isabel', lat: 26.07, lon: -97.22, pop: 1200 }
+        ];
+
+        // Create US Map
+        async function createMap() {
+            const width = document.getElementById('us-map').clientWidth;
+            const height = 500;
+
+            const svg = d3.select('#us-map')
+                .append('svg')
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            const projection = d3.geoAlbersUsa()
+                .scale(width * 1.1)
+                .translate([width / 2, height / 2]);
+
+            const path = d3.geoPath().projection(projection);
+
+            // Color scale
+            const colorScale = d3.scaleSequential()
+                .domain([0, 18000])
+                .interpolator(t => d3.interpolateRgb('#1a1a24', '#e63946')(t));
+
+            // Load US TopoJSON
+            const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
+
+            // Draw states
+            svg.selectAll('path')
+                .data(topojson.feature(us, us.objects.states).features)
+                .enter()
+                .append('path')
+                .attr('d', path)
+                .attr('fill', d => {
+                    const stateId = d.properties.name;
+                    const abbrev = getStateAbbrev(stateId);
+                    const data = stateData[abbrev];
+                    return data ? colorScale(data.detention) : '#1a1a24';
+                })
+                .attr('stroke', '#2a2a3a')
+                .attr('stroke-width', 0.5)
+                .attr('class', 'state')
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('stroke', '#f4a261').attr('stroke-width', 2);
+                    showTooltip(event, d);
+                })
+                .on('mousemove', function(event) {
+                    moveTooltip(event);
+                })
+                .on('mouseout', function() {
+                    d3.select(this).attr('stroke', '#2a2a3a').attr('stroke-width', 0.5);
+                    hideTooltip();
+                });
+
+            // Draw field office markers
+            svg.selectAll('.office-marker')
+                .data(fieldOffices)
+                .enter()
+                .append('circle')
+                .attr('class', 'office-marker')
+                .attr('cx', d => {
+                    const coords = projection([d.lon, d.lat]);
+                    return coords ? coords[0] : -100;
+                })
+                .attr('cy', d => {
+                    const coords = projection([d.lon, d.lat]);
+                    return coords ? coords[1] : -100;
+                })
+                .attr('r', 4)
+                .on('mouseover', function(event, d) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">${d.name} Field Office</div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Type</span>
+                            <span class="tooltip-value">ERO</span>
+                        </div>
+                    `;
+                    tooltip.classList.add('visible');
+                    moveTooltip(event);
+                })
+                .on('mousemove', moveTooltip)
+                .on('mouseout', hideTooltip);
+
+            // Draw facility markers
+            svg.selectAll('.facility-marker')
+                .data(facilities)
+                .enter()
+                .append('circle')
+                .attr('class', 'facility-marker')
+                .attr('cx', d => {
+                    const coords = projection([d.lon, d.lat]);
+                    return coords ? coords[0] : -100;
+                })
+                .attr('cy', d => {
+                    const coords = projection([d.lon, d.lat]);
+                    return coords ? coords[1] : -100;
+                })
+                .attr('r', d => Math.sqrt(d.pop / 200))
+                .on('mouseover', function(event, d) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.innerHTML = `
+                        <div class="tooltip-title">${d.name}</div>
+                        <div class="tooltip-row">
+                            <span class="tooltip-label">Avg. Daily Pop.</span>
+                            <span class="tooltip-value">${d.pop.toLocaleString()}</span>
+                        </div>
+                    `;
+                    tooltip.classList.add('visible');
+                    moveTooltip(event);
+                })
+                .on('mousemove', moveTooltip)
+                .on('mouseout', hideTooltip);
+
+            // Map view switching
+            document.querySelectorAll('.map-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const view = this.dataset.view;
+                    
+                    let maxVal, accessor;
+                    if (view === 'detention') {
+                        maxVal = 18000;
+                        accessor = d => d.detention;
+                    } else if (view === 'arrests') {
+                        maxVal = 90;
+                        accessor = d => d.arrestRate;
+                    } else {
+                        maxVal = 70;
+                        accessor = d => d.facilities;
+                    }
+                    
+                    const newScale = d3.scaleSequential()
+                        .domain([0, maxVal])
+                        .interpolator(t => d3.interpolateRgb('#1a1a24', '#e63946')(t));
+                    
+                    svg.selectAll('.state')
+                        .transition()
+                        .duration(500)
+                        .attr('fill', d => {
+                            const abbrev = getStateAbbrev(d.properties.name);
+                            const data = stateData[abbrev];
+                            return data ? newScale(accessor(data)) : '#1a1a24';
+                        });
+                });
+            });
+        }
+
+        function getStateAbbrev(name) {
+            const abbrevs = {
+                'Texas': 'TX', 'Louisiana': 'LA', 'California': 'CA', 'Florida': 'FL',
+                'Georgia': 'GA', 'Arizona': 'AZ', 'New Jersey': 'NJ', 'Colorado': 'CO',
+                'New Mexico': 'NM', 'Pennsylvania': 'PA', 'Mississippi': 'MS', 'Alabama': 'AL',
+                'Washington': 'WA', 'North Carolina': 'NC', 'New York': 'NY', 'Illinois': 'IL',
+                'Virginia': 'VA', 'Tennessee': 'TN', 'Oklahoma': 'OK', 'Utah': 'UT'
+            };
+            return abbrevs[name] || null;
+        }
+
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            const abbrev = getStateAbbrev(d.properties.name);
+            const data = stateData[abbrev];
+            
+            if (data) {
+                tooltip.innerHTML = `
+                    <div class="tooltip-title">${d.properties.name}</div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Detention Pop.</span>
+                        <span class="tooltip-value">${data.detention.toLocaleString()}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Total Arrests (Jan-Jun)</span>
+                        <span class="tooltip-value">${data.arrests.toLocaleString()}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Arrest Rate/100k</span>
+                        <span class="tooltip-value">${data.arrestRate}</span>
+                    </div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Facilities</span>
+                        <span class="tooltip-value">${data.facilities}</span>
+                    </div>
+                `;
+            } else {
+                tooltip.innerHTML = `
+                    <div class="tooltip-title">${d.properties.name}</div>
+                    <div class="tooltip-row">
+                        <span class="tooltip-label">Data</span>
+                        <span class="tooltip-value">Limited data available</span>
+                    </div>
+                `;
+            }
+            tooltip.classList.add('visible');
+        }
+
+        function moveTooltip(event) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
+        // State Detention Chart
+        new Chart(document.getElementById('stateDetentionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Texas', 'Louisiana', 'California', 'Florida', 'Georgia', 'Arizona', 'Mississippi', 'New Jersey', 'Colorado', 'Washington'],
+                datasets: [{
+                    label: 'Detainees',
+                    data: [17696, 7096, 5711, 4217, 3973, 3200, 2500, 1800, 1650, 1575],
+                    backgroundColor: '#e63946',
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#2a2a3a' },
+                        ticks: { callback: v => v.toLocaleString() }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+
+        // Operator Chart
+        new Chart(document.getElementById('operatorChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['GEO Group', 'CoreCivic', 'LaSalle Corrections', 'ICE-Owned', 'County Jails', 'Other Private'],
+                datasets: [{
+                    data: [32, 28, 12, 8, 12, 8],
+                    backgroundColor: ['#e63946', '#f4a261', '#2a9d8f', '#457b9d', '#7b68ee', '#a0a0b0']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { padding: 15 }
+                    }
+                }
+            }
+        });
+
+        // Trend Chart
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jan 20', 'Jul 20', 'Jan 21', 'Jul 21', 'Jan 22', 'Jul 22', 'Jan 23', 'Jul 23', 'Jan 24', 'Jul 24', 'Jan 25', 'Mar 25', 'May 25', 'Jul 25', 'Sep 25', 'Nov 25'],
+                datasets: [{
+                    label: 'Avg. Daily Population',
+                    data: [38000, 20000, 15000, 22000, 21000, 27000, 28000, 38000, 35000, 37000, 39703, 45000, 52000, 58000, 62000, 65735],
+                    borderColor: '#e63946',
+                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    annotation: {
+                        annotations: {
+                            line1: {
+                                type: 'line',
+                                xMin: 10,
+                                xMax: 10,
+                                borderColor: '#f4a261',
+                                borderWidth: 2,
+                                borderDash: [5, 5]
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { grid: { color: '#2a2a3a' } },
+                    y: {
+                        grid: { color: '#2a2a3a' },
+                        ticks: { callback: v => v.toLocaleString() }
+                    }
+                }
+            }
+        });
+
+        // Region Arrest Chart
+        new Chart(document.getElementById('regionArrestChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Texas (5 offices)', 'Southeast', 'California', 'Southwest', 'Midwest', 'Northeast'],
+                datasets: [{
+                    label: 'Arrests',
+                    data: [26341, 22000, 8460, 6200, 5400, 5200],
+                    backgroundColor: ['#e63946', '#f4a261', '#2a9d8f', '#457b9d', '#7b68ee', '#a0a0b0'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        grid: { color: '#2a2a3a' },
+                        ticks: { callback: v => v.toLocaleString() }
+                    }
+                }
+            }
+        });
+
+        // Budget Chart
+        new Chart(document.getElementById('budgetChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Detention Operations', 'Personnel/Hiring', 'Transportation/Removal', 'Technology/Admin', 'Facilities Construction'],
+                datasets: [{
+                    data: [14, 5, 3.5, 2.2, 4],
+                    backgroundColor: ['#e63946', '#f4a261', '#2a9d8f', '#457b9d', '#7b68ee']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: { padding: 12 }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: ctx => `$${ctx.raw}B`
+                        }
+                    }
+                }
+            }
+        });
+
+        // Workforce Chart
+        new Chart(document.getElementById('workforceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['ERO Officers', 'HSI Agents', 'HSI Support', 'Admin/Legal', 'Detailees (other agencies)'],
+                datasets: [{
+                    label: 'Personnel',
+                    data: [6000, 6900, 3400, 5700, 33000],
+                    backgroundColor: ['#e63946', '#f4a261', '#f4a261', '#457b9d', '#7b68ee'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: {
+                        grid: { color: '#2a2a3a' },
+                        ticks: { callback: v => v.toLocaleString() }
+                    }
+                }
+            }
+        });
+
+        // Hiring Chart
+        new Chart(document.getElementById('hiringChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                datasets: [{
+                    label: 'Cumulative Hires',
+                    data: [2000, 5000, 8000, 10500, 12000],
+                    borderColor: '#2a9d8f',
+                    backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: '#2a9d8f'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { color: '#2a2a3a' } },
+                    y: {
+                        grid: { color: '#2a2a3a' },
+                        ticks: { callback: v => v.toLocaleString() }
+                    }
+                }
+            }
+        });
+
+        // Initialize map
+        createMap();
+    </script>
+</body>
+</html>
