@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Immigration Threat — By the Numbers</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0c;
+  --bg-elevated: #111114;
+  --bg-card: #16161a;
+  --bg-card-hover: #1c1c22;
+  --border: #2a2a30;
+  --border-subtle: #1e1e24;
+  --text: #e8e6e1;
+  --text-secondary: #b0ada6;
+  --text-dim: #7a7770;
+  --text-muted: #4a4840;
+  --accent: #e85d3a;
+  --accent-dim: rgba(232,93,58,0.15);
+  --accent-secondary: #f0a830;
+  --green: #3ecf8e;
+  --green-dim: rgba(62,207,142,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --blue: #4a9eff;
+  --blue-dim: rgba(74,158,255,0.12);
+  --purple: #a78bfa;
+  --yellow: #fbbf24;
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Crimson Pro', Georgia, serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --max-w: 740px;
+  --wide-w: 1000px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+::selection{background:var(--accent);color:var(--bg)}
+html{scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:var(--text-muted) var(--bg)}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:19px;line-height:1.75;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ── PROGRESS ── */
+.progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-secondary));z-index:1000;width:0%;transition:width 80ms linear}
+
+/* ── FLOATING NAV ── */
+.fnav{position:fixed;right:24px;top:50%;transform:translateY(-50%);z-index:999;display:flex;flex-direction:column;gap:14px;opacity:0;transition:opacity .4s}
+.fnav.visible{opacity:1}
+.fnav a{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--text-muted);font:500 9px/1 var(--font-mono);letter-spacing:.08em;text-transform:uppercase;transition:all .25s;white-space:nowrap}
+.fnav a:hover,.fnav a.active{color:var(--accent)}
+.fnav a .dot{width:7px;height:7px;border-radius:50%;border:1.5px solid currentColor;transition:all .25s;flex-shrink:0}
+.fnav a.active .dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 8px var(--accent-dim)}
+.fnav .label{opacity:0;transform:translateX(6px);transition:all .25s}
+.fnav a:hover .label,.fnav a.active .label{opacity:1;transform:translateX(0)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:80px 24px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 40%,rgba(232,93,58,.06),transparent 70%)}
+.hero-kicker{font:500 11px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:28px;opacity:0;animation:fadeUp .8s .2s forwards}
+.hero h1{font:800 clamp(42px,7vw,80px)/1.05 var(--font-display);text-align:center;max-width:900px;color:var(--text);opacity:0;animation:fadeUp .8s .4s forwards}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero-sub{font:300 clamp(18px,2.5vw,24px)/1.6 var(--font-body);color:var(--text-secondary);text-align:center;max-width:640px;margin-top:28px;opacity:0;animation:fadeUp .8s .6s forwards}
+.hero-meta{display:flex;gap:24px;margin-top:40px;font:400 12px/1 var(--font-mono);color:var(--text-dim);letter-spacing:.04em;opacity:0;animation:fadeUp .8s .8s forwards}
+.scroll-cue{position:absolute;bottom:40px;display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--text-muted);font:400 10px/1 var(--font-mono);letter-spacing:.1em;text-transform:uppercase;opacity:0;animation:fadeUp .8s 1.2s forwards}
+.scroll-cue .arrow{width:1px;height:32px;background:linear-gradient(to bottom,var(--text-muted),transparent);animation:pulse 2s infinite}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* ── SECTIONS ── */
+section{padding:100px 24px;position:relative}
+.section-inner{max-width:var(--max-w);margin:0 auto}
+.section-wide{max-width:var(--wide-w);margin:0 auto}
+.section-label{font:600 10px/1 var(--font-mono);letter-spacing:.15em;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
+.section-title{font:700 clamp(28px,4vw,40px)/1.2 var(--font-display);color:var(--text);margin-bottom:32px}
+p{margin-bottom:1.4em;color:var(--text-secondary)}
+p strong{color:var(--text);font-weight:600}
+p em{color:var(--text);font-style:italic}
+
+/* ── BIG NUMBER ── */
+.big-number{text-align:center;padding:60px 24px;margin:48px 0}
+.big-number .number{font:800 clamp(56px,10vw,96px)/1 var(--font-display);color:var(--accent);margin-bottom:12px}
+.big-number .number.green{color:var(--green)}
+.big-number .number.blue{color:var(--blue)}
+.big-number .number.red{color:var(--red)}
+.big-number .label{font:400 16px/1.5 var(--font-body);color:var(--text-secondary);max-width:500px;margin:0 auto}
+.big-number .source{font:400 11px/1 var(--font-mono);color:var(--text-muted);margin-top:12px;letter-spacing:.03em}
+.big-number .grade{display:inline-block;padding:2px 8px;border-radius:3px;font:600 10px/1 var(--font-mono);margin-left:6px;letter-spacing:.05em}
+.grade-a{background:var(--green-dim);color:var(--green)}
+.grade-b{background:var(--blue-dim);color:var(--blue)}
+.grade-c{background:rgba(251,191,36,.12);color:var(--yellow)}
+.grade-d{background:var(--red-dim);color:var(--red)}
+.grade-f{background:var(--red-dim);color:var(--red)}
+
+/* ── COMPARISON BARS ── */
+.compare-bars{margin:48px 0;padding:32px;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px}
+.compare-bars h3{font:600 16px/1.3 var(--font-display);color:var(--text);margin-bottom:24px}
+.bar-row{margin-bottom:20px}
+.bar-label{font:400 13px/1 var(--font-mono);color:var(--text-dim);margin-bottom:6px;display:flex;justify-content:space-between}
+.bar-track{height:32px;background:var(--bg-elevated);border-radius:6px;position:relative;overflow:hidden;display:flex}
+.bar-fill{height:100%;border-radius:6px;display:flex;align-items:center;padding:0 12px;font:600 12px/1 var(--font-mono);color:var(--bg);transition:width 1.2s cubic-bezier(.22,1,.36,1);width:0}
+.bar-fill.immigrant{background:var(--accent)}
+.bar-fill.native{background:var(--text-dim)}
+.bar-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.bar-pair-label{font:400 14px/1.4 var(--font-body);color:var(--text-secondary);margin-bottom:8px;grid-column:1/-1}
+
+/* ── VERSUS CARD ── */
+.vs-card{display:grid;grid-template-columns:1fr auto 1fr;gap:0;margin:48px 0;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden}
+.vs-side{padding:40px 32px;text-align:center}
+.vs-side .vs-value{font:800 clamp(36px,6vw,56px)/1 var(--font-display);margin-bottom:8px}
+.vs-side .vs-label{font:400 14px/1.4 var(--font-body);color:var(--text-secondary)}
+.vs-side .vs-sub{font:400 12px/1.4 var(--font-mono);color:var(--text-dim);margin-top:8px}
+.vs-divider{width:1px;background:var(--border);display:flex;align-items:center;justify-content:center;position:relative}
+.vs-divider span{background:var(--bg-card);padding:8px 0;font:700 14px/1 var(--font-display);color:var(--text-muted)}
+.vs-claim{background:var(--red-dim);border:1px solid rgba(239,68,68,.2)}
+.vs-claim .vs-value{color:var(--red)}
+.vs-reality{background:var(--green-dim);border:1px solid rgba(62,207,142,.2)}
+.vs-reality .vs-value{color:var(--green)}
+
+/* ── CALLOUT ── */
+.callout{margin:40px 0;padding:24px 28px;border-left:3px solid var(--accent);background:var(--bg-card);border-radius:0 8px 8px 0}
+.callout.green{border-color:var(--green)}
+.callout.blue{border-color:var(--blue)}
+.callout.red{border-color:var(--red)}
+.callout p{margin:0;color:var(--text-secondary);font-size:17px}
+.callout p:first-child{color:var(--text);font-weight:600;margin-bottom:8px}
+
+/* ── DONUT / PIE ── */
+.vote-viz{display:flex;align-items:center;justify-content:center;gap:48px;margin:48px 0;flex-wrap:wrap}
+.donut-wrap{position:relative;width:200px;height:200px}
+.donut-wrap svg{transform:rotate(-90deg)}
+.donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.donut-center .year{font:700 20px/1 var(--font-display);color:var(--text)}
+.donut-center .delta{font:400 12px/1 var(--font-mono);color:var(--text-dim);margin-top:4px}
+.donut-legend{display:flex;flex-direction:column;gap:12px}
+.donut-legend .leg-item{display:flex;align-items:center;gap:10px;font:400 14px/1.3 var(--font-body);color:var(--text-secondary)}
+.leg-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0}
+
+/* ── TIMELINE ── */
+.timeline{position:relative;margin:48px 0;padding-left:32px}
+.timeline::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent),var(--blue),var(--green),var(--purple),var(--accent))}
+.tl-item{position:relative;margin-bottom:40px;padding-left:24px}
+.tl-item::before{content:'';position:absolute;left:-28px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--bg);border:2px solid var(--accent);z-index:1}
+.tl-item:nth-child(2)::before{border-color:var(--blue)}
+.tl-item:nth-child(3)::before{border-color:var(--green)}
+.tl-item:nth-child(4)::before{border-color:var(--purple)}
+.tl-item:nth-child(5)::before{border-color:var(--accent-secondary)}
+.tl-item:nth-child(6)::before{border-color:var(--accent)}
+.tl-date{font:600 12px/1 var(--font-mono);color:var(--accent);letter-spacing:.05em;margin-bottom:6px}
+.tl-title{font:600 18px/1.3 var(--font-display);color:var(--text);margin-bottom:6px}
+.tl-body{font:400 15px/1.6 var(--font-body);color:var(--text-dim)}
+.tl-outcome{font:400 13px/1.5 var(--font-mono);color:var(--green);margin-top:8px;padding:8px 12px;background:var(--green-dim);border-radius:6px;display:inline-block}
+
+/* ── GRID STAT CARDS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:48px 0}
+.stat-card{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:10px;padding:24px;transition:border-color .2s}
+.stat-card:hover{border-color:var(--border)}
+.stat-card .stat-val{font:700 clamp(28px,4vw,36px)/1 var(--font-display);margin-bottom:8px}
+.stat-card .stat-val.accent{color:var(--accent)}
+.stat-card .stat-val.green{color:var(--green)}
+.stat-card .stat-val.blue{color:var(--blue)}
+.stat-card .stat-val.red{color:var(--red)}
+.stat-card .stat-desc{font:400 14px/1.5 var(--font-body);color:var(--text-secondary)}
+.stat-card .stat-src{font:400 10px/1 var(--font-mono);color:var(--text-muted);margin-top:10px;letter-spacing:.03em}
+
+/* ── DIG DEEPER ── */
+.dig-deeper{margin:32px 0;border:1px solid var(--border-subtle);border-radius:8px;overflow:hidden}
+.dig-deeper summary{padding:16px 20px;cursor:pointer;font:500 14px/1.4 var(--font-display);color:var(--accent);list-style:none;display:flex;align-items:center;gap:8px;background:var(--bg-card);transition:background .2s}
+.dig-deeper summary:hover{background:var(--bg-card-hover)}
+.dig-deeper summary::before{content:'→';font:400 14px/1 var(--font-mono);transition:transform .2s}
+.dig-deeper[open] summary::before{transform:rotate(90deg)}
+.dig-deeper .dd-content{padding:20px;background:var(--bg-elevated);font:400 15px/1.6 var(--font-body);color:var(--text-dim)}
+.dig-deeper .dd-content strong{color:var(--text-secondary)}
+
+/* ── SEPARATOR ── */
+.sep{width:60px;height:2px;background:linear-gradient(90deg,var(--accent),transparent);margin:80px auto}
+
+/* ── STACKED BAR ── */
+.stacked-bar-wrap{margin:40px 0}
+.stacked-bar-title{font:500 14px/1.3 var(--font-display);color:var(--text);margin-bottom:12px}
+.stacked-bar{height:40px;display:flex;border-radius:8px;overflow:hidden;background:var(--bg-elevated)}
+.stacked-seg{display:flex;align-items:center;justify-content:center;font:600 11px/1 var(--font-mono);color:var(--bg);transition:width 1.2s cubic-bezier(.22,1,.36,1);overflow:hidden;white-space:nowrap}
+.stacked-legend{display:flex;gap:20px;margin-top:10px;flex-wrap:wrap}
+.stacked-legend span{font:400 12px/1.3 var(--font-mono);color:var(--text-dim);display:flex;align-items:center;gap:6px}
+.stacked-legend .sl-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* ── FOOTER ── */
+.article-footer{padding:80px 24px;border-top:1px solid var(--border-subtle)}
+.article-footer .section-inner{text-align:center}
+.article-footer p{color:var(--text-dim);font-size:15px;max-width:600px;margin:0 auto 12px}
+.article-footer .methodology{font:400 12px/1.6 var(--font-mono);color:var(--text-muted);max-width:600px;margin:24px auto 0}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .fnav{display:none}
+  .vs-card{grid-template-columns:1fr;gap:0}
+  .vs-divider{width:100%;height:1px;flex-direction:row}
+  .vs-divider span{padding:0 12px}
+  .vote-viz{flex-direction:column;gap:32px}
+  .bar-pair{grid-template-columns:1fr}
+  section{padding:60px 20px}
+  .hero{padding:60px 20px}
+  .stat-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+
+<nav class="fnav" id="fnav">
+  <a href="#voters"><span class="dot"></span><span class="label">The Voter Myth</span></a>
+  <a href="#census"><span class="dot"></span><span class="label">Census Seats</span></a>
+  <a href="#taxes"><span class="dot"></span><span class="label">Follow the Money</span></a>
+  <a href="#welfare"><span class="dot"></span><span class="label">Welfare Use</span></a>
+  <a href="#real-cost"><span class="dot"></span><span class="label">The Real Cost</span></a>
+  <a href="#productive"><span class="dot"></span><span class="label">Productivity</span></a>
+  <a href="#history"><span class="dot"></span><span class="label">275 Years</span></a>
+</nav>
+
+<!-- ═══════════════════ HERO ═══════════════════ -->
+<header class="hero">
+  <div class="hero-kicker">Data-Driven Analysis</div>
+  <h1>The Immigration <em>Threat</em></h1>
+  <p class="hero-sub">Seven claims. Exposed to evidence. What survives contact with the data — and what doesn't.</p>
+  <div class="hero-meta">
+    <span>Corey Petty</span>
+    <span>February 2026</span>
+    <span>~15 min read</span>
+  </div>
+  <div class="scroll-cue">
+    <span>Scroll to begin</span>
+    <div class="arrow"></div>
+  </div>
+</header>
+
+<!-- ═══════════════════ INTRO ═══════════════════ -->
+<section>
+  <div class="section-inner">
+    <p><strong>There's a story roughly half the country believes.</strong> It goes: Democrats are importing voters through mass immigration. The immigrants are fiscal parasites, freeloading off welfare while contributing nothing. The Census inflates blue-state power by counting non-citizens. The system is rigged.</p>
+    <p>I wanted to test each of these claims against the best available data — peer-reviewed research, government statistical agencies, and analyses from think tanks across the political spectrum. What I found wasn't a simple debunking. <em>Some of the underlying observations are real.</em> But the framework they get plugged into collapses under the weight of the very evidence that's supposed to support it.</p>
+    <p>Every claim below includes its source, that source's institutional bias, and an evidence grade. If you want to dig deeper on any data point, the <strong>Source Analysis & Evidence Foundation</strong> document catalogs every source with full bias assessments and cross-reference notes.</p>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: VOTERS ═══════════════════ -->
+<section id="voters">
+  <div class="section-inner">
+    <div class="section-label reveal">Claim #1</div>
+    <h2 class="section-title reveal">"They're Importing Voters"</h2>
+    <p class="reveal">The central theory: immigrants vote overwhelmingly Democratic, so more immigrants means permanent Democratic power. From 1996 to 2020, there was a real trend supporting this — Obama won naturalized citizens by ~30 points in 2012.</p>
+    <p class="reveal">Then came 2024.</p>
+  </div>
+
+  <div class="section-wide">
+    <div class="vote-viz reveal">
+      <div>
+        <div class="donut-wrap" id="donut2020">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--bg-elevated)" stroke-width="24"/>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--blue)" stroke-width="24"
+              stroke-dasharray="0 503" class="donut-arc" data-target="302"/>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--red)" stroke-width="24"
+              stroke-dasharray="0 503" stroke-dashoffset="-302" class="donut-arc" data-target="196"/>
+          </svg>
+          <div class="donut-center">
+            <span class="year">2020</span>
+            <span class="delta">Biden +21</span>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="donut-wrap" id="donut2024">
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--bg-elevated)" stroke-width="24"/>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--blue)" stroke-width="24"
+              stroke-dasharray="0 503" class="donut-arc" data-target="257"/>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--red)" stroke-width="24"
+              stroke-dasharray="0 503" stroke-dashoffset="-257" class="donut-arc" data-target="237"/>
+          </svg>
+          <div class="donut-center">
+            <span class="year">2024</span>
+            <span class="delta">Harris +4</span>
+          </div>
+        </div>
+      </div>
+      <div class="donut-legend">
+        <div class="leg-item"><div class="leg-swatch" style="background:var(--blue)"></div> Democratic</div>
+        <div class="leg-item"><div class="leg-swatch" style="background:var(--red)"></div> Republican</div>
+        <div class="leg-item" style="margin-top:8px;font-family:var(--font-mono);font-size:12px;color:var(--text-muted)">Naturalized citizen vote<br>Source: Pew validated voter study</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="big-number reveal">
+      <div class="number" id="counter-swing">0</div>
+      <div class="label">point swing among naturalized citizens from 2020 to 2024. The "reliable Democratic constituency" split <strong>51–47</strong>.</div>
+      <div class="source">Pew Research — Validated Voter Study <span class="grade grade-a">Grade A</span></div>
+    </div>
+
+    <p class="reveal">Among Hispanic naturalized citizens specifically, <strong>51% voted Trump</strong>. The entire theory's core prediction failed its empirical test.</p>
+
+    <div class="callout reveal">
+      <p>The pipeline problem</p>
+      <p>Even if immigrants did vote reliably Democratic, the naturalization timeline makes "voter manufacturing" extraordinarily inefficient: median <strong>7.5 years</strong> from green card to citizenship (10.9 for Mexican nationals). Only 49% of the foreign-born are citizens. Only 54–62% of those turn out. Mexican naturalization rate: 42% — the lowest among major groups. From unauthorized entry to first possible vote: <strong>15–25 years</strong>.</p>
+    </div>
+
+    <details class="dig-deeper reveal">
+      <summary>Dig deeper: Why the 2024 shift matters structurally</summary>
+      <div class="dd-content">
+        <strong>Fraga, Velez & West (APSR, 2025)</strong> found Latinos are sorting by ideology, not ethnic identity — the opposite of what the "emerging Democratic majority" thesis predicted. Ruy Teixeira, who co-wrote <em>The Emerging Democratic Majority</em> (2002), now works at the conservative AEI and explicitly argues his own thesis was wrong. The California shift from red to blue was caused by Republican Prop 187 backlash (1994), not IRCA amnesty (1986) — the chronology contradicts the conspiracy. <strong>Source bias note:</strong> Pew is center/nonpartisan; APSR is the field's top peer-reviewed journal. Evidence grade: <strong>A</strong>.
+      </div>
+    </details>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: CENSUS ═══════════════════ -->
+<section id="census">
+  <div class="section-inner">
+    <div class="section-label reveal">Claim #2</div>
+    <h2 class="section-title reveal">"Non-Citizens Inflate Blue-State Representation"</h2>
+    <p class="reveal">Elon Musk popularized the claim that counting non-citizens in the Census shifts <strong>"20 seats"</strong> to blue states. The 14th Amendment says "whole number of persons" — citizen-only proposals were explicitly rejected during its drafting. But what about the actual number?</p>
+  </div>
+
+  <div class="section-wide">
+    <div class="vs-card reveal">
+      <div class="vs-side vs-claim">
+        <div class="vs-value">20</div>
+        <div class="vs-label">Seats claimed to shift to blue states</div>
+        <div class="vs-sub">Musk, 2024 — no methodology cited</div>
+      </div>
+      <div class="vs-divider"><span>vs</span></div>
+      <div class="vs-side vs-reality">
+        <div class="vs-value">2</div>
+        <div class="vs-label">Seats that would actually shift</div>
+        <div class="vs-sub">PNAS Nexus, 2025 — peer-reviewed</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <p class="reveal">Off by a factor of ten. And the partisan direction is ambiguous: <strong>Texas and Florida</strong> — both GOP-trending — would <em>lose</em> seats under a citizens-only count. The net partisan effect in any election since 1980: no more than 3 Electoral College votes shifted between parties.</p>
+
+    <details class="dig-deeper reveal">
+      <summary>Dig deeper: The constitutional and legal history</summary>
+      <div class="dd-content">
+        The Trump administration attempted both a citizenship question on the 2020 Census (blocked by SCOTUS in <em>Dept. of Commerce v. New York</em>, 2019) and an executive memorandum to exclude undocumented from apportionment (data never delivered). Both failed because the legal framework is clear. At the 2007 peak unauthorized population (12.2M), the maximum apportionment shift would have been 5 seats. <strong>Source:</strong> PNAS Nexus (academic, peer-reviewed); Census Bureau. Evidence grade: <strong>A</strong>.
+      </div>
+    </details>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: TAXES ═══════════════════ -->
+<section id="taxes">
+  <div class="section-inner">
+    <div class="section-label reveal">Claim #3</div>
+    <h2 class="section-title reveal">Follow the Money</h2>
+    <p class="reveal">The "free-rider" framing depends on the assumption that undocumented immigrants don't pay taxes. Here's what the IRS, SSA, and independent tax analysts actually found:</p>
+  </div>
+
+  <div class="section-wide">
+    <div class="big-number reveal">
+      <div class="number accent" id="counter-taxes">$0</div>
+      <div class="label">Total taxes paid by undocumented immigrants in 2022.</div>
+      <div class="source">Institute on Taxation and Economic Policy, 2024 <span class="grade grade-b">Grade B+</span></div>
+    </div>
+
+    <div class="stat-grid reveal">
+      <div class="stat-card">
+        <div class="stat-val accent">$25.7B</div>
+        <div class="stat-desc">Social Security payroll taxes — for benefits they <em>can never receive</em></div>
+        <div class="stat-src">ITEP • Grade B+</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val accent">$6.4B</div>
+        <div class="stat-desc">Medicare payroll taxes — for benefits they <em>can never receive</em></div>
+        <div class="stat-src">ITEP • Grade B+</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val blue">$2.15T</div>
+        <div class="stat-desc">Cumulative wages in SSA's Earnings Suspense File — unmatched W-2s, largely from undocumented workers</div>
+        <div class="stat-src">SSA • Grade A</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val green">8.9%</div>
+        <div class="stat-desc">Avg effective state/local tax rate paid by undocumented immigrants — <em>higher</em> than the top 1% (7.2%)</div>
+        <div class="stat-src">ITEP • Grade B+</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="callout reveal">
+      <p>The programs they're barred from</p>
+      <p>Undocumented immigrants are categorically ineligible for: Social Security, Medicare, Medicaid (except emergency), SNAP, TANF, SSI, federal housing assistance, ACA marketplace plans, federal student aid, unemployment insurance, and the EITC. Emergency Medicaid — which reimburses hospitals, not individuals — totaled $3.8B in FY2023: <strong>0.4%</strong> of Medicaid spending.</p>
+    </div>
+
+    <p class="reveal">They're paying into a system they cannot draw from. The Social Security Administration itself concluded: "earnings by unauthorized immigrants result in a net positive effect on Social Security financial status generally."</p>
+
+    <details class="dig-deeper reveal">
+      <summary>Dig deeper: ITEP methodology and source bias</summary>
+      <div class="dd-content">
+        <strong>ITEP</strong> is left-leaning on tax policy but their tax incidence modeling is used across the political spectrum. The $96.7B figure relies on modeling (undocumented status isn't recorded on tax returns), using assumptions about compliance rates and income distribution. It's a central estimate with uncertainty ranges. <strong>IRS data:</strong> 26M ITINs issued since 1996; ~3.8M ITIN returns filed in 2022 reporting $14.4B in taxable income. The payroll tax contribution figure is corroborated by SSA's own Earnings Suspense File, which is direct administrative data (Grade A). Evidence grade for overall tax contribution: <strong>B+</strong>.
+      </div>
+    </details>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: WELFARE ═══════════════════ -->
+<section id="welfare">
+  <div class="section-inner">
+    <div class="section-label reveal">Claim #4</div>
+    <h2 class="section-title reveal">"Immigrants Use More Welfare Than Americans"</h2>
+    <p class="reveal">This is where institutional bias in the sources becomes most visible. The answer depends entirely on <em>who you ask</em> and <em>how they count</em>.</p>
+  </div>
+
+  <div class="section-wide">
+    <div class="compare-bars reveal" id="welfare-bars">
+      <h3>Per-capita welfare consumption: Immigrants vs. Native-born</h3>
+
+      <div class="bar-row">
+        <div class="bar-label"><span>All programs combined</span><span style="color:var(--accent)">53% less</span></div>
+        <div class="bar-track">
+          <div class="bar-fill native" data-width="100" style="width:0">100%</div>
+        </div>
+        <div style="height:4px"></div>
+        <div class="bar-track">
+          <div class="bar-fill immigrant" data-width="47" style="width:0">47%</div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-label"><span>Social Security</span><span style="color:var(--accent)">39% less</span></div>
+        <div class="bar-track">
+          <div class="bar-fill native" data-width="100" style="width:0">100%</div>
+        </div>
+        <div style="height:4px"></div>
+        <div class="bar-track">
+          <div class="bar-fill immigrant" data-width="61" style="width:0">61%</div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-label"><span>SNAP (food stamps)</span><span style="color:var(--accent)">35% less</span></div>
+        <div class="bar-track">
+          <div class="bar-fill native" data-width="100" style="width:0">100%</div>
+        </div>
+        <div style="height:4px"></div>
+        <div class="bar-track">
+          <div class="bar-fill immigrant" data-width="65" style="width:0">65%</div>
+        </div>
+      </div>
+
+      <div class="bar-row">
+        <div class="bar-label"><span>SSI</span><span style="color:var(--accent)">42% less</span></div>
+        <div class="bar-track">
+          <div class="bar-fill native" data-width="100" style="width:0">100%</div>
+        </div>
+        <div style="height:4px"></div>
+        <div class="bar-track">
+          <div class="bar-fill immigrant" data-width="58" style="width:0">58%</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;font:400 11px/1.4 var(--font-mono);color:var(--text-muted)">
+        Native-born = 100% baseline · Source: CATO Institute / 2023 SIPP data <span class="grade grade-a">Grade A</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="callout blue reveal">
+      <p>Why the sources disagree</p>
+      <p><strong>CATO</strong> (libertarian, Koch-funded) uses per-capita, income-controlled comparisons — standard methodology. <strong>CIS</strong> (restrictionist, Tanton-founded) uses household-level counts that attribute U.S.-citizen children's benefits to immigrant parents, without income controls. Same data, wildly different conclusions. When CATO, the CBO, USDA, and CIS all look at the same data and CIS is the outlier, the methodological burden is on CIS.</p>
+    </div>
+
+    <p class="reveal">This held <strong>at every income level</strong>. Immigrants in poverty used less welfare than native-born Americans in poverty. The "free-rider" charge is not just unsupported — it's inverted.</p>
+
+    <details class="dig-deeper reveal">
+      <summary>Dig deeper: CIS methodology problems</summary>
+      <div class="dd-content">
+        CIS was founded by John Tanton, who had documented connections to white nationalist organizations (SPLC has designated CIS a hate group, which CIS disputes). Their welfare studies count benefits for U.S.-citizen children in immigrant households as "immigrant" welfare use, don't control for income level, and compare low-income immigrant households against the overall native population. It's like comparing pickup truck fuel economy to a fleet that includes hybrids. USDA data independently confirms the CATO finding: noncitizens = 4.8% of SNAP spending while being 6.5% of the population.
+      </div>
+    </details>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: REAL COST ═══════════════════ -->
+<section id="real-cost">
+  <div class="section-inner">
+    <div class="section-label reveal">The Legitimate Concern</div>
+    <h2 class="section-title reveal">The Cost That's Actually Real</h2>
+    <p class="reveal">Here's where I shift gears. The state and local fiscal burden is the one claim in this entire constellation with <em>genuine, well-documented empirical support</em>. Dismissing it is dishonest.</p>
+    <p class="reveal">The problem is architectural. The federal government collects immigration's fiscal benefits. States and localities absorb its costs. That mismatch is real.</p>
+  </div>
+
+  <div class="section-wide">
+    <div class="stat-grid reveal">
+      <div class="stat-card">
+        <div class="stat-val red">$3.75B</div>
+        <div class="stat-desc">NYC asylum seeker costs, FY2024 alone. FEMA reimbursed just $245M.</div>
+        <div class="stat-src">NYC Comptroller • Grade A</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val red">$2.9B</div>
+        <div class="stat-desc">Texas border security spending, FY2023 — up from $0.4B pre-surge</div>
+        <div class="stat-src">Texas state reports • Grade B</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val blue">$9.2B</div>
+        <div class="stat-desc">Total net cost on state/local governments nationwide, 2023 — 0.3% of spending</div>
+        <div class="stat-src">CBO • Grade A</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val green">$1.2T</div>
+        <div class="stat-desc">Federal revenue increase from the same immigration surge, 2024–2034</div>
+        <div class="stat-src">CBO • Grade A</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="callout green reveal">
+      <p>The reframe that matters</p>
+      <p>This is a <strong>federalism problem, not an immigration problem</strong>. Washington collects $1.2 trillion in revenue from the immigration surge while states absorb $9.2 billion in costs. The federal government already transfers ~$1 trillion annually to states. Adjusting those transfers — through enhanced SCAAP funding, expanded emergency medical reimbursement, or targeted education grants — addresses the real grievance without blaming immigrants for a structural mismatch they didn't create.</p>
+    </div>
+
+    <div class="stacked-bar-wrap reveal">
+      <div class="stacked-bar-title">Federal vs. state/local: Who captures the fiscal impact?</div>
+      <div class="stacked-bar" id="fiscal-bar">
+        <div class="stacked-seg" style="background:var(--green);width:0" data-width="57">+$1.2T Federal Revenue</div>
+        <div class="stacked-seg" style="background:var(--accent-secondary);width:0" data-width="14">-$0.3T Mandatory</div>
+        <div class="stacked-seg" style="background:var(--red);width:0" data-width="4">-$9.2B State/Local</div>
+        <div class="stacked-seg" style="background:var(--bg-elevated);color:var(--text-dim);width:0" data-width="25"></div>
+      </div>
+      <div class="stacked-legend">
+        <span><span class="sl-dot" style="background:var(--green)"></span> Federal revenue gained</span>
+        <span><span class="sl-dot" style="background:var(--accent-secondary)"></span> Federal mandatory spending</span>
+        <span><span class="sl-dot" style="background:var(--red)"></span> State/local net cost</span>
+      </div>
+      <div style="margin-top:8px;font:400 11px/1 var(--font-mono);color:var(--text-muted)">CBO projections, 2024–2034 · Grade A · Not to precise scale — illustrates ratio</div>
+    </div>
+
+    <details class="dig-deeper reveal">
+      <summary>Dig deeper: The Texas Comptroller study they don't update</summary>
+      <div class="dd-content">
+        The 2006 Texas Comptroller study — conducted under <strong>Republican</strong> Comptroller Carole Keeton Strayhorn — found undocumented immigrants generated a net positive of $420M for the state government even as local governments absorbed $1.44B in costs. The Perryman Group estimated removing undocumented residents would cost Texas $69.3B in economic activity and 403,000 jobs. Texas has not updated this study since 2006 despite repeated calls to do so — a notable political choice. Florida data: undocumented immigrants = 0.82% of hospital visits despite comprising ~4% of the state's population.
+      </div>
+    </details>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: PRODUCTIVE ═══════════════════ -->
+<section id="productive">
+  <div class="section-inner">
+    <div class="section-label reveal">Claim #5</div>
+    <h2 class="section-title reveal">"They Don't Work"</h2>
+    <p class="reveal">This one is brief because the data is unambiguous to the point where dwelling on it feels like dignifying a claim that doesn't deserve the attention.</p>
+  </div>
+
+  <div class="section-wide">
+    <div class="compare-bars reveal" id="labor-bars">
+      <h3>Labor force participation rate — BLS, 2024</h3>
+
+      <div class="bar-row">
+        <div class="bar-label"><span>Men — Foreign-born</span><span style="color:var(--accent)">77.3%</span></div>
+        <div class="bar-track">
+          <div class="bar-fill immigrant" data-width="77.3" style="width:0">77.3%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span>Men — Native-born</span><span style="color:var(--text-dim)">65.9%</span></div>
+        <div class="bar-track">
+          <div class="bar-fill native" data-width="65.9" style="width:0">65.9%</div>
+        </div>
+      </div>
+      <div class="bar-row" style="margin-top:12px">
+        <div class="bar-label"><span>Overall — Foreign-born</span><span style="color:var(--accent)">66.5%</span></div>
+        <div class="bar-track">
+          <div class="bar-fill immigrant" data-width="66.5" style="width:0">66.5%</div>
+        </div>
+      </div>
+      <div class="bar-row">
+        <div class="bar-label"><span>Overall — Native-born</span><span style="color:var(--text-dim)">61.8%</span></div>
+        <div class="bar-track">
+          <div class="bar-fill native" data-width="61.8" style="width:0">61.8%</div>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;font:400 11px/1.4 var(--font-mono);color:var(--text-muted)">
+        Bureau of Labor Statistics, "Foreign-Born Workers" 2024 <span class="grade grade-a">Grade A</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-inner">
+    <div class="stat-grid reveal">
+      <div class="stat-card">
+        <div class="stat-val accent">2×</div>
+        <div class="stat-desc">Immigrants are roughly twice as likely to start businesses as native-born Americans</div>
+        <div class="stat-src">Kauffman Foundation • Grade B+</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val accent">46%</div>
+        <div class="stat-desc">of Fortune 500 companies were founded by immigrants or their children</div>
+        <div class="stat-src">AIC, 2025 • Grade B</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val blue">70%</div>
+        <div class="stat-desc">of U.S. farmworkers are foreign-born. When Alabama passed enforcement laws, crops rotted.</div>
+        <div class="stat-src">USDA/BLS • Grade A</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val blue">38.7%</div>
+        <div class="stat-desc">of U.S. software developers are foreign-born</div>
+        <div class="stat-src">AIC/Census • Grade B+</div>
+      </div>
+    </div>
+
+    <p class="reveal" style="margin-top:32px">Evidence grade for the "non-productive" claim: <strong style="color:var(--red)">F — Misleading</strong>. Not debatable. Not complicated. Every available labor market dataset contradicts it.</p>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: HISTORY ═══════════════════ -->
+<section id="history">
+  <div class="section-inner">
+    <div class="section-label reveal">The Pattern</div>
+    <h2 class="section-title reveal">275 Years of the Same Argument</h2>
+    <p class="reveal">Every claim in this analysis has been made before. Not vaguely — <em>specifically</em>. Directed at different groups, repeated on a roughly 40-year cycle. Each time, the observations were real. Each time, the analytical framework was wrong.</p>
+
+    <div class="timeline reveal">
+      <div class="tl-item">
+        <div class="tl-date">1751</div>
+        <div class="tl-title">Benjamin Franklin on Germans</div>
+        <div class="tl-body">"Why should Pennsylvania, founded by the English, become a Colony of Aliens, who will shortly be so numerous as to Germanize us?" He called Germans "swarthy."</div>
+        <div class="tl-outcome">↗ 45 million German-Americans today. Largest ancestral group in the U.S.</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">1850s</div>
+        <div class="tl-title">Know-Nothings on the Irish</div>
+        <div class="tl-body">Irish Catholics would deliver America to the Pope. Proposed 21-year naturalization wait. Irish comprised 70% of NYC charity recipients.</div>
+        <div class="tl-outcome">↗ 150,000 Irish fought for the Union. Built America's infrastructure. Irish Catholics now lean Republican.</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">1882</div>
+        <div class="tl-title">Chinese Exclusion Act</div>
+        <div class="tl-body">"A race of cheap working slaves." Denis Kearney's Workingmen's Party drove the first race-based immigration ban in U.S. history.</div>
+        <div class="tl-outcome">↗ NBER (2024): The Act reduced manufacturing output by 62% in affected counties. It didn't raise native wages.</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">1900s–1920s</div>
+        <div class="tl-title">Southern & Eastern Europeans</div>
+        <div class="tl-body">Stanford president Jordan: "not one in a thousand from Naples or Sicily that is not a burden." Madison Grant: they'd create a "corrupted caricature." Led to the 1924 Johnson-Reed Act.</div>
+        <div class="tl-outcome">↗ Italian and Jewish Americans became Supreme Court justices, governors, Fortune 500 CEOs.</div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-date">2000s–Present</div>
+        <div class="tl-title">Latin American & Other Immigration</div>
+        <div class="tl-body">Buchanan: "barbarian invasions." Carlson: "more obedient voters from the Third World." "They won't assimilate. They'll drain the system. They'll change America forever."</div>
+        <div class="tl-outcome">↗ Children of immigrants show higher upward mobility at every income level — a pattern consistent across 130 years of data.</div>
+      </div>
+    </div>
+
+    <div class="big-number reveal">
+      <div class="number green">+5–6</div>
+      <div class="label">Percentile points of additional upward mobility for children of immigrants vs. children of native-born at the same income rank. Consistent across 130 years of data and 4 million father-son pairs.</div>
+      <div class="source">Abramitzky, Boustan & Jácome — NBER/AER <span class="grade grade-a">Grade A</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- ═══════════════════ SECTION: VERDICT ═══════════════════ -->
+<section>
+  <div class="section-inner">
+    <div class="section-label reveal">The Verdict</div>
+    <h2 class="section-title reveal">Real Problems, Wrong Framework</h2>
+
+    <p class="reveal">The conservative immigration narrative contains <strong>verifiable factual kernels</strong> embedded within an <strong>analytical framework the data does not support</strong>.</p>
+
+    <div class="stat-grid reveal">
+      <div class="stat-card" style="border-color:var(--green);border-width:1px">
+        <div class="stat-val green" style="font-size:18px">What the data supports</div>
+        <div class="stat-desc" style="margin-top:12px">
+          • State/local fiscal costs are real and concentrated<br>
+          • The 1965 Act's effects exceeded its promises<br>
+          • Biden-era border encounters were unprecedented<br>
+          • Some state benefit expansions are debatable policy
+        </div>
+      </div>
+      <div class="stat-card" style="border-color:var(--red);border-width:1px">
+        <div class="stat-val red" style="font-size:18px">What the data doesn't</div>
+        <div class="stat-desc" style="margin-top:12px">
+          • Deliberate voter-importation strategy (D grade)<br>
+          • "Free-rider" framing — it's inverted (F grade)<br>
+          • "Non-productive" claim — every dataset contradicts it (F grade)<br>
+          • "20 seats" apportionment claim — off by 10× (F grade)<br>
+          • "This time is different" — contradicted by 275 years (D grade)
+        </div>
+      </div>
+    </div>
+
+    <p class="reveal" style="margin-top:40px">The conspiracy theory is seductive because it provides a single, emotionally satisfying explanation for a set of real anxieties. But solving the real problems — the federalism mismatch, the border infrastructure, the ESL teacher shortage — requires an accurate diagnosis. And the dominant narrative is not one.</p>
+
+    <p class="reveal">The data is there for anyone who wants to look at it.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer class="article-footer">
+  <div class="section-inner">
+    <p><strong>Corey Petty</strong> · February 2026</p>
+    <p>All claims sourced to the Source Analysis & Evidence Foundation, which provides full bias assessments, evidence grades, and cross-source convergence analysis.</p>
+    <div class="methodology">
+      Written with AI assistance. All claims independently sourced. Evidence grades reflect source type, methodology, and replication. "Dig deeper" sections provide source-level context including institutional bias and funding. Report errors so they can be corrected.
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Progress bar ──
+const progress = document.getElementById('progress');
+window.addEventListener('scroll', () => {
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (window.scrollY / h * 100) + '%';
+});
+
+// ── Floating nav ──
+const fnav = document.getElementById('fnav');
+const sections = document.querySelectorAll('section[id]');
+const navLinks = fnav.querySelectorAll('a');
+
+function updateNav() {
+  const y = window.scrollY;
+  fnav.classList.toggle('visible', y > window.innerHeight * 0.5);
+  let current = '';
+  sections.forEach(s => { if (y >= s.offsetTop - 300) current = s.id; });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+}
+window.addEventListener('scroll', updateNav);
+
+// ── Scroll reveal ──
+const reveals = document.querySelectorAll('.reveal');
+const revealObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revealObs.unobserve(e.target); }});
+}, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+reveals.forEach(el => revealObs.observe(el));
+
+// ── Animated counters ──
+function animateCounter(el, target, prefix='', suffix='', duration=1500) {
+  const start = performance.now();
+  const isNeg = target < 0;
+  const abs = Math.abs(target);
+  function tick(now) {
+    const t = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - t, 3);
+    const val = Math.round(abs * ease);
+    el.textContent = prefix + (isNeg ? '-' : '') + val.toLocaleString() + suffix;
+    if (t < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+const counterSwing = document.getElementById('counter-swing');
+const counterTaxes = document.getElementById('counter-taxes');
+let swingDone = false, taxesDone = false;
+
+const counterObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    if (e.target === counterSwing && !swingDone) {
+      swingDone = true;
+      animateCounter(counterSwing, 17, '', '');
+    }
+    if (e.target === counterTaxes && !taxesDone) {
+      taxesDone = true;
+      animateCounter(counterTaxes, 96.7, '$', 'B');
+    }
+  });
+}, { threshold: 0.5 });
+counterObs.observe(counterSwing);
+counterObs.observe(counterTaxes);
+
+// ── Animate bars on scroll ──
+function animateBars(container) {
+  const bars = container.querySelectorAll('.bar-fill');
+  bars.forEach(b => { b.style.width = b.dataset.width + '%'; });
+}
+['welfare-bars','labor-bars'].forEach(id => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { animateBars(el); obs.unobserve(el); }});
+  }, { threshold: 0.3 });
+  obs.observe(el);
+});
+
+// ── Animate stacked bar ──
+const fiscalBar = document.getElementById('fiscal-bar');
+if (fiscalBar) {
+  const fObs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        fiscalBar.querySelectorAll('.stacked-seg').forEach(s => { s.style.width = s.dataset.width + '%'; });
+        fObs.unobserve(fiscalBar);
+      }
+    });
+  }, { threshold: 0.3 });
+  fObs.observe(fiscalBar);
+}
+
+// ── Animate donut arcs ──
+document.querySelectorAll('.donut-arc').forEach(arc => {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const t = arc.dataset.target;
+        const current = arc.getAttribute('stroke-dasharray');
+        arc.style.transition = 'stroke-dasharray 1.2s cubic-bezier(.22,1,.36,1)';
+        arc.setAttribute('stroke-dasharray', t + ' ' + (503 - t));
+        obs.unobserve(arc);
+      }
+    });
+  }, { threshold: 0.5 });
+  obs.observe(arc);
+});
+</script>
+</body>
+</html>
