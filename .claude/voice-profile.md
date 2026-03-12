@@ -41,7 +41,6 @@ Smart friend explaining something over coffee. Data-driven but opinionated. Show
 ## Language Patterns
 
 ### USE:
-- Em-dashes for asides and clarifications
 - Parenthetical personality: "(ya know, full time job, podcast, wife, and stuff)"
 - Direct questions: "You might be thinking 'does this really matter?'"
 - Strategic profanity: "what the fuck are we doing?" (for emphasis, not shock)
@@ -56,6 +55,8 @@ Smart friend explaining something over coffee. Data-driven but opinionated. Show
 - "Incredibly" / "Absolutely" / "Extremely" / "Remarkably"
 - "Let's dive in" / "Without further ado"
 - "It goes without saying"
+- Excessive em-dashes — AI uses these as a default structuring crutch. Use commas, periods, colons, or parentheses instead. An occasional em-dash is fine, but if you see more than 2-3 in a piece, most of them should be something else.
+- "It's not X. It's Y." / "X wasn't A. It was B." — The rhetorical inversion where you negate one thing then assert another. AI leans on this constantly for false profundity. Once per piece max, and only when the inversion genuinely surprises.
 - Emoji
 - Exclamation points (except in signature phrases)
 - Over-hedged language

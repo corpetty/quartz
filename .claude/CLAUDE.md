@@ -54,6 +54,8 @@ Quick voice check - reject output that contains:
 - "It's worth noting that..."
 - "Furthermore" / "Moreover" / "Additionally"
 - "Incredibly" / "Absolutely" / "Remarkably"
+- Excessive em-dashes (2-3 max per piece; use commas, periods, colons instead)
+- "It's not X. It's Y." rhetorical inversions (1 max per piece)
 - Generic conclusions that could apply to anything
 
 ## grepai - Semantic Code Search
