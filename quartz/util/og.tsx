@@ -196,14 +196,17 @@ export type ImageOptions = {
 }
 
 // This is the default template for generated social image.
-export const defaultImage: SocialImageOptions["imageStructure"] = (
-  cfg: GlobalConfiguration,
-  { colorScheme }: UserOpts,
-  title: string,
-  description: string,
-  fonts: SatoriOptions["fonts"],
-  _fileData: QuartzPluginData,
-) => {
+export const defaultImage: SocialImageOptions["imageStructure"] = ({
+  cfg,
+  userOpts: { colorScheme },
+  title,
+  description,
+  fonts,
+  fileData: _fileData,
+}: ImageOptions & {
+  userOpts: UserOpts
+  iconBase64?: string
+}) => {
   // How many characters are allowed before switching to smaller font
   const fontBreakPoint = 50
   const useSmallerFont = title.length > fontBreakPoint

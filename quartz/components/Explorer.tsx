@@ -55,12 +55,51 @@ export type FolderState = {
   collapsed: boolean
 }
 
+
 let numExplorers = 0
 export default ((userOpts?: Partial<Options>) => {
   const opts: Options = { ...defaultOptions, ...userOpts }
   const { OverflowList, overflowListAfterDOMLoaded } = OverflowListFactory()
 
-  const Explorer: QuartzComponent = ({ cfg, displayClass }: QuartzComponentProps) => {
+  // memoized
+  let fileTree: FileTrieNode
+  let jsonTree: string
+  let lastBuildId: string = ""
+
+  function constructFileTree(allFiles: QuartzPluginData[]) {
+    // Construct tree from allFiles
+    fileTree = new FileTrieNode([])
+    allFiles.forEach((file) => fileTree.add(file))
+
+    // Execute all functions (sort, filter, map) that were provided (if none were provided, only default "sort" is applied)
+    if (opts.order) {
+      // Order is important, use loop with index instead of order.map()
+      for (const functionName of opts.order) {
+        if (functionName === "map") {
+          fileTree.map(opts.mapFn)
+        } else if (functionName === "sort") {
+          fileTree.sort(opts.sortFn)
+        } else if (functionName === "filter") {
+          fileTree.filter(opts.filterFn)
+        }
+      }
+    }
+
+    // Get all folders of tree. Initialize with collapsed state
+    // Stringify to pass json tree as data attribute ([data-tree])
+    const folders = fileTree.getFolderPaths()
+    const folderState: Record<string, boolean> = {}
+    folders.forEach(folder => {
+      folderState[folder] = opts.folderDefaultState === "collapsed"
+    })
+    jsonTree = JSON.stringify(folderState)
+  }
+
+  const Explorer: QuartzComponent = ({ ctx, cfg, allFiles, displayClass }: QuartzComponentProps) => {
+    if (ctx.buildId !== lastBuildId) {
+      constructFileTree(allFiles)
+      lastBuildId = ctx.buildId
+    }
     const id = `explorer-${numExplorers++}`
 
     return (
@@ -127,7 +166,6 @@ export default ((userOpts?: Partial<Options>) => {
         </button>
         <div id="explorer-content" class="collapsed explorer-viewmode">
           <ul class="overflow" id="explorer-ul">
-            <ExplorerNode node={fileTree} opts={opts} fileData={fileData} />
             <li id="explorer-end" />
           </ul>
         </div>
