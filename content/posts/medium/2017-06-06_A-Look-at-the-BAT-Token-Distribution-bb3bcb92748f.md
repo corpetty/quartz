@@ -3,7 +3,7 @@ title: A Look at the BAT Token Distribution
 description: >-
   Jesus H. Christ folks. I’ve put off doing this one a little bit, in part
   because I’m a bit depressed/disappointed/confused/? in the…
-date: '2017-06-06T01:35:25.855Z'
+created: '2017-06-06T01:35:25.855Z'
 tags:
 - ICO Analysis
 - BAT

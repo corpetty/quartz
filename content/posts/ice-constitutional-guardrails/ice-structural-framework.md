@@ -1,7 +1,7 @@
 ---
 title: "ICE Structural Framework and Constitutional Constraints"
 description: "Documentation of the baseline constitutional and statutory framework constraining ICE"
-date: 2026-01-23
+created: 2026-01-23
 tags:
   - ice
   - constitutional-law

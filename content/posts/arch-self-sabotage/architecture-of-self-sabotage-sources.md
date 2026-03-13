@@ -1,7 +1,7 @@
 ---
 title: "Sources & Methodology: The Architecture of Self-Sabotage"
 description: "A complete audit of every claim, source, and potential bias in the Architecture of Self-Sabotage series — because if I'm going to ask you to trust data, you should be able to verify it."
-date: 2026-02-18
+created: 2026-02-18
 tags:
   - methodology
   - sources

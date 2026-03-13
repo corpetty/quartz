@@ -1,7 +1,7 @@
 ---
 title: A Look at the Bancor ICO Distribution
 description: ''
-date: ''
+created: ''
 categories: []
 keywords: []
 draft: true

@@ -1,7 +1,7 @@
 ---
 title: "The Architecture of Self-Sabotage"
 description: "How modern defaults in infrastructure, food, media, and social design are structurally optimized against human flourishing — and the data that proves it."
-date: 2026-02-18
+created: 2026-02-18
 tags:
   - systems-thinking
   - health

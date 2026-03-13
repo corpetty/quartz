@@ -3,7 +3,7 @@ title: The Role of Randomness in Proof of Work Mining
 description: >-
   I hear people throw shade at idea of Proof of Stake (PoS) protocols quite
   often. I think that most of these comments are founded in false…
-date: '2018-04-16T23:06:54.837Z'
+created: '2018-04-16T23:06:54.837Z'
 tags: 
 - Cryptocurrency
 - Randomness

@@ -1,7 +1,7 @@
 ---
 title: "Documented Erosion of Constitutional Safeguards"
 description: "Evidence of constitutional safeguard erosion, December 2025 - January 2026"
-date: 2026-01-23
+created: 2026-01-23
 tags:
   - ice
   - constitutional-law

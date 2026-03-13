@@ -1,6 +1,6 @@
 ---
 title: The Emotional Man
-date: 2026-03-12
+created: 2026-03-12
 tags:
   - posts
   - masculinity

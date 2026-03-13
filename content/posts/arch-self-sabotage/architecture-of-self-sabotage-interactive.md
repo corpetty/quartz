@@ -1,7 +1,7 @@
 ---
 title: "The Architecture of Self-Sabotage — Interactive Edition"
 description: "An interactive, scrollytelling data journalism exploration of how modern defaults are structurally optimized against human flourishing."
-date: 2026-02-18
+created: 2026-02-18
 tags:
   - systems-thinking
   - health

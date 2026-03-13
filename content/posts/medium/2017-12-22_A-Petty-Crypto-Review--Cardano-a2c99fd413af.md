@@ -3,7 +3,7 @@ title: 'A Petty Crypto Review: Cardano'
 description: >-
   So I get hit up quite frequently about various coins and whether or not
   they’re worth looking into, are a scam, are legit, etc. So I’ve…
-date: '2017-12-22T01:54:31.261Z'
+created: '2017-12-22T01:54:31.261Z'
 tags:
 - Cardano
 - Cryptocurrency

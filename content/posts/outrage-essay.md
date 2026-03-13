@@ -1,6 +1,6 @@
 ---
 title: The Debasement of Outrage
-date: 2026-02-01
+created: 2026-02-01
 tags:
   - culture
   - collective-action

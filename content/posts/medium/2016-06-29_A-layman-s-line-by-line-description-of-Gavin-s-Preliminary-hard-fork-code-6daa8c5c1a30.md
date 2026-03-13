@@ -3,7 +3,7 @@ title: A layman’s line-by-line description of Gavin’s Preliminary hard-fork 
 description: >-
   Here I will attempt to perform a line-by-line description of Gavin’s recent
   preliminary hard-fork code submitted to github, which can be…
-date: '2016-06-29T17:08:25.239Z'
+created: '2016-06-29T17:08:25.239Z'
 categories: []
 keywords: []
 slug: >-

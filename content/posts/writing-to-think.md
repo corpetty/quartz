@@ -1,7 +1,7 @@
 ---
 title: "Writing to think"
 description: "Most people think that writing is for others to read. For deep thinkers, writing is required to think."
-date: "2022-01-07"
+created: "2022-01-07"
 tags: 
 - posts
 - writing

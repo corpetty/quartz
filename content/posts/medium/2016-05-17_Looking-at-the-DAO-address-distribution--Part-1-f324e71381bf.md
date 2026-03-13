@@ -1,7 +1,7 @@
 ---
 title: 'Looking at the DAO address distribution: Part 1'
 description: What?!
-date: '2016-05-17T14:35:59.535Z'
+created: '2016-05-17T14:35:59.535Z'
 tags:
 - TheDAO
 slug: /@corpetty/looking-at-the-dao-address-distribution-part-1-f324e71381bf

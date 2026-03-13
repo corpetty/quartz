@@ -1,7 +1,7 @@
 ---
 title: 'Looking at the DAO Token Distribution: Part 2'
 description: 'WTF, Mate?!'
-date: '2016-05-24T02:16:21.032Z'
+created: '2016-05-24T02:16:21.032Z'
 tags:
 - TheDAO
 slug: /@corpetty/looking-at-the-dao-token-distribution-part-2-c77e7c4ac81c

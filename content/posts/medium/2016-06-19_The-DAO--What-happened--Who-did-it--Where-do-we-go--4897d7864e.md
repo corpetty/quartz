@@ -3,7 +3,7 @@ title: 'The DAO: What happened, Who did it, Where do we go?'
 description: >-
   It’s clear something tremendous has happened to the cryptocurrency
   environment, and it’s not the good kind of something. You’re about to be…
-date: '2016-06-19T02:09:37.668Z'
+created: '2016-06-19T02:09:37.668Z'
 categories: []
 keywords: []
 slug: /@corpetty/the-dao-what-happened-who-did-it-where-do-we-go-4897d7864e

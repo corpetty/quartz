@@ -3,7 +3,7 @@ title: The Merkle-ization of Individuality
 description: >-
   Unlike most of my posts or writings, this is not a technical one. It borrows
   from the technical world a bit, but its purpose is more of a…
-date: '2017-11-08T23:03:33.725Z'
+created: '2017-11-08T23:03:33.725Z'
 tags:
 - Philosophy
 - Individualism

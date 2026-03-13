@@ -3,7 +3,7 @@ title: A Look at the Bancor ICO Investor Distribution
 description: >-
   What’s up folks? Welcome to another round of ICO analysis, this time we look
   at Bancor. They’re making a play at becoming the new standard…
-date: ''
+created: ''
 categories: []
 keywords: []
 draft: true

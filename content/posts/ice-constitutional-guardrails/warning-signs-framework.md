@@ -1,7 +1,7 @@
 ---
 title: "Scholarly Warning Signs Frameworks"
 description: "Documentation of Stanton's Ten Stages of Genocide and Levitsky & Ziblatt's authoritarian warning signs"
-date: 2026-01-23
+created: 2026-01-23
 tags:
   - genocide-studies
   - authoritarianism

@@ -1,7 +1,7 @@
 ---
 title: "Complete Source Bibliography"
 description: "Complete bibliography of sources for the ICE constitutional safeguards analysis"
-date: 2026-01-23
+created: 2026-01-23
 tags:
   - bibliography
   - sources

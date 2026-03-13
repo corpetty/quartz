@@ -3,7 +3,7 @@ title: Don’t cling to past ideas so tight to try and explain the future
 description: >-
   If what you do transcends the archetypes of its predecessors, then it can
   become something not explainable by them.
-date: '2016-05-24T22:24:00.162Z'
+created: '2016-05-24T22:24:00.162Z'
 tags:
 - Medium Comment
 slug: >-

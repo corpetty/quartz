@@ -5,7 +5,7 @@ title: >-
 description: >-
   When reading about Bitcoin, Ethereum, Blockchain, other alt coins, etc… (I’ll
   use capital B — Blockchain here to encompass them all) I hear…
-date: '2017-11-11T20:55:31.537Z'
+created: '2017-11-11T20:55:31.537Z'
 tags:
 - Quantum Mechanics
 - Cryptocurrency

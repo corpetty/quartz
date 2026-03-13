@@ -3,7 +3,7 @@ title: The Future is Micro-Communities
 description: >-
   A micro-community isn’t new. You belong to many of them already, they’re just
   inefficient. The internet unlocked our ability to join them…
-date: ''
+created: ''
 categories: []
 keywords: []
 draft: true

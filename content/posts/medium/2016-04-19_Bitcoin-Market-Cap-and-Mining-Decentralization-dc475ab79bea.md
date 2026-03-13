@@ -3,7 +3,7 @@ title: Bitcoin Market Cap and Mining Decentralization
 description: >-
   We got an interesting question on one of our latest episodes on the topic of
   mining and how the market cap could effect it.
-date: '2016-04-19T17:20:00.619Z'
+created: '2016-04-19T17:20:00.619Z'
 tags:
 - Bitcoin
 slug: >-

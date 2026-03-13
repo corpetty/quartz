@@ -5,7 +5,7 @@ title: >-
 description: >-
   I recently listened to an episode of Joe Rogan where Nick Bostrom tried to
   explain the concept of simulation theory. Although the…
-date: '2019-11-12T03:42:57.784Z'
+created: '2019-11-12T03:42:57.784Z'
 tags:
 - Simulation Theory
 - Joe Rogan

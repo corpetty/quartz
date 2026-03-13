@@ -3,7 +3,7 @@ title: A Look at the Status.im ICO Token Distribution
 description: >-
   NOTE UP FRONT: I express my opinions here (at least at the end of the
   article). If you don’t like them and don’t have evidence to support…
-date: '2017-06-27T03:47:04.662Z'
+created: '2017-06-27T03:47:04.662Z'
 tags:
 - ICO Analysis
 - Status

@@ -3,7 +3,7 @@ title: A Look at the TokenCard ICO Investor Distribution
 description: >-
   This is another look at the distribution of an ICO in the Ethereum space,
   because I think its important to see the overall trends of how…
-date: '2017-05-02T22:44:57.830Z'
+created: '2017-05-02T22:44:57.830Z'
 lastmod: 2024-01-31
 tags:
 - ICO Analysis

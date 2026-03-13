@@ -3,7 +3,7 @@ title: Simplex Chat notes
 tags:
 - notes
 - simplex chat
-date: 2023-12-29
+created: 2023-12-29
 ---
 
 ## Overview

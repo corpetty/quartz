@@ -1,7 +1,7 @@
 ---
 title: "When Constitutional Guardrails Fail"
 description: "A Framework for Understanding the Erosion of Democratic Immigration Enforcement"
-date: 2026-01-23
+created: 2026-01-23
 tags:
   - ice
   - immigration

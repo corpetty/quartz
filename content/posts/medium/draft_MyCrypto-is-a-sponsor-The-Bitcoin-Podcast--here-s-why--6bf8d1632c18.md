@@ -3,7 +3,7 @@ title: 'MyCrypto is a sponsor The Bitcoin Podcast, here’s why.'
 description: >-
   So there has been a decent amount of controversy with the MyEtherWallet (MEW)
   “fork” to MyCrypto. We at The Bitcoin Podcast have chosen to…
-date: ''
+created: ''
 categories: []
 keywords: []
 draft: true

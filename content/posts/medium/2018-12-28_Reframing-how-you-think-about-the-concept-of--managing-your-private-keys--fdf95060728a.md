@@ -3,7 +3,7 @@ title: Reframing how you think about the concept of “managing your private key
 description: >-
   If you’ve been around the cryptocurrency community for long, then you’ve
   definitely heard people preach sayings such as, “Always remember…
-date: '2018-12-28T18:13:29.328Z'
+created: '2018-12-28T18:13:29.328Z'
 tags:
 - private keys
 - security

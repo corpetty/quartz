@@ -3,7 +3,7 @@ title: A Look at the Aragon ICO Investment Distribution
 description: >-
   Another ERC20 Initial Coin Offering (ICO), another ridiculous amount of money,
   in another ridiculously short period of time. This time…
-date: '2017-05-18T17:45:33.765Z'
+created: '2017-05-18T17:45:33.765Z'
 tags:
 - ICO Analysis
 - Aragon

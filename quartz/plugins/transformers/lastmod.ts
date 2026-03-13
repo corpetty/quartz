@@ -74,13 +74,17 @@ export const CreatedModifiedDate: QuartzTransformerPlugin<Partial<Options>> = (u
                 created ||= st.birthtimeMs
                 modified ||= st.mtimeMs
               } else if (source === "frontmatter" && file.data.frontmatter) {
-                created ||= file.data.frontmatter.created as MaybeDate
-                modified ||= file.data.frontmatter.modified as MaybeDate
-                published ||= file.data.frontmatter.published as MaybeDate
+                const fm = file.data.frontmatter
+                created ||= fm.created || fm.date as MaybeDate
+                modified ||= fm.modified as MaybeDate
+                published ||= fm.published as MaybeDate
               } else if (source === "git" && repo) {
                 try {
                   const relativePath = path.relative(repositoryWorkdir, fullFp)
-                  modified ||= await repo.getFileLatestModifiedDateAsync(relativePath)
+                  const gitDate = await repo.getFileLatestModifiedDateAsync(relativePath)
+                  created ||= gitDate
+                  modified ||= gitDate
+
                 } catch {
                   console.log(
                     styleText(
