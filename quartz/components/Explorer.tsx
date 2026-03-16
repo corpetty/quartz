@@ -55,51 +55,12 @@ export type FolderState = {
   collapsed: boolean
 }
 
-
 let numExplorers = 0
 export default ((userOpts?: Partial<Options>) => {
   const opts: Options = { ...defaultOptions, ...userOpts }
   const { OverflowList, overflowListAfterDOMLoaded } = OverflowListFactory()
 
-  // memoized
-  let fileTree: FileTrieNode
-  let jsonTree: string
-  let lastBuildId: string = ""
-
-  function constructFileTree(allFiles: QuartzPluginData[]) {
-    // Construct tree from allFiles
-    fileTree = new FileTrieNode([])
-    allFiles.forEach((file) => fileTree.add(file))
-
-    // Execute all functions (sort, filter, map) that were provided (if none were provided, only default "sort" is applied)
-    if (opts.order) {
-      // Order is important, use loop with index instead of order.map()
-      for (const functionName of opts.order) {
-        if (functionName === "map") {
-          fileTree.map(opts.mapFn)
-        } else if (functionName === "sort") {
-          fileTree.sort(opts.sortFn)
-        } else if (functionName === "filter") {
-          fileTree.filter(opts.filterFn)
-        }
-      }
-    }
-
-    // Get all folders of tree. Initialize with collapsed state
-    // Stringify to pass json tree as data attribute ([data-tree])
-    const folders = fileTree.getFolderPaths()
-    const folderState: Record<string, boolean> = {}
-    folders.forEach(folder => {
-      folderState[folder] = opts.folderDefaultState === "collapsed"
-    })
-    jsonTree = JSON.stringify(folderState)
-  }
-
-  const Explorer: QuartzComponent = ({ ctx, cfg, allFiles, displayClass }: QuartzComponentProps) => {
-    if (ctx.buildId !== lastBuildId) {
-      constructFileTree(allFiles)
-      lastBuildId = ctx.buildId
-    }
+  const Explorer: QuartzComponent = ({ cfg, displayClass }: QuartzComponentProps) => {
     const id = `explorer-${numExplorers++}`
 
     return (
@@ -138,15 +99,9 @@ export default ((userOpts?: Partial<Options>) => {
         </button>
         <button
           type="button"
-          id="desktop-explorer"
-          class="title-button collapsed"
-          data-behavior={opts.folderClickBehavior}
-          data-collapsed={opts.folderDefaultState}
-          data-savestate={opts.useSavedState}
-          data-tree={jsonTree}
+          class="title-button explorer-toggle desktop-explorer"
           data-mobile={false}
-          aria-controls="explorer-content"
-          aria-expanded={false}
+          aria-expanded={true}
         >
           <h2>{opts.title ?? i18n(cfg.locale).components.explorer.title}</h2>
           <svg
@@ -164,10 +119,8 @@ export default ((userOpts?: Partial<Options>) => {
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
-        <div id="explorer-content" class="collapsed explorer-viewmode">
-          <ul class="overflow" id="explorer-ul">
-            <li id="explorer-end" />
-          </ul>
+        <div id={id} class="explorer-content" aria-expanded={false} role="group">
+          <OverflowList class="explorer-ul" />
         </div>
         <template id="template-file">
           <li>
