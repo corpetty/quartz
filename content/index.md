@@ -16,9 +16,7 @@ Here is a blurb [about me](/about).
 
 Here are my [scientific publications](/pubs). (TODO: [google scholar search me for now](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C34&q=Corey+Petty&btnG=))
 
-I have done a TON of media, here's a list of them.... 
-TODO: Just search one of the following for now: 
-- Corey Petty
+I have done a TON of media. Here's my [external work & press](/notes/press) page, and you can also search for me via:
 - [The Bitcoin Podcast](https://thebitcoinpodcast.com)
 - Hashing It Out
 - Logos Podcast

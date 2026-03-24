@@ -1,493 +1,496 @@
-import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js'
+import * as THREE from 'https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js';
 
-/**
- * Two Landscapes Visualization
- * Shows how two people's boundary terrains interact
- */
+// Same relationship points as the 2D visualizations
+const POINTS = [
+  { label: 'Acquaintance', x: 0.15, y: 0.08 },
+  { label: 'Colleague', x: 0.20, y: 0.20 },
+  { label: 'Mentor', x: 0.08, y: 0.55 },
+  { label: 'New crush', x: 0.55, y: 0.30 },
+  { label: 'Casual sex', x: 0.85, y: 0.25 },
+  { label: 'Cuddly friend', x: 0.40, y: 0.50 },
+  { label: 'FWB', x: 0.70, y: 0.40 },
+  { label: 'Deep friendship', x: 0.15, y: 0.85 },
+  { label: 'Romantic partner', x: 0.65, y: 0.88 },
+];
+
+const BUMPS_A = [
+  { cx: 0.18, cy: 0.82, sx: 0.14, sy: 0.14, A: -1.0, label: 'Deep friendships' },
+  { cx: 0.62, cy: 0.85, sx: 0.18, sy: 0.12, A: -0.85, label: 'Romantic love' },
+  { cx: 0.50, cy: 0.50, sx: 0.12, sy: 0.12, A: -0.5, label: 'Tender middle' },
+  { cx: 0.80, cy: 0.30, sx: 0.10, sy: 0.10, A: -0.4, label: 'Casual touch' },
+  { cx: 0.15, cy: 0.40, sx: 0.10, sy: 0.12, A: -0.3, label: 'Mentorship' },
+  { cx: 0.50, cy: 0.15, sx: 0.25, sy: 0.08, A: 0.7 },
+  { cx: 0.90, cy: 0.60, sx: 0.08, sy: 0.15, A: 0.6 },
+  { cx: 0.35, cy: 0.70, sx: 0.08, sy: 0.08, A: 0.4 },
+];
+
+const BUMPS_B = [
+  { cx: 0.20, cy: 0.75, sx: 0.12, sy: 0.12, A: -0.8, label: 'Deep friendships' },
+  { cx: 0.55, cy: 0.90, sx: 0.15, sy: 0.10, A: -0.9, label: 'Romantic love' },
+  { cx: 0.75, cy: 0.45, sx: 0.10, sy: 0.10, A: -0.3, label: 'Physical play' },
+  { cx: 0.50, cy: 0.50, sx: 0.15, sy: 0.15, A: 0.5, label: 'Tender middle (barrier)' },
+  { cx: 0.85, cy: 0.25, sx: 0.10, sy: 0.10, A: 0.4 },
+  { cx: 0.40, cy: 0.15, sx: 0.20, sy: 0.08, A: 0.6 },
+];
+
+// Labels for the combined view
+const COMBINED_LABELS = [
+  { cx: 0.19, cy: 0.78, label: 'Shared openness' },
+  { cx: 0.58, cy: 0.87, label: 'Shared openness' },
+  { cx: 0.50, cy: 0.50, label: 'Negotiation needed' },
+  { cx: 0.82, cy: 0.28, label: 'Tension point' },
+];
+
+const HEIGHT_SCALE = 0.35;
+const SEGS = 80;
+
+function gaussian(x, y, cx, cy, sx, sy, A) {
+  const dx = (x - cx) / sx, dy = (y - cy) / sy;
+  return A * Math.exp(-(dx * dx + dy * dy) / 2);
+}
+
+function evalHeight(x, y, bumps) {
+  let h = 0;
+  for (const b of bumps) h += gaussian(x, y, b.cx, b.cy, b.sx, b.sy, b.A);
+  return h;
+}
+
+function heightColor(h) {
+  const nh = Math.max(-1, Math.min(1, h));
+  if (nh < 0) {
+    const t = -nh;
+    return new THREE.Color(
+      (0x1A + (0x1D - 0x1A) * t) / 255,
+      (0x8A + (0x9E - 0x8A) * t) / 255,
+      (0x8A + (0x75 - 0x8A) * t) / 255,
+    );
+  } else {
+    const t = nh;
+    return new THREE.Color(
+      (0xC8 + (0xD8 - 0xC8) * t) / 255,
+      (0x6A + (0x5A - 0x6A) * t) / 255,
+      0x30 / 255,
+    );
+  }
+}
+
+function makeLabel(text, isDark, fontSize) {
+  const canvas = document.createElement('canvas');
+  const sz = fontSize || 28;
+  const ctx = canvas.getContext('2d');
+  ctx.font = `${sz}px system-ui, sans-serif`;
+  const tw = ctx.measureText(text).width;
+  canvas.width = Math.ceil(tw) + 16;
+  canvas.height = sz + 12;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.font = `${sz}px system-ui, sans-serif`;
+  ctx.fillStyle = isDark ? '#e0ded6' : '#2c2c2a';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.minFilter = THREE.LinearFilter;
+  const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, depthTest: false });
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(canvas.width / 400, canvas.height / 400, 1);
+  return { sprite, texture: tex, material: mat };
+}
+
+function buildBasePlane(scene, isDark) {
+  const resources = [];
+  const gridColor = isDark ? 0x444444 : 0xcccccc;
+  const axisColor = isDark ? 0x888888 : 0x666666;
+
+  // Grid 4x4
+  const gridMat = new THREE.LineBasicMaterial({ color: gridColor, transparent: true, opacity: 0.4 });
+  resources.push(gridMat);
+  for (let i = 1; i < 4; i++) {
+    const f = i / 4;
+    const vg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(f, 0, 0), new THREE.Vector3(f, 1, 0)]);
+    scene.add(new THREE.Line(vg, gridMat));
+    resources.push(vg);
+    const hg = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, f, 0), new THREE.Vector3(1, f, 0)]);
+    scene.add(new THREE.Line(hg, gridMat));
+    resources.push(hg);
+  }
+
+  // Border
+  const axisMat = new THREE.LineBasicMaterial({ color: axisColor });
+  resources.push(axisMat);
+  const border = new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(0, 0, 0), new THREE.Vector3(1, 0, 0),
+    new THREE.Vector3(1, 0, 0), new THREE.Vector3(1, 1, 0),
+    new THREE.Vector3(1, 1, 0), new THREE.Vector3(0, 1, 0),
+    new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 0),
+  ]);
+  scene.add(new THREE.LineSegments(border, axisMat));
+  resources.push(border);
+
+  // Axis labels
+  const labels = [
+    ['Emotional', 0.15, -0.06, 0], ['Expression →', 0.5, -0.06, 0], ['Physical', 0.85, -0.06, 0],
+    ['Shallow', -0.08, 0.08, 0], ['↑ Intimacy', -0.08, 0.5, 0], ['Deep', -0.06, 0.92, 0],
+  ];
+  for (const [text, x, y, z] of labels) {
+    const l = makeLabel(text, isDark, 20);
+    l.sprite.position.set(x, y, z);
+    scene.add(l.sprite);
+    resources.push(l.texture, l.material);
+  }
+
+  // Relationship dots on floor
+  const dotGeo = new THREE.SphereGeometry(0.007, 8, 8);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0x7F77DD, transparent: true, opacity: 0.45 });
+  resources.push(dotGeo, dotMat);
+  for (const pt of POINTS) {
+    const dot = new THREE.Mesh(dotGeo, dotMat);
+    dot.position.set(pt.x, pt.y, 0);
+    scene.add(dot);
+    const lab = makeLabel(pt.label, isDark, 14);
+    lab.sprite.position.set(pt.x + 0.035, pt.y, 0.003);
+    lab.sprite.scale.multiplyScalar(0.6);
+    scene.add(lab.sprite);
+    resources.push(lab.texture, lab.material);
+  }
+
+  // Semi-transparent floor
+  const floorGeo = new THREE.PlaneGeometry(1, 1);
+  const floorMat = new THREE.MeshBasicMaterial({
+    color: isDark ? 0x222222 : 0xf5f5f0, transparent: true, opacity: 0.25, side: THREE.DoubleSide,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.position.set(0.5, 0.5, -0.002);
+  scene.add(floor);
+  resources.push(floorGeo, floorMat);
+
+  return resources;
+}
 
 export function init(container, options = {}) {
-  const {
-    height = 480,
-    dark = false,
-  } = options
+  const isDark = options.dark ?? false;
+  const canvasHeight = parseInt(options.height) || 480;
+  const canvasWidth = container.clientWidth || 800;
 
-  const width = container.clientWidth
-  const isDark = dark
+  // Scene
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(isDark ? '#1a1a1a' : '#fafaf8');
 
-  // Color palette
-  const colors = {
-    bg: isDark ? '#1a1a1a' : '#fafaf8',
-    text: isDark ? '#e0ded6' : '#2c2c2a',
-    trough: new THREE.Color('#1A8A8A'),
-    ridge: new THREE.Color('#D85A30'),
-    neutral: new THREE.Color('#999999'),
-    active: new THREE.Color('#7F77DD'),
-  }
-
-  // Scene setup
-  const scene = new THREE.Scene()
-  scene.background = new THREE.Color(colors.bg)
-
-  const camera = new THREE.PerspectiveCamera(
-    45,
-    width / height,
-    0.1,
-    1000
-  )
-  camera.position.set(0.5, 0.8, 1.2)
-  camera.lookAt(0.5, 0.3, 0.5)
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true })
-  renderer.setSize(width, height)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-  container.appendChild(renderer.domElement)
+  const camera = new THREE.PerspectiveCamera(50, canvasWidth / canvasHeight, 0.01, 100);
+  const renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(canvasWidth, canvasHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
   // Lighting
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
-  scene.add(ambientLight)
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  dirLight.position.set(0.8, 0.3, 1.2);
+  scene.add(dirLight);
 
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8)
-  directionalLight.position.set(1, 1, 1)
-  scene.add(directionalLight)
+  // Build terrain geometry — vertices in XY plane, height along Z
+  const geo = new THREE.BufferGeometry();
+  const vertCount = (SEGS + 1) * (SEGS + 1);
+  const positions = new Float32Array(vertCount * 3);
+  const colors = new Float32Array(vertCount * 3);
+  const indices = [];
 
-  // Terrain geometry
-  const segmentsX = 80
-  const segmentsY = 80
-  const geometry = new THREE.PlaneGeometry(1, 1, segmentsX, segmentsY)
-  geometry.rotateX(-Math.PI / 2)
-
-  // Initial colors
-  const colorAttribute = geometry.getAttribute('color') ||
-    new THREE.BufferAttribute(new Float32Array(geometry.attributes.position.count * 3), 3)
-  geometry.setAttribute('color', colorAttribute)
-
-  const material = new THREE.MeshPhongMaterial({
-    vertexColors: true,
-    side: THREE.DoubleSide,
-  })
-
-  const mesh = new THREE.Mesh(geometry, material)
-  scene.add(mesh)
-
-  // Wireframe overlay
-  const wireframeGeometry = geometry.clone()
-  const wireframeMaterial = new THREE.LineBasicMaterial({
-    color: isDark ? '#444444' : '#cccccc',
-    opacity: 0.2,
-    transparent: true,
-    linewidth: 1,
-  })
-  const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial)
-  wireframe.position.copy(mesh.position)
-  scene.add(wireframe)
-
-  // Gaussian basis functions
-  const gaussianBumps = {
-    personA: [
-      { cx: 0.18, cy: 0.82, sx: 0.14, sy: 0.14, A: -1.0, label: 'Deep friendships' },
-      { cx: 0.62, cy: 0.85, sx: 0.18, sy: 0.12, A: -0.85, label: 'Romantic love' },
-      { cx: 0.50, cy: 0.50, sx: 0.12, sy: 0.12, A: -0.5, label: 'Tender middle' },
-      { cx: 0.80, cy: 0.30, sx: 0.10, sy: 0.10, A: -0.4, label: 'Casual touch' },
-      { cx: 0.15, cy: 0.40, sx: 0.10, sy: 0.12, A: -0.3, label: 'Mentorship' },
-      { cx: 0.50, cy: 0.15, sx: 0.25, sy: 0.08, A: 0.7 },
-      { cx: 0.90, cy: 0.60, sx: 0.08, sy: 0.15, A: 0.6 },
-      { cx: 0.35, cy: 0.70, sx: 0.08, sy: 0.08, A: 0.4 },
-    ],
-    personB: [
-      { cx: 0.20, cy: 0.75, sx: 0.12, sy: 0.12, A: -0.8, label: 'Deep friendships' },
-      { cx: 0.55, cy: 0.90, sx: 0.15, sy: 0.10, A: -0.9, label: 'Romantic love' },
-      { cx: 0.75, cy: 0.45, sx: 0.10, sy: 0.10, A: -0.3, label: 'Physical play' },
-      { cx: 0.50, cy: 0.50, sx: 0.15, sy: 0.15, A: 0.5, label: 'Tender middle (barrier)' },
-      { cx: 0.85, cy: 0.25, sx: 0.10, sy: 0.10, A: 0.4 },
-      { cx: 0.40, cy: 0.15, sx: 0.20, sy: 0.08, A: 0.6 },
-    ],
-  }
-
-  function evaluateHeight(x, y, bumps) {
-    let h = 0
-    for (const bump of bumps) {
-      const dx = (x - bump.cx) / bump.sx
-      const dy = (y - bump.cy) / bump.sy
-      h += bump.A * Math.exp(-(dx * dx / 2 + dy * dy / 2))
+  // Initialize positions (X, Y fixed; Z will be set per state)
+  let idx = 0;
+  for (let iy = 0; iy <= SEGS; iy++) {
+    for (let ix = 0; ix <= SEGS; ix++) {
+      positions[idx] = ix / SEGS;
+      positions[idx + 1] = iy / SEGS;
+      positions[idx + 2] = 0;
+      idx += 3;
     }
-    return h * 0.3
   }
-
-  function heightToColor(h) {
-    if (h < -0.08) return colors.trough
-    if (h > 0.08) return colors.ridge
-    // Interpolate between ridge and neutral and trough
-    if (h < 0) {
-      const t = -h / 0.08
-      const c = new THREE.Color()
-      c.lerpColors(colors.neutral, colors.trough, t)
-      return c
-    } else {
-      const t = h / 0.08
-      const c = new THREE.Color()
-      c.lerpColors(colors.neutral, colors.ridge, t)
-      return c
+  for (let iy = 0; iy < SEGS; iy++) {
+    for (let ix = 0; ix < SEGS; ix++) {
+      const a = iy * (SEGS + 1) + ix;
+      const b = a + 1;
+      const c = a + (SEGS + 1);
+      const d = c + 1;
+      indices.push(a, b, d, a, d, c);
     }
   }
 
-  function updateTerrain(bumps) {
-    const positions = geometry.attributes.position
-    const colors = geometry.attributes.color
+  geo.setIndex(indices);
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
 
-    for (let i = 0; i < positions.count; i++) {
-      const x = positions.getX(i)
-      const y = positions.getY(i)
-      const h = evaluateHeight(x, y, bumps)
+  const terrainMat = new THREE.MeshPhongMaterial({ vertexColors: true, shininess: 15, side: THREE.DoubleSide });
+  const terrainMesh = new THREE.Mesh(geo, terrainMat);
+  scene.add(terrainMesh);
 
-      positions.setZ(i, h)
+  const wireMat = new THREE.MeshBasicMaterial({ wireframe: true, color: isDark ? 0x444444 : 0xd0d0ce, transparent: true, opacity: 0.1 });
+  const wireMesh = new THREE.Mesh(geo, wireMat);
+  scene.add(wireMesh);
 
-      const col = heightToColor(h)
-      colors.setXYZ(i, col.r, col.g, col.b)
-    }
-
-    positions.needsUpdate = true
-    colors.needsUpdate = true
-  }
-
-  function getMixedTerrain() {
-    const mixed = []
-    const allLabels = new Set()
-
-    for (let i = 0; i < Math.max(gaussianBumps.personA.length, gaussianBumps.personB.length); i++) {
-      const bumpA = gaussianBumps.personA[i]
-      const bumpB = gaussianBumps.personB[i]
-
-      if (bumpA && bumpB) {
-        mixed.push({
-          cx: (bumpA.cx + bumpB.cx) / 2,
-          cy: (bumpA.cy + bumpB.cy) / 2,
-          sx: (bumpA.sx + bumpB.sx) / 2,
-          sy: (bumpA.sy + bumpB.sy) / 2,
-          A: (bumpA.A + bumpB.A) / 2,
-        })
-      } else if (bumpA) {
-        mixed.push({
-          cx: bumpA.cx,
-          cy: bumpA.cy,
-          sx: bumpA.sx,
-          sy: bumpA.sy,
-          A: bumpA.A * 0.5,
-        })
-      } else if (bumpB) {
-        mixed.push({
-          cx: bumpB.cx,
-          cy: bumpB.cy,
-          sx: bumpB.sx,
-          sy: bumpB.sy,
-          A: bumpB.A * 0.5,
-        })
+  // Precompute height fields for each state
+  function computeField(bumps) {
+    const heights = new Float32Array(vertCount);
+    const fieldColors = new Float32Array(vertCount * 3);
+    for (let iy = 0; iy <= SEGS; iy++) {
+      for (let ix = 0; ix <= SEGS; ix++) {
+        const i = iy * (SEGS + 1) + ix;
+        const x = ix / SEGS, y = iy / SEGS;
+        const h = evalHeight(x, y, bumps);
+        heights[i] = h * HEIGHT_SCALE;
+        const c = heightColor(h);
+        fieldColors[i * 3] = c.r;
+        fieldColors[i * 3 + 1] = c.g;
+        fieldColors[i * 3 + 2] = c.b;
       }
     }
-
-    return mixed
+    return { heights, colors: fieldColors };
   }
 
-  // Store original heights for smooth transitions
-  const originalPositions = new Float32Array(geometry.attributes.position.array)
-  const originalColors = new Float32Array(geometry.attributes.color.array)
-
-  let currentState = 'personA'
-  let isTransitioning = false
-  let transitionProgress = 0
-  const transitionDuration = 500 // ms
-
-  function setTerrain(state) {
-    if (state === currentState || isTransitioning) return
-
-    currentState = state
-    isTransitioning = true
-    transitionProgress = 0
-
-    const targetHeights = []
-    const targetColors = []
-
-    const positions = geometry.attributes.position
-    let bumps
-
-    if (state === 'personA') {
-      bumps = gaussianBumps.personA
-    } else if (state === 'personB') {
-      bumps = gaussianBumps.personB
-    } else {
-      bumps = getMixedTerrain()
-    }
-
-    for (let i = 0; i < positions.count; i++) {
-      const x = positions.getX(i)
-      const y = positions.getY(i)
-      const h = evaluateHeight(x, y, bumps)
-      targetHeights.push(h)
-
-      const col = heightToColor(h)
-      targetColors.push(col.r, col.g, col.b)
-    }
-
-    // Start transition
-    const startTime = performance.now()
-
-    function animateTransition(currentTime) {
-      transitionProgress = Math.min(1, (currentTime - startTime) / transitionDuration)
-
-      const positions = geometry.attributes.position
-      const colors = geometry.attributes.color
-
-      for (let i = 0; i < positions.count; i++) {
-        const startZ = originalPositions[i * 3 + 2]
-        const targetZ = targetHeights[i]
-        const z = startZ + (targetZ - startZ) * transitionProgress
-
-        positions.setZ(i, z)
-
-        const startR = originalColors[i * 3]
-        const startG = originalColors[i * 3 + 1]
-        const startB = originalColors[i * 3 + 2]
-
-        const targetR = targetColors[i * 3]
-        const targetG = targetColors[i * 3 + 1]
-        const targetB = targetColors[i * 3 + 2]
-
-        colors.setXYZ(
-          i,
-          startR + (targetR - startR) * transitionProgress,
-          startG + (targetG - startG) * transitionProgress,
-          startB + (targetB - startB) * transitionProgress
-        )
+  // Combined: average height at each point (NOT averaged bumps)
+  function computeCombinedField() {
+    const heights = new Float32Array(vertCount);
+    const fieldColors = new Float32Array(vertCount * 3);
+    for (let iy = 0; iy <= SEGS; iy++) {
+      for (let ix = 0; ix <= SEGS; ix++) {
+        const i = iy * (SEGS + 1) + ix;
+        const x = ix / SEGS, y = iy / SEGS;
+        const hA = evalHeight(x, y, BUMPS_A);
+        const hB = evalHeight(x, y, BUMPS_B);
+        const h = (hA + hB) / 2;
+        heights[i] = h * HEIGHT_SCALE;
+        const c = heightColor(h);
+        fieldColors[i * 3] = c.r;
+        fieldColors[i * 3 + 1] = c.g;
+        fieldColors[i * 3 + 2] = c.b;
       }
+    }
+    return { heights, colors: fieldColors };
+  }
 
-      positions.needsUpdate = true
-      colors.needsUpdate = true
+  const fields = {
+    personA: computeField(BUMPS_A),
+    personB: computeField(BUMPS_B),
+    combined: computeCombinedField(),
+  };
 
-      if (transitionProgress < 1) {
-        requestAnimationFrame(animateTransition)
+  // Apply a field to the geometry
+  function applyField(field) {
+    const pos = geo.attributes.position.array;
+    const col = geo.attributes.color.array;
+    for (let i = 0; i < vertCount; i++) {
+      pos[i * 3 + 2] = field.heights[i];
+      col[i * 3] = field.colors[i * 3];
+      col[i * 3 + 1] = field.colors[i * 3 + 1];
+      col[i * 3 + 2] = field.colors[i * 3 + 2];
+    }
+    geo.attributes.position.needsUpdate = true;
+    geo.attributes.color.needsUpdate = true;
+    geo.computeVertexNormals();
+  }
+
+  // Initialize with Person A
+  applyField(fields.personA);
+  geo.computeVertexNormals();
+
+  // Feature label sprites (managed per-state)
+  let featureLabelSprites = [];
+  function setFeatureLabels(labels) {
+    for (const s of featureLabelSprites) { scene.remove(s.sprite); s.texture.dispose(); s.material.dispose(); }
+    featureLabelSprites = [];
+    for (const f of labels) {
+      const l = makeLabel(f.label, isDark, 18);
+      // Position above terrain at that point
+      const x = f.cx, y = f.cy;
+      const h = f._z !== undefined ? f._z : 0.06;
+      l.sprite.position.set(x, y, h);
+      scene.add(l.sprite);
+      featureLabelSprites.push(l);
+    }
+  }
+
+  function labelsForState(state) {
+    const bumps = state === 'personA' ? BUMPS_A : state === 'personB' ? BUMPS_B : null;
+    if (bumps) {
+      return bumps.filter(b => b.label).map(b => {
+        const h = evalHeight(b.cx, b.cy, bumps) * HEIGHT_SCALE;
+        return { cx: b.cx, cy: b.cy, label: b.label, _z: h + (b.A < 0 ? -0.05 : 0.05) };
+      });
+    }
+    // Combined labels
+    return COMBINED_LABELS.map(l => {
+      const hA = evalHeight(l.cx, l.cy, BUMPS_A);
+      const hB = evalHeight(l.cx, l.cy, BUMPS_B);
+      const h = ((hA + hB) / 2) * HEIGHT_SCALE;
+      return { cx: l.cx, cy: l.cy, label: l.label, _z: h + 0.06 };
+    });
+  }
+
+  setFeatureLabels(labelsForState('personA'));
+
+  // Build the 2D base plane at Z=0
+  const baseResources = buildBasePlane(scene, isDark);
+
+  // Transition state
+  let currentState = 'personA';
+  let transitioning = false;
+
+  function transitionTo(state) {
+    if (state === currentState || transitioning) return;
+    transitioning = true;
+
+    const target = fields[state];
+    const startPos = new Float32Array(geo.attributes.position.array);
+    const startCol = new Float32Array(geo.attributes.color.array);
+    const t0 = performance.now();
+    const duration = 500;
+
+    function step(now) {
+      let t = Math.min(1, (now - t0) / duration);
+      // Ease in-out
+      t = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+
+      const pos = geo.attributes.position.array;
+      const col = geo.attributes.color.array;
+      for (let i = 0; i < vertCount; i++) {
+        pos[i * 3 + 2] = startPos[i * 3 + 2] + (target.heights[i] - startPos[i * 3 + 2]) * t;
+        col[i * 3] = startCol[i * 3] + (target.colors[i * 3] - startCol[i * 3]) * t;
+        col[i * 3 + 1] = startCol[i * 3 + 1] + (target.colors[i * 3 + 1] - startCol[i * 3 + 1]) * t;
+        col[i * 3 + 2] = startCol[i * 3 + 2] + (target.colors[i * 3 + 2] - startCol[i * 3 + 2]) * t;
+      }
+      geo.attributes.position.needsUpdate = true;
+      geo.attributes.color.needsUpdate = true;
+      geo.computeVertexNormals();
+
+      if (t < 1) {
+        requestAnimationFrame(step);
       } else {
-        isTransitioning = false
-        // Store new originals
-        originalPositions.set(geometry.attributes.position.array)
-        originalColors.set(geometry.attributes.color.array)
+        transitioning = false;
+        currentState = state;
+        setFeatureLabels(labelsForState(state));
       }
     }
 
-    requestAnimationFrame(animateTransition)
+    // Clear labels during transition
+    setFeatureLabels([]);
+    currentState = state;
+    requestAnimationFrame(step);
   }
 
-  // Initialize terrain
-  updateTerrain(gaussianBumps.personA)
+  // UI — buttons above the canvas
+  const btnRow = document.createElement('div');
+  btnRow.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;';
 
-  // UI Setup
-  const uiContainer = document.createElement('div')
-  uiContainer.style.cssText = `
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    right: 12px;
-    display: flex;
-    gap: 8px;
-    z-index: 10;
-  `
+  const stateLabels = { personA: 'Person A', personB: 'Person B', combined: 'Combined' };
+  const buttons = {};
 
-  const buttonStyle = (isActive) => `
-    padding: 8px 16px;
-    border: 1px solid ${colors.text};
-    background: ${isActive ? colors.active : 'transparent'};
-    color: ${isActive ? '#ffffff' : colors.text};
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    transition: all 200ms ease;
-    flex: 1;
-    text-align: center;
-  `
-
-  const buttons = {}
-  const states = ['personA', 'personB', 'combined']
-  const labels = {
-    personA: 'Person A',
-    personB: 'Person B',
-    combined: 'Combined',
-  }
-
-  for (const state of states) {
-    const btn = document.createElement('button')
-    btn.textContent = labels[state]
-    btn.style.cssText = buttonStyle(state === currentState)
-    btn.onclick = () => {
-      setTerrain(state)
-      updateButtonStyles()
-    }
-    uiContainer.appendChild(btn)
-    buttons[state] = btn
-  }
-
-  function updateButtonStyles() {
-    for (const state of states) {
-      buttons[state].style.cssText = buttonStyle(state === currentState)
+  function updateBtnStyles() {
+    for (const [s, btn] of Object.entries(buttons)) {
+      const active = s === currentState;
+      btn.style.borderColor = active ? '#7F77DD' : (isDark ? '#555' : '#ccc');
+      btn.style.background = active ? 'rgba(127,119,221,0.15)' : 'transparent';
+      btn.style.color = active ? '#7F77DD' : (isDark ? '#e0ded6' : '#2c2c2a');
     }
   }
 
-  container.appendChild(uiContainer)
-
-  // Orbit controls (manual implementation)
-  let isDragging = false
-  let previousMousePosition = { x: 0, y: 0 }
-  let cameraRotation = {
-    x: Math.asin(camera.position.y / Math.hypot(camera.position.x, camera.position.y, camera.position.z)),
-    y: Math.atan2(camera.position.z, camera.position.x),
-  }
-  let cameraDistance = Math.hypot(camera.position.x, camera.position.y, camera.position.z)
-
-  function updateCameraPosition() {
-    const radius = cameraDistance
-    const centerX = 0.5
-    const centerY = 0.3
-    const centerZ = 0.5
-
-    camera.position.x = centerX + radius * Math.cos(cameraRotation.x) * Math.cos(cameraRotation.y)
-    camera.position.y = centerY + radius * Math.sin(cameraRotation.x)
-    camera.position.z = centerZ + radius * Math.cos(cameraRotation.x) * Math.sin(cameraRotation.y)
-
-    camera.lookAt(centerX, centerY, centerZ)
+  for (const state of ['personA', 'personB', 'combined']) {
+    const btn = document.createElement('button');
+    btn.textContent = stateLabels[state];
+    btn.style.cssText = `padding:6px 16px;border-radius:6px;border:1.5px solid;font:13px system-ui,sans-serif;cursor:pointer;transition:all 0.2s;flex:1;`;
+    btn.addEventListener('click', () => { transitionTo(state); updateBtnStyles(); });
+    btnRow.appendChild(btn);
+    buttons[state] = btn;
   }
 
-  function onMouseDown(e) {
-    isDragging = true
-    previousMousePosition = { x: e.clientX, y: e.clientY }
+  container.appendChild(btnRow);
+  container.appendChild(renderer.domElement);
+  updateBtnStyles();
+
+  // Hint
+  const hint = document.createElement('div');
+  hint.textContent = 'Drag to orbit · Scroll to zoom';
+  hint.style.cssText = `text-align:center;font:11px system-ui,sans-serif;color:${isDark ? '#73726c' : '#9c9a92'};margin-top:6px;`;
+  container.appendChild(hint);
+
+  // Orbit controls
+  const center = new THREE.Vector3(0.5, 0.5, 0.0);
+  let theta = -Math.PI * 0.3;
+  let phi = Math.PI * 0.3;
+  let radius = 1.6;
+
+  function updateCamera() {
+    camera.position.set(
+      center.x + radius * Math.sin(phi) * Math.cos(theta),
+      center.y + radius * Math.sin(phi) * Math.sin(theta),
+      center.z + radius * Math.cos(phi),
+    );
+    camera.up.set(0, 0, 1);
+    camera.lookAt(center);
   }
+  updateCamera();
 
-  function onMouseMove(e) {
-    if (!isDragging) return
-
-    const deltaX = e.clientX - previousMousePosition.x
-    const deltaY = e.clientY - previousMousePosition.y
-
-    cameraRotation.y -= deltaX * 0.005
-    cameraRotation.x += deltaY * 0.005
-    cameraRotation.x = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, cameraRotation.x))
-
-    updateCameraPosition()
-    previousMousePosition = { x: e.clientX, y: e.clientY }
+  let dragging = false, prev = { x: 0, y: 0 };
+  function onDown(e) { dragging = true; const p = e.touches ? e.touches[0] : e; prev = { x: p.clientX, y: p.clientY }; }
+  function onMove(e) {
+    if (!dragging) return;
+    const p = e.touches ? e.touches[0] : e;
+    theta -= (p.clientX - prev.x) * 0.006;
+    phi = Math.max(0.15, Math.min(Math.PI * 0.48, phi + (p.clientY - prev.y) * 0.006));
+    prev = { x: p.clientX, y: p.clientY };
+    updateCamera();
   }
+  function onUp() { dragging = false; }
+  function onWheel(e) { e.preventDefault(); radius = Math.max(0.7, Math.min(3.0, radius + e.deltaY * 0.002)); updateCamera(); }
 
-  function onMouseUp() {
-    isDragging = false
-  }
-
-  function onWheel(e) {
-    e.preventDefault()
-    cameraDistance += e.deltaY * 0.0005
-    cameraDistance = Math.max(0.5, Math.min(3, cameraDistance))
-    updateCameraPosition()
-  }
-
-  renderer.domElement.addEventListener('mousedown', onMouseDown)
-  renderer.domElement.addEventListener('mousemove', onMouseMove)
-  renderer.domElement.addEventListener('mouseup', onMouseUp)
-  renderer.domElement.addEventListener('wheel', onWheel, { passive: false })
-
-  // Touch support
-  let touchStartDistance = 0
-
-  function getTouchDistance(touches) {
-    if (touches.length < 2) return 0
-    const dx = touches[0].clientX - touches[1].clientX
-    const dy = touches[0].clientY - touches[1].clientY
-    return Math.hypot(dx, dy)
-  }
-
+  let pinchDist = 0;
   function onTouchStart(e) {
-    if (e.touches.length === 1) {
-      isDragging = true
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    } else if (e.touches.length === 2) {
-      isDragging = false
-      touchStartDistance = getTouchDistance(e.touches)
-    }
+    if (e.touches.length === 2) {
+      dragging = false;
+      pinchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+    } else { onDown(e); }
   }
-
   function onTouchMove(e) {
-    if (e.touches.length === 1 && isDragging) {
-      const deltaX = e.touches[0].clientX - previousMousePosition.x
-      const deltaY = e.touches[0].clientY - previousMousePosition.y
-
-      cameraRotation.y -= deltaX * 0.005
-      cameraRotation.x += deltaY * 0.005
-      cameraRotation.x = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, cameraRotation.x))
-
-      updateCameraPosition()
-      previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-    } else if (e.touches.length === 2) {
-      const currentDistance = getTouchDistance(e.touches)
-      const delta = touchStartDistance - currentDistance
-      cameraDistance += delta * 0.0005
-      cameraDistance = Math.max(0.5, Math.min(3, cameraDistance))
-      updateCameraPosition()
-      touchStartDistance = currentDistance
-    }
+    if (e.touches.length === 2) {
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      radius = Math.max(0.7, Math.min(3.0, radius - (d - pinchDist) * 0.003));
+      pinchDist = d;
+      updateCamera();
+    } else { onMove(e); }
   }
 
-  function onTouchEnd() {
-    isDragging = false
-  }
+  const el = renderer.domElement;
+  el.addEventListener('mousedown', onDown);
+  el.addEventListener('mousemove', onMove);
+  el.addEventListener('mouseup', onUp);
+  el.addEventListener('mouseleave', onUp);
+  el.addEventListener('wheel', onWheel, { passive: false });
+  el.addEventListener('touchstart', onTouchStart, { passive: true });
+  el.addEventListener('touchmove', onTouchMove, { passive: true });
+  el.addEventListener('touchend', onUp);
 
-  renderer.domElement.addEventListener('touchstart', onTouchStart, { passive: true })
-  renderer.domElement.addEventListener('touchmove', onTouchMove, { passive: true })
-  renderer.domElement.addEventListener('touchend', onTouchEnd, { passive: true })
+  let frameId;
+  function loop() { frameId = requestAnimationFrame(loop); renderer.render(scene, camera); }
+  loop();
 
-  // Animation loop
-  let animationFrameId
-
-  function animate() {
-    animationFrameId = requestAnimationFrame(animate)
-    renderer.render(scene, camera)
-  }
-
-  animate()
-
-  // Resize handler
-  function onResize() {
-    const newWidth = container.clientWidth
-    camera.aspect = newWidth / height
-    camera.updateProjectionMatrix()
-    renderer.setSize(newWidth, height)
-  }
-
-  window.addEventListener('resize', onResize)
-
-  // Return public API
   return {
     destroy() {
-      window.removeEventListener('resize', onResize)
-      renderer.domElement.removeEventListener('mousedown', onMouseDown)
-      renderer.domElement.removeEventListener('mousemove', onMouseMove)
-      renderer.domElement.removeEventListener('mouseup', onMouseUp)
-      renderer.domElement.removeEventListener('wheel', onWheel)
-      renderer.domElement.removeEventListener('touchstart', onTouchStart)
-      renderer.domElement.removeEventListener('touchmove', onTouchMove)
-      renderer.domElement.removeEventListener('touchend', onTouchEnd)
-
-      cancelAnimationFrame(animationFrameId)
-
-      geometry.dispose()
-      wireframeGeometry.dispose()
-      material.dispose()
-      wireframeMaterial.dispose()
-      renderer.dispose()
-
-      if (renderer.domElement.parentNode === container) {
-        container.removeChild(renderer.domElement)
-      }
-      if (uiContainer.parentNode === container) {
-        container.removeChild(uiContainer)
-      }
+      cancelAnimationFrame(frameId);
+      el.removeEventListener('mousedown', onDown);
+      el.removeEventListener('mousemove', onMove);
+      el.removeEventListener('mouseup', onUp);
+      el.removeEventListener('mouseleave', onUp);
+      el.removeEventListener('wheel', onWheel);
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onUp);
+      geo.dispose(); terrainMat.dispose(); wireMat.dispose();
+      for (const r of baseResources) { if (r.dispose) r.dispose(); }
+      for (const l of featureLabelSprites) { l.texture.dispose(); l.material.dispose(); }
+      renderer.dispose();
+      container.innerHTML = '';
     },
-
     resize() {
-      onResize()
+      const w = container.clientWidth;
+      camera.aspect = w / canvasHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, canvasHeight);
     },
-  }
+  };
 }
