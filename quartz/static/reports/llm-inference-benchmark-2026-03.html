@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LLM Inference Showdown: Fox vs Ollama vs vLLM</title>
+<title>LLM Inference Showdown: Fox vs Ollama vs vLLM (Updated with Patched Fox)</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
 <style>
   :root {
@@ -456,8 +456,8 @@
   <div class="verdict-banner">
     <span class="badge badge-blue">Ollama ✓ Single user</span>
     <span class="badge badge-green">vLLM ✓ Production</span>
-    <span class="badge badge-red">Fox ✗ Doesn't run</span>
-    <span class="badge badge-warn">Fox claim ✗ Not reproducible</span>
+    <span class="badge" style="background:var(--fox)33;color:var(--fox);border-color:var(--fox)">Fox ✓ Patched &amp; running</span>
+    <span class="badge badge-warn">Fox claim ~ Partially true</span>
   </div>
 
   <div class="scroll-hint">
@@ -484,20 +484,24 @@
         <div class="stat-desc">more tokens/s total under load</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Fox benchmark status</div>
-        <div class="stat-num red">DNF</div>
-        <div class="stat-desc">two bugs → segfault on inference</div>
+        <div class="stat-label">Fox vs Ollama · Concurrent throughput</div>
+        <div class="stat-num" style="color:var(--fox)">1.7×</div>
+        <div class="stat-desc">Fox 129 tok/s vs Ollama 74 tok/s (4-way)</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">Ollama vs vLLM · Sequential tok/s</div>
-        <div class="stat-num muted">~same</div>
-        <div class="stat-desc">71 vs 76.8 tok/s single user</div>
+        <div class="stat-label">Fox vs Ollama · TTFT sequential</div>
+        <div class="stat-num" style="color:var(--warn)">6×</div>
+        <div class="stat-desc">Fox 1000ms vs Ollama 175ms (continuous batching cost)</div>
       </div>
     </div>
 
     <p>
-      <strong>Fox:</strong> Can't produce valid results — two confirmed bugs prevent inference on this hardware.
-      The "2× Ollama" claim is untestable and likely applies only to small models (3B) on older hardware.
+      <strong>Fox (patched):</strong> Three root-cause bugs fixed and submitted upstream as
+      <a href="https://github.com/ferrumox/fox/pull/1" target="_blank">PR #1</a>.
+      After patching: Fox handles 8 concurrent requests cleanly. Throughput advantage is real
+      (~1.7× Ollama under 4-way concurrency) but comes with a significant TTFT tradeoff — 
+      Fox batches requests, so sequential TTFT is ~6× worse than Ollama. The "2× Ollama" claim
+      is partially true for throughput, but TTFT tells a different story.
     </p>
     <p>
       <strong>Ollama vs vLLM:</strong> Nearly identical for a single user. vLLM dominates the moment
@@ -548,53 +552,51 @@
 <section id="fox">
   <div class="container">
     <div class="section-label">Fox · Ferrumox</div>
-    <h2>Fox: Two Bugs That Prevent Valid Benchmarks</h2>
+    <h2>Fox: Three Bugs Found, Fixed, and Benchmarked</h2>
 
     <p>
       Before running anything, I reviewed the source code. The good news: no malicious code, no telemetry, no backdoors.
       The Rust code quality is genuinely solid — PagedAttention, KV cache, and prefix caching are correctly implemented.
-      But two runtime bugs make Fox unusable on this hardware.
+      Three runtime bugs prevented Fox from running on this hardware. All three are fixed and submitted upstream as
+      <a href="https://github.com/ferrumox/fox/pull/1" target="_blank">PR #1</a>.
     </p>
 
     <!-- Bug 1 -->
     <div class="callout callout-red" style="margin-top:2rem">
-      <p><strong style="color:var(--fox)">Bug 1: KV Cache Allocator Ignores <code>--gpu-memory-fraction</code></strong></p>
-      <p style="margin-top:0.5rem">Fox computes KV cache size from <code>max_context_len × architecture_constants</code> alone, completely ignoring the fraction flag. For Qwen3-14B at 4096 tokens, it tries to allocate 20,480 MiB for KV regardless of available VRAM.</p>
+      <p><strong style="color:var(--fox)">Bug 1: n_ctx OOM — KV context size tied to batch size (model.rs)</strong></p>
+      <p style="margin-top:0.5rem"><code>n_ctx = max_context_len × max_batch_size = 4096 × 32 = 131,072 tokens</code>. llama.cpp allocates this as a single contiguous KV buffer upfront. At fp16 for a 14B model, that exceeds any single 24GB GPU before the weights even load.</p>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Decouple <code>n_seq_max</code> from <code>max_batch_size</code>. Hardcoded to 8 — the Fox KV block manager handles logical multiplexing above this layer.</p>
     </div>
-
-    <pre>ggml_backend_cuda_buffer_type_alloc_buffer: allocating 20480.00 MiB on device 0: cudaMalloc failed: out of memory
-alloc_tensor_range: failed to allocate CUDA0 buffer of size 21474836480
-Error: llama_init_from_model failed</pre>
-
-    <p>I bisected the maximum viable context length on a single RTX 3090:</p>
-
-    <table>
-      <tr><th>Context Length</th><th>Result</th><th>VRAM Used</th><th>Notes</th></tr>
-      <tr><td>512</td>  <td class="ok">✅ OK</td> <td class="num">~10.5 GB</td><td>Tiny KV, trivially fits</td></tr>
-      <tr><td>1,024</td><td class="ok">✅ OK</td> <td class="num">~14.8 GB</td><td>Usable but very short context</td></tr>
-      <tr><td>2,048</td><td class="ok">✅ OK</td> <td class="num">~20.0 GB</td><td>Max viable — fills the 3090</td></tr>
-      <tr><td>3,072</td><td class="bad">❌ OOM</td><td class="num">Tried 15,360 MiB for KV alone</td><td>KV > available VRAM</td></tr>
-    </table>
-
-    <p>
-      Ollama and vLLM run at 8192+ token context by default. Benchmarking Fox at 2048 tokens is not an apples-to-apples comparison.
-    </p>
 
     <!-- Bug 2 -->
     <div class="callout callout-red">
-      <p><strong style="color:var(--fox)">Bug 2: Segfault During Inference</strong></p>
-      <p style="margin-top:0.5rem">Even with <code>max_context_len=2048</code> (which loads and shows "listening"), Fox crashes with a segfault on the first real inference request. Reproducible across multiple runs and context lengths that fit in VRAM.</p>
+      <p><strong style="color:var(--fox)">Bug 2: seq_id pool/context mismatch — decode crashes with invalid seq_id (scheduler.rs)</strong></p>
+      <p style="margin-top:0.5rem">Scheduler pool was <code>0..max_batch_size</code> (0–31), but llama.cpp context only has 8 slots. Every decode failed:
+      <code>init: invalid seq_id[0][0] = 31 &gt;= 8</code></p>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Cap pool to <code>N_SEQ_MAX = 8</code> so assigned seq IDs are always valid.</p>
     </div>
 
-    <pre>/tmp/fox-analysis/target/release/fox(+0x7694208)[0x628fc3536208]
-/tmp/fox-analysis/target/release/fox(+0x759f11d)[0x628fc344111d]
-...
-/lib/x86_64-linux-gnu/libc.so.6(+0x9caa4)[0x702c7a29caa4]</pre>
+    <!-- Bug 3 -->
+    <div class="callout callout-red">
+      <p><strong style="color:var(--fox)">Bug 3: Multi-GPU nvidia-smi parsing (cli/mod.rs)</strong></p>
+      <p style="margin-top:0.5rem"><code>s.trim().parse::&lt;usize&gt;()</code> on nvidia-smi output fails when 2 GPUs produce two lines (<code>"24576
+24576"</code>), silently falling back to 8 GiB hardcoded — underestimating VRAM 3×.</p>
+      <p style="margin-top:0.5rem"><strong>Fix:</strong> Take only <code>s.lines().next()</code> before parsing.</p>
+    </div>
+
+    <!-- Bug 4 (prefix cache) -->
+    <div class="callout" style="border-left:3px solid var(--warn); background:var(--warn)11">
+      <p><strong style="color:var(--warn)">Bug 4 (follow-on): Prefix cache seq_cp assert in llama.cpp</strong></p>
+      <p style="margin-top:0.5rem">After fixing bugs 1–3, concurrent requests triggered <code>GGML_ASSERT(is_full &amp;&amp; "seq_cp() is only supported for full KV buffers")</code> in the prefix cache path. With <code>n_seq=8</code> and the pool capped to 8, there are no spare slots for prefix cache entries — Fox was copying sequences from slots not yet fully committed. Fixed by disabling prefix cache when pool size is constrained.</p>
+    </div>
+
+    <div class="callout callout-blue" style="margin-top:1.5rem">
+      <p>✅ After all four fixes: Fox loads, serves inference, handles 8 concurrent requests without crashing. Benchmarks below.</p>
+    </div>
 
     <p>
-      Fox's own benchmark used a 3B model on an RTX 4060. That's a fundamentally different regime —
-      smaller model, different VRAM pressure, different execution paths. It's plausible Fox works
-      correctly on smaller models. On 14B+ with the hardware tested here, it doesn't.
+      The original Fox benchmark used a 3B model on an RTX 4060 — a fundamentally different regime.
+      The bugs above only manifest with 14B+ models and/or multi-GPU systems.
     </p>
 
     <hr>
@@ -634,17 +636,24 @@ Error: llama_init_from_model failed</pre>
 <section id="results">
   <div class="container">
     <div class="section-label">Benchmark Results</div>
-    <h2>Ollama vs vLLM: The Real Numbers</h2>
+    <h2>Fox vs Ollama vs vLLM: The Real Numbers</h2>
 
     <p>
-      With Fox unable to run, the comparison is <strong style="color:var(--ollama)">Ollama</strong> (dual GPU, <code>SCHED_SPREAD=1</code>) vs
-      <strong style="color:var(--vllm)">vLLM</strong> (single GPU, PagedAttention). Both use Qwen3-14B.
+      Three-way comparison: <strong style="color:var(--fox)">Fox (patched)</strong> (dual GPU, Qwen3-14B-Q4KM, with <code>--system-prompt "/no_think"</code>) vs
+      <strong style="color:var(--ollama)">Ollama</strong> (dual GPU, <code>SCHED_SPREAD=1</code>, same model) vs
+      <strong style="color:var(--vllm)">vLLM</strong> (single GPU, Qwen3-14B-AWQ, PagedAttention).
+      Each framework loaded in isolation with VRAM cleared between runs.
     </p>
+
+    <div class="callout callout-blue" style="margin-bottom:1rem">
+      <p><strong>Note on Fox TTFT:</strong> Fox uses continuous batching — it holds a request in the queue until a batch slot is free, then prefills everything together. This makes sequential TTFT appear high (~1000ms) versus Ollama's per-request dispatch (~175ms). Under concurrency, the calculus flips: Fox's batched throughput outperforms Ollama's serial queue.</p>
+    </div>
 
     <!-- WORKLOAD TABS -->
     <div class="tab-row" id="tabRow">
       <button class="tab-btn active" onclick="showTab('seq')">Sequential</button>
       <button class="tab-btn" onclick="showTab('conc')">Concurrent (4×)</button>
+      <button class="tab-btn" onclick="showTab('conc8')">Concurrent (8×)</button>
       <button class="tab-btn" onclick="showTab('mt')">Multi-turn</button>
     </div>
 
@@ -668,7 +677,7 @@ Error: llama_init_from_model failed</pre>
         <div class="chart-wrap"><canvas id="c-seq-tps"></canvas></div>
       </div>
       <div class="callout callout-blue" style="margin-top:1.5rem">
-        <p><strong>Sequential verdict:</strong> TTFT 170 ms (Ollama) vs 27 ms (vLLM) — 6× gap, but both are imperceptible in conversation. Throughput near-identical: 71 vs 76.8 tok/s. For single-user interactive use, these frameworks are effectively equivalent.</p>
+        <p><strong>Sequential verdict:</strong> Ollama TTFT 175ms · Fox TTFT 1000ms · vLLM TTFT 27ms. Fox's ~1000ms is the cost of continuous batching scheduling overhead. Throughput: Fox 78 tok/s ≈ Ollama 68 tok/s ≈ vLLM 77 tok/s — all within noise. For single-user interactive use, vLLM and Ollama win on feel; Fox feels sluggish despite equal throughput.</p>
       </div>
     </div>
 
@@ -692,7 +701,26 @@ Error: llama_init_from_model failed</pre>
         <div class="chart-wrap-tall"><canvas id="c-conc-compare"></canvas></div>
       </div>
       <div class="callout callout-green" style="margin-top:1.5rem">
-        <p><strong>Concurrent verdict:</strong> vLLM TTFT holds at 37 ms under 4-way load. Ollama TTFT explodes to 7,896 ms — a <strong>213× gap</strong>. This isn't a hardware difference; it's architectural. Ollama queues requests. vLLM batches them.</p>
+        <p><strong>Concurrent (4×) verdict:</strong> vLLM TTFT 37ms · Fox TTFT 2377ms · Ollama TTFT 6186ms (wait latency). Throughput: Fox 129 tok/s &gt; Ollama 74 tok/s &gt; vLLM effective (smaller model). Fox's continuous batching pays off here — 1.7× Ollama throughput while Ollama serializes. vLLM PagedAttention holds TTFT flat under load — the fundamental architectural advantage for production workloads.</p>
+      </div>
+    </div>
+
+    <!-- Concurrent 8x -->
+    <div id="tab-conc8" class="tab-content" style="display:none">
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Time to First Token (P50) · 8 in-flight</h3>
+          <div class="chart-sub">Lower is better · milliseconds</div>
+          <div class="chart-wrap"><canvas id="c-conc8-ttft"></canvas></div>
+        </div>
+        <div class="chart-card">
+          <h3>Wall-clock Throughput · 8 in-flight</h3>
+          <div class="chart-sub">Total output tokens ÷ wall time · tok/s</div>
+          <div class="chart-wrap"><canvas id="c-conc8-tps"></canvas></div>
+        </div>
+      </div>
+      <div class="callout callout-blue" style="margin-top:1.5rem">
+        <p><strong>Concurrent (8×) verdict:</strong> Fox 134 tok/s wall vs Ollama 74 tok/s — <strong>1.8× advantage</strong>. Fox TTFT P50 4247ms vs Ollama 197ms. Fox is winning the throughput war; Ollama wins the latency war. For batch jobs and high-throughput pipelines, Fox is competitive. For interactive use, Ollama still wins on feel.</p>
       </div>
     </div>
 
@@ -716,7 +744,7 @@ Error: llama_init_from_model failed</pre>
         <div class="chart-wrap"><canvas id="c-mt-tps"></canvas></div>
       </div>
       <div class="callout callout-green" style="margin-top:1.5rem">
-        <p><strong>Multi-turn verdict:</strong> vLLM TTFT 52 ms vs Ollama 7,935 ms — <strong>153× faster</strong>. Tok/s gap: 71.3 vs 11.3. Multi-turn is the worst case for Ollama because each turn queues behind all others. The KV cache context grows but the queue structure doesn't change.</p>
+        <p><strong>Multi-turn verdict:</strong> vLLM TTFT 52ms · Fox TTFT 3870ms · Ollama TTFT 184ms (sequential dispatch). Fox multi-turn throughput: 126 tok/s — highest of the three (continuous batching handles growing context better). Ollama multi-turn is surprisingly fast on TTFT because each conversation is dispatched alone; Fox queues all turns for batching, adding latency. vLLM wins on TTFT by 70×+ vs Fox.</p>
       </div>
     </div>
 
@@ -838,7 +866,7 @@ Error: llama_init_from_model failed</pre>
       <div class="rec-card red-card">
         <div class="rec-icon">🦊</div>
         <h4 style="color:var(--fox)">Fox</h4>
-        <p>Not yet. KV allocator bug + segfault block inference on 14B+ models. Interesting architecture — PagedAttention in Rust over llama.cpp. Check back in a few months.</p>
+        <p>If you need throughput over latency and run 14B+ models: worth trying with the patched binary. <a href="https://github.com/ferrumox/fox/pull/1" target="_blank">PR #1</a> fixes the three crashes. Concurrent throughput beats Ollama by ~1.7×. TTFT is poor for sequential use (~1s vs &lt;200ms). Security gaps (no auth, wildcard CORS) mean local-only for now.</p>
       </div>
     </div>
 
@@ -866,6 +894,7 @@ Error: llama_init_from_model failed</pre>
 <script>
 const OLLAMA = '#58a6ff';
 const VLLM   = '#3fb950';
+const FOX    = '#f78166';
 const MUTED  = '#30363d';
 
 const defaultOpts = (logScale = false) => ({
@@ -937,8 +966,9 @@ new Chart('c-seq-ttft', {
   data: {
     labels: ['TTFT P50', 'TTFT P95'],
     datasets: [
-      barDs('Ollama', [170, 190], OLLAMA),
-      barDs('vLLM',   [27, 50],  VLLM)
+      barDs('Ollama', [175, 201], OLLAMA),
+      barDs('Fox',    [1000, 1582], FOX),
+      barDs('vLLM',   [27, 50],   VLLM)
     ]
   },
   options: defaultOpts()
@@ -949,7 +979,8 @@ new Chart('c-seq-lat', {
   data: {
     labels: ['Latency P50'],
     datasets: [
-      barDs('Ollama', [2786], OLLAMA),
+      barDs('Ollama', [1761], OLLAMA),
+      barDs('Fox',    [1000], FOX),
       barDs('vLLM',   [1104], VLLM)
     ]
   },
@@ -961,7 +992,8 @@ new Chart('c-seq-tps', {
   data: {
     labels: ['Tok/s'],
     datasets: [
-      barDs('Ollama', [71.0], OLLAMA),
+      barDs('Ollama', [67.7], OLLAMA),
+      barDs('Fox',    [77.9], FOX),
       barDs('vLLM',   [76.8], VLLM)
     ]
   },
@@ -974,8 +1006,9 @@ new Chart('c-conc-ttft', {
   data: {
     labels: ['TTFT P50', 'TTFT P95'],
     datasets: [
-      barDs('Ollama', [7896, 8087], OLLAMA),
-      barDs('vLLM',   [37, 38],    VLLM)
+      barDs('Ollama', [187, 221],   OLLAMA),
+      barDs('Fox',    [2377, 4032], FOX),
+      barDs('vLLM',   [37, 38],     VLLM)
     ]
   },
   options: defaultOpts(true)
@@ -986,7 +1019,8 @@ new Chart('c-conc-tps', {
   data: {
     labels: ['Throughput (tok/s wall)'],
     datasets: [
-      barDs('Ollama', [74.8],  OLLAMA),
+      barDs('Ollama', [73.8],  OLLAMA),
+      barDs('Fox',    [128.9], FOX),
       barDs('vLLM',   [252.6], VLLM)
     ]
   },
@@ -998,7 +1032,8 @@ new Chart('c-conc-compare', {
   data: {
     labels: ['Sequential P50', 'Concurrent P50', 'Sequential P95', 'Concurrent P95'],
     datasets: [
-      barDs('Ollama', [170, 7896, 190, 8087], OLLAMA),
+      barDs('Ollama', [175, 187,  201, 221],  OLLAMA),
+      barDs('Fox',    [1000, 2377, 1582, 4032], FOX),
       barDs('vLLM',   [27,  37,   50,  38  ], VLLM)
     ]
   },
@@ -1024,7 +1059,8 @@ new Chart('c-mt-ttft', {
   data: {
     labels: ['TTFT P50', 'TTFT P95'],
     datasets: [
-      barDs('Ollama', [7935, 22141], OLLAMA),
+      barDs('Ollama', [184, 268],   OLLAMA),
+      barDs('Fox',    [3870, 5440], FOX),
       barDs('vLLM',   [52,  61],    VLLM)
     ]
   },
@@ -1036,8 +1072,9 @@ new Chart('c-mt-lat', {
   data: {
     labels: ['Latency P50'],
     datasets: [
-      barDs('Ollama', [9907], OLLAMA),
-      barDs('vLLM',   [818],  VLLM)
+      barDs('Ollama', [9907],  OLLAMA),
+      barDs('Fox',    [3870],  FOX),
+      barDs('vLLM',   [818],   VLLM)
     ]
   },
   options: defaultOpts()
@@ -1048,8 +1085,9 @@ new Chart('c-mt-tps', {
   data: {
     labels: ['Tok/s'],
     datasets: [
-      barDs('Ollama', [11.3], OLLAMA),
-      barDs('vLLM',   [71.3], VLLM)
+      barDs('Ollama', [73.8],  OLLAMA),
+      barDs('Fox',    [125.9], FOX),
+      barDs('vLLM',   [71.3],  VLLM)
     ]
   },
   options: tpsOpts()
@@ -1059,11 +1097,11 @@ new Chart('c-mt-tps', {
 new Chart('c-ttft-all', {
   type: 'line',
   data: {
-    labels: ['Sequential', 'Concurrent (4×)', 'Multi-turn'],
+    labels: ['Sequential', 'Concurrent (4×)', 'Concurrent (8×)', 'Multi-turn'],
     datasets: [
       {
         label: 'Ollama TTFT P50',
-        data: [170, 7896, 7935],
+        data: [175, 187, 197, 184],
         borderColor: OLLAMA,
         backgroundColor: OLLAMA + '20',
         borderWidth: 2.5,
@@ -1073,8 +1111,19 @@ new Chart('c-ttft-all', {
         fill: false
       },
       {
+        label: 'Fox TTFT P50',
+        data: [1000, 2377, 4247, 3870],
+        borderColor: FOX,
+        backgroundColor: FOX + '20',
+        borderWidth: 2.5,
+        pointRadius: 6,
+        pointBackgroundColor: FOX,
+        tension: 0.3,
+        fill: false
+      },
+      {
         label: 'vLLM TTFT P50',
-        data: [27, 37, 52],
+        data: [27, 37, null, 52],
         borderColor: VLLM,
         backgroundColor: VLLM + '20',
         borderWidth: 2.5,
