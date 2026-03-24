@@ -205,7 +205,7 @@ Again: take these numbers with a big grain of salt given the non-isolated condit
 
 **Ollama think-mode note:** `qwen3.5-uncensored:35b-iq4xs` generates reasoning tokens (`<think>...</think>`) by default and ignores `think: false` in the API body. To prevent this from consuming the token budget, I run a local proxy on port 11435 that injects `"think": false` at the request level. Without this, Ollama "thinks" for 300–4800 chars before any visible output, which artificially inflates latency. The 14B GGUF model used in the main benchmark doesn't have this issue.
 
-All benchmark scripts available at: [github.com/corpetty/quartz](https://github.com/corpetty/quartz) (reports section).
+All benchmark scripts available at: [github.com/corpetty/quartz](https://github.com/corpetty/quartz) (reports section). More writing at [bayesianpersuasion.com](https://bayesianpersuasion.com).
 
 ---
 

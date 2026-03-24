@@ -858,7 +858,7 @@ Error: llama_init_from_model failed</pre>
     <p><strong>Ollama / think-mode:</strong> qwen3-uncensored generates reasoning tokens by default and ignores <code>think: false</code> in the API body. A local proxy on port 11435 injects the flag at the request level. The 14B GGUF model used in the main benchmark doesn't exhibit this issue.</p>
     <p><strong>Not a pure apples-to-apples comparison:</strong> Ollama used both GPUs (~8.8 GB VRAM each); vLLM used one GPU (~20 GB). Same base model, different quantization (GGUF Q4_K_M vs AWQ). This reflects the real-world hardware allocation on this machine, not an attempt to disadvantage either framework.</p>
     <p>TTFT = time from request send to first token. Tok/s = output tokens ÷ total response duration. Throughput = total output tokens ÷ wall-clock time (concurrent tests only).</p>
-    <p>Posted to <a href="https://www.reddit.com/r/LocalLLM/comments/1s2753y/" target="_blank">r/LocalLLM thread</a>. Source: <a href="https://github.com/corpetty/quartz" target="_blank">github.com/corpetty/quartz</a>.</p>
+    <p>Posted to <a href="https://www.reddit.com/r/LocalLLM/comments/1s2753y/" target="_blank">r/LocalLLM thread</a>. More writing at <a href="https://bayesianpersuasion.com" target="_blank">bayesianpersuasion.com</a>.</p>
   </div>
 </div>
 
