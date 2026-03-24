@@ -1166,6 +1166,8 @@ function showTab(id) {
   document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + id).style.display = 'block';
   event.target.classList.add('active');
+  // Resize all charts so hidden-at-init canvases render correctly
+  Object.values(Chart.instances).forEach(c => c.resize());
 }
 </script>
 
