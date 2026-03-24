@@ -1,5 +1,9 @@
 const vizInstances = new Map<Element, { destroy?: () => void; resize?: () => void }>()
 
+// Session-level cache buster — forces re-fetch of viz modules once per page load
+// so that deploys with updated JS are picked up without needing hard refresh
+const vizCacheBust = Date.now()
+
 async function initAllViz() {
   // Destroy previous instances
   for (const [, instance] of vizInstances) {
@@ -28,13 +32,22 @@ async function initAllViz() {
     const savedTheme = document.documentElement.getAttribute("saved-theme")
     options.dark = savedTheme === "dark"
 
+    // Ensure container is a positioning context so absolutely-positioned
+    // children (buttons, overlays) don't escape to the page body
+    const el = container as HTMLElement
+    if (getComputedStyle(el).position === "static") {
+      el.style.position = "relative"
+    }
+    // Ensure overflow is visible for labels but contained for UI
+    el.style.overflow = "hidden"
+
     try {
-      const module = await import(`/static/viz/${name}.js`)
-      const instance = module.init(container as HTMLElement, options)
+      const module = await import(`/static/viz/${name}.js?v=${vizCacheBust}`)
+      const instance = module.init(el, options)
       vizInstances.set(container, instance || {})
     } catch (err) {
       console.error(`[viz] Failed to load "${name}":`, err)
-      ;(container as HTMLElement).innerHTML =
+      el.innerHTML =
         '<p style="color:var(--secondary);font-size:13px;padding:1rem;">Visualization failed to load.</p>'
     }
   }

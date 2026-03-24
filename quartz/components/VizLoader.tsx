@@ -4,10 +4,7 @@ import { QuartzComponent, QuartzComponentConstructor, QuartzComponentProps } fro
 import vizLoaderScript from "./scripts/viz-loader.inline"
 
 const VizLoader: QuartzComponentConstructor = () => {
-  const Component: QuartzComponent = (_props: QuartzComponentProps) => {
-    return null
-  }
-
+  const Component: QuartzComponent = () => null
   Component.afterDOMLoaded = vizLoaderScript
   return Component
 }
