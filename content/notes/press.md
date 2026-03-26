@@ -30,15 +30,25 @@ See also: [Cointelegraph author page](https://cointelegraph.com/authors/corey-pe
 
 ## Medium Writing
 
-Self-published pieces on crypto, security, and philosophy.
+Self-published pieces on crypto, security, and philosophy — mirrored locally at [[posts/medium/index]].
 
 | Date | Title |
 |------|-------|
-| 2019-11-12 | [How to Understand What People Mean When They Say "We're Probably in a Simulation"](https://medium.com/@corpetty/how-to-understand-what-people-mean-when-they-say-were-probably-in-a-simulation-f838bad0a92) |
-| 2018-12-28 | [Reframing how you think about the concept of "managing your private keys"](https://medium.com/the-bitcoin-podcast-blog/reframing-how-you-think-about-the-concept-of-managing-your-private-keys-fdf95060728a) |
-| 2018-04-16 | [The Role of Randomness in Proof of Work Mining](https://medium.com/the-bitcoin-podcast-blog/the-role-of-randomness-in-proof-of-work-mining-3827a809f745) |
-| 2017-12-22 | [A Petty Crypto Review: Cardano](https://medium.com/the-bitcoin-podcast-blog/a-petty-crypto-review-cardano-a2c99fd413af) |
-| 2017-06-27 | [A Look at the Status.im ICO Token Distribution](https://medium.com/the-bitcoin-podcast-blog/a-look-at-the-status-im-ico-token-distribution-f5bcf7f00907) |
-| 2017-06-06 | [A Look at the BAT Token Distribution](https://medium.com/the-bitcoin-podcast-blog/a-look-at-the-bat-token-distribution-bb3bcb92748f) |
-| 2017-05-18 | [A Look at the Aragon ICO Investment Distribution](https://medium.com/blockchannel/a-look-at-the-aragon-ico-investment-distribution-a78f601229d8) |
-| 2016-06-19 | [The DAO: What happened, Who did it, Where do we go?](https://medium.com/the-bitcoin-podcast-blog/the-dao-what-happened-who-did-it-where-do-we-go-4897d7864e) |
+| 2019-11-12 | [[posts/medium/2019-11-12_How-to-Understand-What-People-Mean-When-They-Say--We-re-Probably-in-a-Simulation---f838bad0a92\|How to Understand What People Mean When They Say "We're Probably in a Simulation"]] |
+| 2018-12-28 | [[posts/medium/2018-12-28_Reframing-how-you-think-about-the-concept-of--managing-your-private-keys--fdf95060728a\|Reframing how you think about the concept of "managing your private keys"]] |
+| 2018-04-16 | [[posts/medium/2018-04-16_The-Role-of-Randomness-in-Proof-of-Work-Mining-3827a809f745\|The Role of Randomness in Proof of Work Mining]] |
+| 2017-12-22 | [[posts/medium/2017-12-22_A-Petty-Crypto-Review--Cardano-a2c99fd413af\|A Petty Crypto Review: Cardano]] |
+| 2017-11-11 | [[posts/medium/2017-11-11_Getting-Past-the-Golden-Hammer-with-a-Quantum-Mechanics-Example--A-Valuable-Lesson-for-Blockchain-f254c289dad0\|Getting Past the Golden Hammer with a Quantum Mechanics Example]] |
+| 2017-11-08 | [[posts/medium/2017-11-08_The-Merkle-ization-of-Individuality-e53618de835d\|The Merkle-ization of Individuality]] |
+| 2017-06-27 | [[posts/medium/2017-06-27_A-Look-at-the-Status-im-ICO-Token-Distribution-f5bcf7f00907\|A Look at the Status.im ICO Token Distribution]] |
+| 2017-06-06 | [[posts/medium/2017-06-06_A-Look-at-the-BAT-Token-Distribution-bb3bcb92748f\|A Look at the BAT Token Distribution]] |
+| 2017-05-18 | [[posts/medium/2017-05-18_A-Look-at-the-Aragon-ICO-Investment-Distribution-a78f601229d8\|A Look at the Aragon ICO Investment Distribution]] |
+| 2017-05-02 | [[posts/medium/2017-05-02_A-Look-at-the-TokenCard-ICO-Investor-Distribution-cddeb6f534f9\|A Look at the TokenCard ICO Investor Distribution]] |
+| 2017-04-24 | [[posts/medium/2017-04-24_A-Look-at-the-Gnosis-Dutch-Auction-Distribution-25c2ccac2d9d\|A Look at the Gnosis Dutch Auction Distribution]] |
+| 2016-06-29 | [[posts/medium/2016-06-29_A-layman-s-line-by-line-description-of-Gavin-s-Preliminary-hard-fork-code-6daa8c5c1a30\|A Layman's Line-by-Line Description of Gavin's Preliminary Hard Fork Code]] |
+| 2016-06-19 | [[posts/medium/2016-06-19_The-DAO--What-happened--Who-did-it--Where-do-we-go--4897d7864e\|The DAO: What happened, Who did it, Where do we go?]] |
+| 2016-05-24 | [[posts/medium/2016-05-24_Looking-at-the-DAO-Token-Distribution--Part-2-c77e7c4ac81c\|Looking at the DAO Token Distribution, Part 2]] |
+| 2016-05-24 | [[posts/medium/2016-05-24_Don-t-cling-to-past-ideas-so-tight-to-try-and-explain-the-future-f86298b658a1\|Don't cling to past ideas so tight to try and explain the future]] |
+| 2016-05-17 | [[posts/medium/2016-05-17_Looking-at-the-DAO-address-distribution--Part-1-f324e71381bf\|Looking at the DAO Address Distribution, Part 1]] |
+| 2016-04-19 | [[posts/medium/2016-04-19_Bitcoin-Market-Cap-and-Mining-Decentralization-dc475ab79bea\|Bitcoin Market Cap and Mining Decentralization]] |
+| 2016-03-29 | [[posts/medium/2016-03-29_Bitcoin-as-a-Vehicle-for-Personal-Growth\|Bitcoin as a Vehicle for Personal Growth]] |
