@@ -1,8 +1,9 @@
 ---
-title: "The Geometry of Intimacy"
+title: "The Shape of Intimacy"
 date: 2026-03-24
 tags: [philosophy, relationships, sexuality]
 draft: false
+aliases: ["/posts/the-geometry-of-intimacy"]
 ---
 
 There's an axiom I keep coming back to in conversations about relationships:
