@@ -1,7 +1,7 @@
 ---
 title: "Compersion: The Joy You Feel When Someone You Love Is Happy With Someone Else"
 date: 2026-04-04
-draft: true
+draft: false
 description: "From a Ouija-like board in a 1970s San Francisco commune to peer-reviewed psychology journals: the history, science, and practice of compersion."
 tags:
   - psychology
