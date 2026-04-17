@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto CE for CFPs — 2026 Market Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1b2a;
+    --navy-mid: #162334;
+    --navy-light: #1e3147;
+    --gold: #c9a84c;
+    --gold-light: #e4c97e;
+    --gold-dim: #8a6e30;
+    --cream: #f5f0e8;
+    --cream-dark: #e8e0d0;
+    --slate: #94a8bc;
+    --slate-light: #bccad6;
+    --white: #ffffff;
+    --red-accent: #d64045;
+    --green-accent: #3d8b6e;
+    --radius: 4px;
+    --radius-lg: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--navy);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(160deg, var(--navy-light) 0%, var(--navy) 100%);
+    border-bottom: 1px solid var(--gold-dim);
+    padding: 48px 20px 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%; transform: translateX(-50%);
+    width: 400px; height: 400px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    padding: 5px 14px;
+    border-radius: 2px;
+    margin-bottom: 20px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 6vw, 44px);
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+  .header h1 em {
+    font-style: normal;
+    color: var(--gold);
+  }
+  .header-sub {
+    font-size: 14px;
+    color: var(--slate-light);
+    max-width: 420px;
+    margin: 0 auto;
+    font-weight: 300;
+  }
+
+  /* STAT CARDS */
+  .stats-strip {
+    padding: 24px 16px;
+    background: var(--navy-mid);
+    border-bottom: 1px solid rgba(201,168,76,0.15);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .stat-card {
+    background: var(--navy-light);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius-lg);
+    padding: 14px 10px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .stat-label {
+    font-size: 10.5px;
+    color: var(--slate);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.3;
+    font-weight: 500;
+  }
+
+  /* TOC */
+  .toc-wrapper {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 28px 16px 8px;
+  }
+  .toc-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gold-dim);
+    margin-bottom: 12px;
+  }
+  .toc-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .toc-list li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 14px;
+    color: var(--slate-light);
+    text-decoration: none;
+    font-size: 13.5px;
+    border-radius: var(--radius);
+    border: 1px solid transparent;
+    transition: all 0.18s;
+    font-weight: 400;
+  }
+  .toc-list li a:hover {
+    background: var(--navy-light);
+    border-color: rgba(201,168,76,0.2);
+    color: var(--gold-light);
+  }
+  .toc-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-dim);
+    min-width: 20px;
+    font-weight: 500;
+  }
+
+  /* MAIN CONTENT */
+  .main {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 8px 0 60px;
+  }
+
+  /* SECTION / ACCORDION */
+  .section {
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin: 0 16px;
+  }
+  .section-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 22px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    text-align: left;
+    color: var(--cream);
+    transition: color 0.15s;
+  }
+  .section-toggle:hover { color: var(--gold-light); }
+  .section-toggle:hover .section-num { color: var(--gold); }
+  .section-num {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-dim);
+    padding-top: 5px;
+    min-width: 24px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    font-weight: 500;
+  }
+  .section-title-wrap { flex: 1; }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(17px, 3.8vw, 21px);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-bottom: 3px;
+  }
+  .section-preview {
+    font-size: 12.5px;
+    color: var(--slate);
+    font-weight: 300;
+    line-height: 1.4;
+  }
+  .section-icon {
+    font-size: 18px;
+    color: var(--slate);
+    padding-top: 3px;
+    flex-shrink: 0;
+    transition: transform 0.25s, color 0.15s;
+  }
+  .section.open .section-icon {
+    transform: rotate(90deg);
+    color: var(--gold);
+  }
+  .section-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+  }
+  .section.open .section-body {
+    max-height: 9999px;
+  }
+  .section-content {
+    padding: 0 0 28px 38px;
+    color: var(--cream-dark);
+  }
+
+  /* INTRO SECTION (always open) */
+  .intro-section {
+    padding: 28px 16px 20px;
+    margin: 0 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .intro-section p {
+    font-size: 15px;
+    line-height: 1.75;
+    color: var(--cream-dark);
+    font-weight: 300;
+  }
+  .intro-section p + p { margin-top: 14px; }
+
+  /* TYPOGRAPHY inside content */
+  .section-content p,
+  .intro-section p {
+    margin-bottom: 14px;
+  }
+  .section-content p:last-child { margin-bottom: 0; }
+
+  .section-content h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    color: var(--gold-light);
+    margin: 22px 0 10px;
+    font-weight: 700;
+  }
+  .section-content h4 {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gold-dim);
+    margin: 18px 0 8px;
+    font-weight: 600;
+  }
+
+  strong {
+    color: var(--cream);
+    font-weight: 600;
+  }
+
+  /* CALLOUT BOXES */
+  .callout {
+    background: rgba(201,168,76,0.07);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 14px 16px;
+    margin: 18px 0;
+    font-size: 14px;
+    line-height: 1.65;
+    color: var(--cream);
+  }
+  .callout.red {
+    background: rgba(214,64,69,0.08);
+    border-color: var(--red-accent);
+  }
+  .callout.green {
+    background: rgba(61,139,110,0.08);
+    border-color: var(--green-accent);
+  }
+
+  /* TAGS / PILLS */
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    padding: 3px 8px;
+    border-radius: 2px;
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    border: 1px solid rgba(201,168,76,0.25);
+    margin: 2px 3px 2px 0;
+    vertical-align: middle;
+    font-weight: 500;
+  }
+
+  /* TABLE */
+  .table-wrap {
+    overflow-x: auto;
+    margin: 18px 0;
+    border-radius: var(--radius-lg);
+    border: 1px solid rgba(201,168,76,0.15);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 500px;
+  }
+  thead th {
+    background: var(--navy-light);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 11px 14px;
+    text-align: left;
+    font-weight: 500;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.12s;
+  }
+  tbody tr:hover { background: rgba(201,168,76,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+  td {
+    padding: 11px 14px;
+    color: var(--cream-dark);
+    vertical-align: top;
+  }
+  td:first-child { color: var(--cream); font-weight: 500; }
+
+  /* NUMBERED LIST ITEMS */
+  .num-list {
+    list-style: none;
+    margin: 14px 0;
+  }
+  .num-list li {
+    display: flex;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px;
+    color: var(--cream-dark);
+    line-height: 1.55;
+  }
+  .num-list li:last-child { border-bottom: none; }
+  .num-list .n {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-dim);
+    min-width: 22px;
+    padding-top: 3px;
+    font-weight: 500;
+  }
+
+  /* BULLET LIST */
+  .b-list {
+    list-style: none;
+    margin: 12px 0;
+  }
+  .b-list li {
+    padding: 5px 0 5px 18px;
+    position: relative;
+    font-size: 14px;
+    color: var(--cream-dark);
+    line-height: 1.6;
+  }
+  .b-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--gold-dim);
+    font-weight: 400;
+  }
+
+  /* REGULATORY TIMELINE */
+  .timeline {
+    margin: 16px 0;
+  }
+  .tl-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .tl-item:last-child { border-bottom: none; }
+  .tl-date {
+    font-family: 'DM Mono', monospace;
+    font-size: 10.5px;
+    color: var(--gold);
+    min-width: 80px;
+    padding-top: 2px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .tl-text {
+    font-size: 13.5px;
+    color: var(--cream-dark);
+    line-height: 1.55;
+  }
+  .tl-text strong { color: var(--cream); }
+
+  /* PROGRESS / GAP BAR */
+  .gap-bar-wrap { margin: 18px 0; }
+  .gap-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--slate);
+    margin-bottom: 6px;
+  }
+  .gap-bar {
+    height: 8px;
+    background: var(--navy-light);
+    border-radius: 99px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .gap-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    border-radius: 99px;
+    transition: width 0.8s ease;
+  }
+
+  /* FOOTER */
+  .footer {
+    border-top: 1px solid rgba(201,168,76,0.15);
+    padding: 28px 20px;
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  .footer p {
+    font-size: 12px;
+    color: var(--slate);
+    line-height: 1.6;
+  }
+
+  /* MOBILE TWEAKS */
+  @media (max-width: 420px) {
+    .stats-strip { grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .stat-num { font-size: 22px; }
+    .stat-label { font-size: 9.5px; }
+    .section-content { padding-left: 0; }
+    .section-num { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-badge">Research Brief · April 2026</div>
+  <h1>Crypto CE for <em>CFPs</em><br>Market Opportunity & Curriculum Strategy</h1>
+  <p class="header-sub">A landscape analysis for proposing a cryptocurrency awareness course to the American College of Financial Services</p>
+</div>
+
+<!-- STAT STRIP -->
+<div class="stats-strip">
+  <div class="stat-card">
+    <div class="stat-num">94%</div>
+    <div class="stat-label">Advisors fielded crypto questions in 2025</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">32%</div>
+    <div class="stat-label">Actually allocate crypto in client portfolios</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-num">+33%</div>
+    <div class="stat-label">CE hours required starting Q1 2027</div>
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc-wrapper">
+  <div class="toc-label">Contents</div>
+  <ul class="toc-list">
+    <li><a href="#s0"><span class="toc-num">00</span>Executive Summary</a></li>
+    <li><a href="#s1"><span class="toc-num">01</span>How CFP Continuing Education Works</a></li>
+    <li><a href="#s2"><span class="toc-num">02</span>The CFP Board's Crypto Position</a></li>
+    <li><a href="#s3"><span class="toc-num">03</span>Existing Course Market</a></li>
+    <li><a href="#s4"><span class="toc-num">04</span>What Advisors Don't Know</a></li>
+    <li><a href="#s5"><span class="toc-num">05</span>The Regulatory Pivot (2025–2026)</a></li>
+    <li><a href="#s6"><span class="toc-num">06</span>Fiduciary Duty in the New Landscape</a></li>
+    <li><a href="#s7"><span class="toc-num">07</span>What a Course Proposal Needs</a></li>
+    <li><a href="#s8"><span class="toc-num">08</span>Strategic Conclusions</a></li>
+  </ul>
+</div>
+
+<div class="main">
+
+  <!-- INTRO -->
+  <div class="intro-section" id="s0">
+    <p>A new cryptocurrency continuing education course for CFP® professionals is landing in a market that is simultaneously wide open and well-defended. <strong>Client demand is near-universal — yet only 32% of advisors actually allocate crypto in client portfolios, and roughly a quarter openly admit they don't understand valuation, custody, or how to talk to clients about it.</strong></p>
+    <p>The CFP Board's only formal crypto guidance is a 14-page Notice from December 2022 that offers no specific competency framework, no mandatory CE hours, and no curriculum. That ambiguity is the opening. Two designations dominate the paid CE market — DACFP's CBDA (18 CE hours) and PlannerDAO's CDAA (12 hours) — but neither the CFP Board nor The American College has published its own dedicated crypto program. A credible new course can earn CFP CE approval in 5–7 business days once a sponsor is registered.</p>
+  </div>
+
+  <!-- SECTION 1 -->
+  <div class="section" id="s1">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">01</span>
+      <div class="section-title-wrap">
+        <div class="section-title">How CFP Continuing Education Works</div>
+        <div class="section-preview">Requirements, sponsor registration, credit structure, 2027 changes</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>CFP® professionals currently need <strong>30 CE hours per two-year reporting cycle</strong> — 28 general plus 2 ethics using CFP Board–approved ethics curriculum.</p>
+
+        <div class="callout">
+          <strong>2027 Expansion:</strong> On January 27, 2026, the CFP Board announced the requirement rises to <strong>40 hours per cycle</strong> (38 general + 2 ethics) effective Q1 2027. Up to 5 hours of Practice Management become eligible, up to 10 general hours may carry over, and the Board gains authority to mandate specific CE topics in response to regulatory shifts.
+        </div>
+
+        <h3>Sponsor & Submission Process</h3>
+        <ul class="b-list">
+          <li><strong>$500/year</strong> (for-profit) or <strong>$250/year</strong> (non-profit) to register as a CE Sponsor</li>
+          <li>Individual program fees paid per submission; review turnaround is <strong>5–7 business days</strong></li>
+          <li>1 CE credit = 50 minutes of instruction</li>
+          <li>Minimum <strong>5 assessment questions per CE hour</strong> for self-study; 70% passing score required</li>
+          <li>Live programs (webinars, in-person) need no assessment, but need attendance verification</li>
+          <li>Attendance must be reported within 14 days of completion</li>
+        </ul>
+
+        <h3>Content Eligibility</h3>
+        <p>Eligibility is governed by the <strong>2021 Principal Knowledge Topics list</strong> — eight domains with 70 sub-topics. Crypto is not named explicitly. The strongest topic mappings for a crypto course are:</p>
+        <ul class="b-list">
+          <li><strong>Investment Planning (D.27, D.28, D.31, D.35)</strong> — valuation, risk, allocation, alternative investments</li>
+          <li><strong>Tax Planning (E)</strong> — cost basis, 1099-DA, staking, wash-sale mechanics</li>
+          <li><strong>Retirement Savings (F)</strong> — crypto in 401(k)/IRA accounts</li>
+          <li><strong>Estate Planning (G)</strong> — RUFADAA, key-transfer mechanics</li>
+          <li><strong>Professional Conduct (A)</strong> — CFP Board 2022 Notice, Reg BI, fiduciary documentation</li>
+        </ul>
+
+        <div class="callout red">
+          <strong>Ineligible content:</strong> Product-specific sales content, marketing/prospecting, practice management (until Q1 2027), and anything off the Principal Knowledge list. Proposals most often get rejected here.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="section" id="s2">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">02</span>
+      <div class="section-title-wrap">
+        <div class="section-title">The CFP Board's Crypto Position</div>
+        <div class="section-preview">The 2022 Notice, what it says, and what it deliberately doesn't say</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>The defining document is the <strong>"Notice to CFP® Professionals Regarding Financial Advice About Cryptocurrency-Related Assets"</strong> issued December 5, 2022. It remains unamended as of April 2026 — despite spot Bitcoin ETFs (January 2024), spot Ethereum ETFs, the GENIUS Act, and DOL's rescission of its own crypto warning.</p>
+
+        <h3>What the Notice Says</h3>
+        <ul class="b-list">
+          <li>Crypto assets — coins, ETFs, derivatives, crypto-related equities — are <strong>"Financial Assets"</strong> subject to full fiduciary duty</li>
+          <li><em>"A CFP® professional must be competent to provide Financial Advice about cryptocurrency-related assets and must consider the particular attributes and heightened risks."</em></li>
+          <li>The Board explicitly endorses CE as the path to competence: CFPs "interested in becoming more competent…should consider further education through continuing education courses"</li>
+        </ul>
+
+        <h3>What the Notice Doesn't Say</h3>
+        <div class="callout green">
+          The Notice imposes <strong>no minimum CE hours, no syllabus, no required topic list, and no obligation to offer crypto advice</strong>. Competence is qualitative and self-assessed. This is the opening — a well-designed course can effectively define what competence looks like before the Board does it for you.
+        </div>
+
+        <p>General counsel Leo Rydzewski publicly framed the competence bar as high — "developing competence in this area to fulfill the duty of competence is no small undertaking" — but the Board has never quantified it. That ambiguity is why DACFP's 18-hour program and PlannerDAO's 12-hour program coexist without either being "wrong."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="section" id="s3">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">03</span>
+      <div class="section-title-wrap">
+        <div class="section-title">Existing Course Market</div>
+        <div class="section-preview">DACFP, PlannerDAO, Cannon, and a glaring institutional gap</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+
+        <h3>Competitive Landscape</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Program</th>
+                <th>CFP CE Hours</th>
+                <th>Price</th>
+                <th>Credential</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>DACFP Certificate (CBDA) — Advanced</td>
+                <td>18</td>
+                <td>~$549–$1,495</td>
+                <td>CBDA (FINRA-listed)</td>
+              </tr>
+              <tr>
+                <td>PlannerDAO CDAA</td>
+                <td>12</td>
+                <td>$289</td>
+                <td>CDAA (FINRA-listed)</td>
+              </tr>
+              <tr>
+                <td>Cannon Financial Institute</td>
+                <td>~5.5</td>
+                <td>Enterprise</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td>Kitces Premier (crypto modules)</td>
+                <td>6+</td>
+                <td>~$297/yr subscription</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td>WebCE Understanding Digital Assets</td>
+                <td>2.0</td>
+                <td>$20–$40</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td>Bitwise + DACFP webinars</td>
+                <td>1/session</td>
+                <td>Free</td>
+                <td>None</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>DACFP: The Current Ceiling</h3>
+        <p>Founded by Ric Edelman, DACFP sets the standard. Faculty includes blockchain co-inventor Scott Stornetta, Bitwise CIO Matt Hougan, and MarketCounsel's Brian Hamburger. Endorsements from FPA, IAA, MMI, IWI, NAPFA, XYPN, Schwab, and Fidelity. Industry sponsors (Bitwise, Franklin Templeton, Grayscale, Hashdex) reportedly pay $35,000 per faculty interview — a disclosed but real conflict of interest.</p>
+
+        <h3>The Glaring Gap: The American College</h3>
+        <div class="callout">
+          Despite operating ChFC®, CLU®, RICP®, WMCP®, and the profession's largest branded CE library through Knowledge Hub+, <strong>The American College offers no dedicated crypto certificate, designation, or structured curriculum</strong>. Coverage is limited to a single webcast and a handful of white papers. That is an open lane for a well-designed course with institutional distribution.
+        </div>
+
+        <div class="gap-bar-wrap">
+          <div class="gap-bar-label"><span>Market coverage by institution type</span></div>
+          <div style="margin: 8px 0 4px; font-size: 12px; color: var(--slate);">Independent providers (DACFP, PlannerDAO)</div>
+          <div class="gap-bar"><div class="gap-fill" style="width: 65%"></div></div>
+          <div style="margin: 12px 0 4px; font-size: 12px; color: var(--slate);">CFP Board / American College / Major institutions</div>
+          <div class="gap-bar"><div class="gap-fill" style="width: 8%"></div></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="section" id="s4">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">04</span>
+      <div class="section-title-wrap">
+        <div class="section-title">What Advisors Don't Know</div>
+        <div class="section-preview">15 priority knowledge gaps from the 2026 Bitwise/VettaFi survey</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>The <strong>Bitwise/VettaFi 2026 Benchmark Survey</strong> (n=299) finds that among advisors who haven't yet allocated, 36% say they "have no idea how to value crypto assets," 27% cite custody concerns, 24% cite general lack of understanding, and 15% don't feel confident talking to clients about crypto. These are knowledge gaps, not ideological objections.</p>
+
+        <div class="callout red">
+          In 2025, <strong>74% of clients were already investing in crypto outside the advisory relationship</strong> — held-away assets most advisors can't see, report on, or bill. Christina Lynn, CFP®, captured it: "Advisers are accustomed to being the smartest person in the room. That position is turned on its head with blockchain technology."
+        </div>
+
+        <h3>Priority Curriculum Topics</h3>
+        <ol class="num-list">
+          <li><span class="n">01</span><div><strong>Custody models and the Custody Rule</strong> — qualified custodians, self-custody limits, SMA structures, ETF custody chains. Coinbase vs. Fidelity Digital Assets vs. BitGo vs. Gemini.</div></li>
+          <li><span class="n">02</span><div><strong>Valuation frameworks</strong> for assets without cash flows — network value, Metcalfe, stock-to-flow, tokenomics. How to document "prudent" investment decisions for arbitration panels.</div></li>
+          <li><span class="n">03</span><div><strong>Taxation of staking, airdrops, forks, DeFi, NFTs</strong> — Rev. Rul. 2023-14 on dominion and control, Rev. Proc. 2024-28 wallet-by-wallet basis (effective January 2025), the wash-sale rule that currently doesn't apply to crypto.</div></li>
+          <li><span class="n">04</span><div><strong>Form 1099-DA mechanics</strong> — what brokers report in 2026 (gross proceeds), what they'll report in 2027 (basis), and why DeFi/wallet-to-wallet transfers arrive with blank basis fields.</div></li>
+          <li><span class="n">05</span><div><strong>Suitability, fiduciary duty, documentation</strong> — applying CFP Board's 2022 Notice, Reg BI, FINRA Rule 2111; Form ADV disclosures; IPS language.</div></li>
+          <li><span class="n">06</span><div><strong>Spot vs. futures vs. equity vs. index ETFs</strong> — why spot BTC/ETH ETFs are grantor trusts not 1940 Act funds, why IRAs are the cleanest wrapper, why clients won't see a 1099-DIV.</div></li>
+          <li><span class="n">07</span><div><strong>Stablecoin mechanics post-GENIUS Act</strong> — permitted issuers, 1:1 reserves, yield prohibitions, tokenized money-market funds (BUIDL, BENJI).</div></li>
+          <li><span class="n">08</span><div><strong>Client communication and behavioral coaching</strong> — managing the liability anxiety that Kitces describes as the dominant emotional barrier to advisor adoption.</div></li>
+          <li><span class="n">09</span><div><strong>Estate planning</strong> — RUFADAA hierarchy, keeping seed phrases out of probated wills, multi-sig inheritance solutions (Casa, Unchained), the §1014 step-up opportunity, corporate trustee refusals.</div></li>
+          <li><span class="n">10</span><div><strong>Held-away asset integration and AUM billing</strong> — Onramp, Eaglebrook, Flourish Crypto, Arch; how to bill without triggering custody rules.</div></li>
+          <li><span class="n">11</span><div><strong>Post-FTX counterparty due diligence</strong> — charter verification, proof of reserves, SOC-2 audits, bankruptcy remoteness.</div></li>
+          <li><span class="n">12</span><div><strong>DeFi basics and tax events</strong> — liquid staking token swaps, AMM deposits, lending protocols.</div></li>
+          <li><span class="n">13</span><div><strong>Portfolio construction</strong> — the 1–5% consensus allocation, correlation dynamics, funding source decisions.</div></li>
+          <li><span class="n">14</span><div><strong>Regulatory landscape monitoring</strong> — CLARITY Act tracking, SEC–CFTC March 2026 Token Taxonomy, state money-transmitter variations.</div></li>
+          <li><span class="n">15</span><div><strong>Tech stack integration</strong> — Orion, Black Diamond, Tamarac, Addepar, eMoney, Envestnet, and the crypto data feeds that connect them.</div></li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="section" id="s5">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">05</span>
+      <div class="section-title-wrap">
+        <div class="section-title">The Regulatory Pivot</div>
+        <div class="section-preview">Six major shifts in 2025–2026 that have outrun existing curriculum</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>The U.S. crypto regulatory posture in April 2026 is almost unrecognizable from three years ago. Chair Paul Atkins' SEC and the 119th Congress have moved from enforcement-driven ambiguity to permissive rulemaking.</p>
+
+        <h3>Key Developments</h3>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-date">Jan 2025</div>
+            <div class="tl-text"><strong>SAB 122 replaces SAB 121.</strong> Banks no longer record customer crypto as balance-sheet liabilities. BNY Mellon, State Street, Citi, and U.S. Bank begin building institutional crypto custody.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">Apr 2025</div>
+            <div class="tl-text"><strong>DeFi Broker Rule repealed</strong> by H.J.Res.25 (Public Law 119-5) — the first crypto-specific law ever enacted. Also blocks Treasury from issuing substantially similar rules.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">May 2025</div>
+            <div class="tl-text"><strong>DOL rescinds 2022 "extreme care" crypto guidance</strong> (Compliance Assistance Release 2025-01), restoring a neutral stance on crypto in 401(k) plans.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">Jul 2025</div>
+            <div class="tl-text"><strong>GENIUS Act signed into law</strong> (July 18). Stablecoins become explicitly non-securities, requiring 1:1 USD/Treasury reserves and banning issuer-paid yield. Three permitted issuer pathways established.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">Mar 2026</div>
+            <div class="tl-text"><strong>SEC–CFTC Joint Token Taxonomy (Press Release 2026-30)</strong> reclassifies BTC, ETH, SOL, XRP, ADA, and 11 other tokens as "digital commodities" under CFTC jurisdiction. Staking yield on these tokens explicitly not a securities transaction.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">Apr 2026</div>
+            <div class="tl-text"><strong>SEC "Reg Crypto" proposal</strong> in public comment — $75M safe harbor, $5M Startup Exemption, innovation exemption. DOL alternative-asset 401(k) safe harbor proposed with six evaluation factors.</div>
+          </div>
+        </div>
+
+        <h3>Tax Mechanics: What Tightened</h3>
+        <ul class="b-list">
+          <li><strong>Rev. Proc. 2024-28</strong> — wallet-by-wallet basis effective January 1, 2025. Every wallet/account is now its own basis ledger, FIFO by default unless Specific ID is elected.</li>
+          <li><strong>Form 1099-DA</strong> — live for 2025 sales (gross proceeds). Expands to cost basis for assets acquired after January 1, 2026.</li>
+          <li><strong>Rev. Rul. 2023-14</strong> — staking rewards are ordinary income at FMV when the taxpayer has dominion and control.</li>
+          <li><strong>Wash-sale rule still does not apply to crypto</strong> — but the bipartisan Digital Asset PARITY Act (December 2025) would close that window. Aggressive loss harvesting is a time-limited opportunity.</li>
+        </ul>
+
+        <h3>The Practical Endpoint for Most Clients</h3>
+        <p>Spot Bitcoin and Ethereum ETFs held in a traditional IRA at Fidelity, Schwab, or a similar broker. Key details advisors must know:</p>
+        <ul class="b-list">
+          <li><strong>IBIT</strong> (BlackRock) — ~$54–70B AUM, 0.25% expense ratio, enables options</li>
+          <li><strong>FBTC</strong> (Fidelity) — ~$17.7B, 0.25% with in-house custody</li>
+          <li><strong>ETHA / ETHB</strong> (BlackRock) — ETH ETFs; ETHB with staking launched March 12, 2026</li>
+          <li>All are grantor trusts: clients receive <strong>no 1099-DIV</strong>, must download issuer's annual tax PDF — a predictable client-service surprise a competent CFP should preempt</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="section" id="s6">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">06</span>
+      <div class="section-title-wrap">
+        <div class="section-title">Fiduciary Duty in the New Landscape</div>
+        <div class="section-preview">The four active duties, allocation consensus, and the held-away asset problem</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>The CFP Board's 2022 Notice imposes four active duties on any crypto-advising CFP: <strong>Competence, Care, Information, and Compliance with Law</strong>. Post-March 2026 taxonomy, those duties require granular execution.</p>
+
+        <h3>Disclosure Requirements</h3>
+        <ul class="b-list">
+          <li>Form ADV Part 2A Items 4, 8, 10, 12, and 15 must disclose crypto service types, custodial arrangements, volatility/cyber/liquidity risks, and referral economics</li>
+          <li>Reg BI applies to broker-dealer recommendations even for non-security digital commodities</li>
+          <li>RIAs owe Advisers Act fiduciary duty under the 2019 Commission Interpretation</li>
+          <li>Marketing Rule (Rule 206(4)-1) requires fair and balanced presentation of crypto performance</li>
+        </ul>
+
+        <h3>Allocation Consensus</h3>
+        <div class="callout green">
+          <strong>1–5% as a satellite position</strong> for most clients. Up to 5–10% for high risk-tolerance clients with long horizons. 0% for risk-averse or near-retirement clients absent specific client demand.
+        </div>
+
+        <p>Implementation tiers by client size: spot ETFs for most retail, direct custody for clients above roughly $1M, and SMAs (Eaglebrook, Onramp, Bitwise) for middle-ground mandates.</p>
+
+        <h3>The Held-Away Asset Dilemma</h3>
+        <p>74% of clients hold crypto outside the advisory relationship. Billing held-away crypto via direct wallet deduction risks being deemed custody under Rule 206(4)-2. Flat-fee or retainer pricing on crypto planning, paired with data aggregation through Onramp or Flourish, is the emerging answer.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="section" id="s7">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">07</span>
+      <div class="section-title-wrap">
+        <div class="section-title">What a Course Proposal Needs</div>
+        <div class="section-preview">Six elements for CFP Board approval; pathways to The American College</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>Getting a new course approved for CFP CE credit is more procedural than evaluative. A credible submission package requires six elements.</p>
+
+        <ol class="num-list">
+          <li><span class="n">01</span><div><strong>Sponsor registration</strong> — $500 for-profit or $250 non-profit, calendar-year, submitted through the CE Sponsor Portal on cfp.net.</div></li>
+          <li><span class="n">02</span><div><strong>Program narrative</strong> tying every module to one or more 2021 Principal Knowledge Topics (D.27, D.28, D.31, D.35 for portfolio; E for tax; F for retirement; G for estate; A for professional conduct).</div></li>
+          <li><span class="n">03</span><div><strong>Specific, measurable learning objectives</strong> — one per CE hour minimum, written with Bloom's taxonomy verbs (evaluate, analyze, apply — not "know" or "understand").</div></li>
+          <li><span class="n">04</span><div><strong>Assessment design</strong> — five or more questions per CE hour for self-study, 70% passing. Live programs need only attendance verification.</div></li>
+          <li><span class="n">05</span><div><strong>Instructor credentials</strong> documented for each contributor — CFP®, JD, CPA, PhD, or subject-matter equivalent.</div></li>
+          <li><span class="n">06</span><div><strong>Content currency commitment</strong> — documented update cadence, given how rapidly the regulatory landscape is changing. Title cannot include trademarked product names.</div></li>
+        </ol>
+
+        <h3>The American College Pathway</h3>
+        <p>The College operates a Professional Recertification Program for its designations; external CE is recognized if delivered by approved providers. A proposal can go two routes:</p>
+        <ul class="b-list">
+          <li><strong>Licensed white-label program</strong> delivered through Knowledge Hub+</li>
+          <li><strong>Co-branded certificate</strong> with The College's FinTech content — DACFP's endorsement pattern shows the model works, and The College's absence from the market makes a co-brand more plausible than it would be elsewhere</li>
+        </ul>
+
+        <h3>Two Strategic Decisions That Matter Most</h3>
+        <div class="callout">
+          <strong>Credit hours:</strong> 18 (DACFP ceiling) vs. 12 (PlannerDAO middle) vs. 6–10 (serious but not yet a designation). Six to ten hours is the sweet spot for a first course that hasn't yet earned a designation — it fits within one cycle's general CE budget.<br><br>
+          <strong>Positioning:</strong> Product-agnostic (Cannon's play) vs. designation-building (DACFP, PlannerDAO) vs. institutional (The American College). Product-agnostic carries fewer conflict disclosures but generates less revenue; designation-building is the most defensible long-term moat but requires ongoing update infrastructure.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="section" id="s8">
+    <button class="section-toggle" onclick="toggle(this)">
+      <span class="section-num">08</span>
+      <div class="section-title-wrap">
+        <div class="section-title">Strategic Conclusions</div>
+        <div class="section-preview">The differentiated opening, timing considerations, and partnership strategy</div>
+      </div>
+      <span class="section-icon">›</span>
+    </button>
+    <div class="section-body">
+      <div class="section-content">
+        <p>The case for a new CFP crypto CE course rests on three convergent facts:</p>
+
+        <ul class="b-list">
+          <li><strong>Demand is structural.</strong> 94% of advisors get crypto questions, 74% of clients hold it outside the advisory relationship, and the CE hour requirement rises 33% in 2027.</li>
+          <li><strong>The incumbent offerings are thin at the top and bottom.</strong> DACFP and PlannerDAO own the serious middle, WebCE's budget offering is flagged as outdated, and The American College hasn't shown up.</li>
+          <li><strong>Regulatory flux has outrun existing curriculum.</strong> The March 2026 SEC–CFTC Token Taxonomy, GENIUS Act, Form 1099-DA, Rev. Proc. 2024-28, SAB 122, and the imminent CLARITY Act all require content that wasn't written three years ago.</li>
+        </ul>
+
+        <div class="callout green">
+          <strong>The differentiated opening:</strong> Not another "Bitcoin 101." A tightly scoped, 10–18 CE-hour course that treats crypto as a regulated asset class a fiduciary must handle competently — heavy on custody selection, wallet-by-wallet tax mechanics, held-away integration, and estate-plan key transfer. Updated quarterly to track legislation.
+        </div>
+
+        <h3>Highest-Value Positioning</h3>
+        <p>Partnering with The American College would give such a course institutional gravity DACFP still lacks despite market share. Alternatively, <strong>a standalone Ethics + Crypto pairing</strong> — the single unmet structural need once mandatory CE topics become possible in 2027 — could position the sponsor ahead of the Board's own decision to name crypto a mandated topic.</p>
+
+        <p>The CFP Board has told the profession that competence in crypto is "no small undertaking" and that CE is the path. It has not yet said what competence looks like. <strong>A well-designed course can, for now, define it.</strong></p>
+
+        <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+          <h4>Key Tags</h4>
+          <span class="tag">CFP Board</span>
+          <span class="tag">American College</span>
+          <span class="tag">DACFP</span>
+          <span class="tag">GENIUS Act</span>
+          <span class="tag">1099-DA</span>
+          <span class="tag">Rev. Proc. 2024-28</span>
+          <span class="tag">Spot ETFs</span>
+          <span class="tag">Held-Away Assets</span>
+          <span class="tag">Token Taxonomy</span>
+          <span class="tag">CLARITY Act</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main -->
+
+<div class="footer">
+  <p>Research compiled April 2026 · Sources: CFP Board, Bitwise/VettaFi 2026 Benchmark Survey, DACFP, SEC, DOL, IRS, Latham & Watkins, Forvis Mazars, Financial Planning Association</p>
+</div>
+
+<script>
+  function toggle(btn) {
+    const section = btn.closest('.section');
+    section.classList.toggle('open');
+  }
+
+  // Open first section by default on load
+  window.addEventListener('DOMContentLoaded', () => {
+    // Animate stat bars on scroll
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.querySelectorAll('.gap-fill').forEach(bar => {
+            const w = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => { bar.style.width = w; }, 100);
+          });
+        }
+      });
+    }, { threshold: 0.3 });
+    document.querySelectorAll('.gap-bar-wrap').forEach(el => observer.observe(el));
+
+    // Smooth anchor scrolling with offset for fixed elements
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const target = document.querySelector(a.getAttribute('href'));
+        if (!target) return;
+        e.preventDefault();
+        const offset = target.getBoundingClientRect().top + window.scrollY - 16;
+        window.scrollTo({ top: offset, behavior: 'smooth' });
+        // Open the section if it's closed
+        const section = target.closest ? target.closest('.section') : target;
+        if (section && section.classList.contains('section') && !section.classList.contains('open')) {
+          section.classList.add('open');
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>
