@@ -12,4 +12,7 @@ description: "A landscape analysis of the cryptocurrency continuing education ma
 
 A landscape analysis for proposing a cryptocurrency awareness course to the American College of Financial Services. Covers the CFP Board's 2022 crypto notice, the competitive CE market (DACFP, PlannerDAO, and the institutional gap), 15 priority knowledge gaps from the 2026 Bitwise/VettaFi survey, the major regulatory pivot (SAB 122 → GENIUS Act → March 2026 Token Taxonomy), fiduciary duty mechanics, and what a CFP Board-approved course submission actually requires.
 
+<div style="text-align:right; margin-bottom:6px;">
+  <a href="/static/reports/crypto-ce-cfp-report-2026-04.html" target="_blank" rel="noopener" style="font-size:13px; opacity:0.7;">↗ open fullscreen</a>
+</div>
 <iframe src="/static/reports/crypto-ce-cfp-report-2026-04.html" width="100%" height="900px" style="border:none; border-radius:8px;"></iframe>
