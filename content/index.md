@@ -1,31 +1,42 @@
 ---
-title: Just the thoughts of a dude, shared in hopes that they help others update their priors.
+title: "Welcome"
+description: "Just the thoughts of a dude, shared in hopes that they help others update their priors."
 ---
 
-## Welcome!
-I've reset my website to be a "digital garden." It's basically just a bunch of linked notes with all of my migrated articles I've written. I use this mostly to just make it so my notes are linkable to other people and sharable / discoverable. Hope you enjoy. If you don't, doesn't really bother me. The core concept behind this site is [[writing-to-think|writing to think]], and I share it in hopes that it's useful to someone else. I have derived much of my personal rationale through other people's thoughts, I can only hope that what I've come to does some of that for someone else. 
+*Just the thoughts of a dude, shared in hopes that they help others update their priors.*
 
-Why this domain name? It's a play words incorporating a philosophy of [Bayesian Inference](https://plato.stanford.edu/entries/epistemology-bayesian/), a core part of how I view the world and make decisions based in what I've experienced and understand and how it gets updated when I learn new things. 
+This is my digital garden, a collection of linked notes and longer posts I've been writing for myself and sharing in case any of it is useful to anyone else. The core idea behind all of it is [[posts/writing-to-think|writing to think]]. I update my priors by putting ideas down, and I share the process in case someone wants to do the same with theirs.
 
-## Navigating around
-Here are some [posts](/posts). These are longer formed content that is self contained and meant to drive home a specific thing. [Here is a note](/notes/future-articles.md) that lists things I'd like to write about.
+I've derived a lot of my own thinking from other people's writing. If any of this does that for you, great. If not, that's fine too.
 
-Here are [notes](/notes). These are all over the place, and the thoughts that hopefully grow up to be a post.  
+Why the domain name? It's a play on [Bayesian inference](https://plato.stanford.edu/entries/epistemology-bayesian/), which is the lens I try to use when looking at the world. You have priors, new evidence updates them, and you should be honest about how much weight you're putting on what.
 
-Here is a blurb [about me](/about).
+## Start here
 
-Here are my [scientific publications](/pubs). (TODO: [google scholar search me for now](https://scholar.google.com/scholar?hl=en&as_sdt=0%2C34&q=Corey+Petty&btnG=))
+New to the site? A few reasonable entry points:
 
-I have done a TON of media. Here's my [external work & press](/notes/press) page, and you can also search for me via:
+- [About me](/about): who I am, what I do, and why this site exists
+- [Posts](/posts): longer, self-contained writing meant to land a specific point
+- [Notes](/notes): rougher thinking that may or may not grow into a post
+- [Reports](/reports): data-journalism style deep dives on things I think are important, often with interactive visualizations to let you explore the data yourself
+- [Future articles](/notes/future-articles): things I want to write about eventually
+
+## The rest of the site
+
+- [Poetry](/poetry): when prose isn't the right container
+- [Scientific publications](/pubs): peer-reviewed work from the computational chemistry days
+- [External work & press](/notes/press): articles I've written elsewhere and podcast appearances
+- [Future projects](/future-projects): things I'd love to see built but don't have time to build myself
+- [Contact](/contact): how to reach me
+- [Disclosures](/disclosures): the formal "don't take anything here as advice" page (thanks to Kevin Sekniqi for the template)
+
+## Podcasts
+
+I've done a lot of media. If you're looking for where to hear me talk:
+
 - [The Bitcoin Podcast](https://thebitcoinpodcast.com)
 - Hashing It Out
 - Logos Podcast
 - BlockChannel
 
-Here are some [projects I'd love built](/future-projects) that I don't have time to do myself.
-
-[Contact me](/contact.md) if you have a question/comment/concern. 
-
-Personal [disclosure page](/disclosures.md) here. Thanks to Kevin Sekniqi for format and copy as a template.
-
-Not sure? you can search with `ctrl + k`.
+Not sure where to start? You can search with `ctrl + k`.
