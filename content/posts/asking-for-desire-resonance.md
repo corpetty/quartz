@@ -7,7 +7,9 @@ tags:
   - vulnerability
   - masculinity
   - performance
-description: "On performance, omission, and asking to be witnessed in the attempt to be real."
+description: On performance, omission, and asking to be witnessed in the attempt to be real.
+aliases:
+  - asking-for-desire
 ---
 
 I built a life on being useful and out of the way. That's the whole thing. Useful enough to be wanted in the room, quiet enough about my own needs that no one had to work around them. If I took up space, I made sure it returned more than it took. I got good at this. So good that I stopped noticing I was doing it.
@@ -38,7 +40,7 @@ The performance isn't a single act. It's an operation you apply to yourself in r
 
 The mild form is omission. You leave things out. A preference you don't mention. A disagreement you don't voice. A tiredness you don't admit to. What gets broadcast is incomplete but still true. You've shaved the parts of yourself you suspected wouldn't fit through the room. Most of the performance is this. Quiet, continuous, low-effort, usually invisible to you.
 
-The severe form is disfiguring. You don't just leave things out, you put things in. You agree with an opinion you don't hold. You laugh at a joke you don't find funny. You manufacture interest in a topic you don't care about. What gets broadcast now contains components the source never produced. Omission is lossy. Disfiguring is generative.
+The severe form is disfiguring. You don't just leave things out, you put things in. You agree with an opinion you don't hold. You laugh at a joke you don't find funny. You manufacture interest in a topic you don't care about. What gets broadcast now contains components the source never produced. Omission is lossy (information lost in the process). Disfiguring is generative (making something new).
 
 Here's what one of these looks like in the body, in the moment.
 
