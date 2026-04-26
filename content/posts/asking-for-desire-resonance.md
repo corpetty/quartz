@@ -8,7 +8,6 @@ tags:
   - masculinity
   - performance
 description: "On performance, omission, and asking to be witnessed in the attempt to be real."
-draft: true
 ---
 
 I built a life on being useful and out of the way. That's the whole thing. Useful enough to be wanted in the room, quiet enough about my own needs that no one had to work around them. If I took up space, I made sure it returned more than it took. I got good at this. So good that I stopped noticing I was doing it.
