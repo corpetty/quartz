@@ -151,3 +151,13 @@ And here's the thing I want to leave you with: the complexity of this is beautif
 You don't finish mapping yourself. You don't arrive at a complete understanding of what you want or who you are in relation to other people. The terrain shifts. New relationships reveal valleys you didn't know were there. Time erodes ridges you thought were permanent. And the unmapped edges — those aren't failures of exploration. They're invitations.
 
 It's okay not to know. It might be the most honest place to start.
+
+---
+
+## Explore your own landscape
+
+If this framework resonated with you, I built an interactive tool that lets you map your own love landscape — plot your own axes, trace your terrain, and see what shape your intimacy actually takes.
+
+**[love-landscape.com](https://love-landscape.com)**
+
+It's an invitation, not a test. There are no correct answers, and the map you make is yours.
