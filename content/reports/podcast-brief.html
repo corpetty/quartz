@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Crypto Podcast Brief — Corey Petty</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface2: #18181c;
+    --border: #252528;
+    --amber: #f5a623;
+    --amber-dim: rgba(245,166,35,0.12);
+    --amber-mid: rgba(245,166,35,0.25);
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --blue: #4fa3e0;
+    --text: #e8e8ec;
+    --text-dim: #8888a0;
+    --text-dimmer: #55555f;
+    --mono: 'DM Mono', monospace;
+    --display: 'Syne', sans-serif;
+    --body: 'DM Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--body); overflow: hidden; }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0;
+  }
+  .topbar-left { display: flex; align-items: center; gap: 14px; }
+  .on-air {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em;
+    color: var(--red); text-transform: uppercase;
+  }
+  .on-air-dot {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--red);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.7)} }
+
+  .show-title { font-family: var(--display); font-size: 15px; font-weight: 700; color: var(--text); }
+  .guest-tag { font-family: var(--mono); font-size: 10px; color: var(--amber); letter-spacing: 0.08em; }
+
+  .btc-ticker {
+    font-family: var(--mono); font-size: 13px; color: var(--text-dim);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btc-price { color: var(--amber); font-size: 15px; font-weight: 500; }
+  .btc-change { color: var(--red); font-size: 11px; }
+
+  /* ── SEGMENT NAV ── */
+  .seg-nav {
+    display: flex; gap: 0; border-bottom: 1px solid var(--border);
+    background: var(--surface); flex-shrink: 0; overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .seg-nav::-webkit-scrollbar { display: none; }
+  .seg-btn {
+    flex: 1; min-width: 90px; padding: 11px 6px; border: none; background: none;
+    color: var(--text-dimmer); font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.06em; cursor: pointer; transition: all 0.18s ease;
+    border-bottom: 2px solid transparent; text-align: center; white-space: nowrap;
+  }
+  .seg-btn .num { font-size: 16px; font-family: var(--display); font-weight: 800; display: block; margin-bottom: 2px; }
+  .seg-btn:hover { color: var(--text-dim); background: var(--amber-dim); }
+  .seg-btn.active { color: var(--amber); border-bottom-color: var(--amber); background: var(--amber-dim); }
+
+  /* ── MAIN CONTENT ── */
+  .content { flex: 1; overflow-y: auto; padding: 0; scrollbar-width: thin; scrollbar-color: var(--border) transparent; }
+  .content::-webkit-scrollbar { width: 4px; }
+  .content::-webkit-scrollbar-track { background: transparent; }
+  .content::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .segment { display: none; padding: 18px 18px 40px; animation: fadeUp 0.22s ease; }
+  .segment.active { display: block; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* ── SEGMENT HEADER ── */
+  .seg-header { margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .seg-label { font-family: var(--mono); font-size: 10px; color: var(--amber); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 5px; }
+  .seg-title { font-family: var(--display); font-size: 22px; font-weight: 800; color: var(--text); line-height: 1.1; }
+  .seg-goal { font-size: 13px; color: var(--text-dim); margin-top: 6px; font-style: italic; }
+
+  /* ── STAT GRID ── */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; margin-bottom: 18px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; position: relative; overflow: hidden;
+  }
+  .stat-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--amber); }
+  .stat-card.green::before { background: var(--green); }
+  .stat-card.red::before { background: var(--red); }
+  .stat-card.blue::before { background: var(--blue); }
+  .stat-label { font-family: var(--mono); font-size: 9px; color: var(--text-dimmer); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 5px; }
+  .stat-value { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--text); line-height: 1; }
+  .stat-sub { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+  /* ── Q&A CARDS ── */
+  .qa-section { margin-bottom: 14px; }
+  .qa-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    margin-bottom: 10px; overflow: hidden; transition: border-color 0.2s;
+  }
+  .qa-card.open { border-color: var(--amber); }
+  .qa-q {
+    display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px;
+    cursor: pointer; user-select: none;
+  }
+  .qa-icon { font-size: 11px; font-family: var(--mono); color: var(--amber); margin-top: 2px; flex-shrink: 0; transition: transform 0.2s; }
+  .qa-card.open .qa-icon { transform: rotate(90deg); }
+  .qa-q-text { font-size: 13.5px; font-weight: 500; color: var(--text); line-height: 1.4; flex: 1; }
+  .qa-a {
+    max-height: 0; overflow: hidden; transition: max-height 0.35s ease, padding 0.2s;
+    padding: 0 16px;
+  }
+  .qa-card.open .qa-a { max-height: 800px; padding-bottom: 16px; }
+  .qa-a-inner { padding-top: 10px; border-top: 1px solid var(--border); }
+  .qa-a-inner p { font-size: 13px; color: var(--text-dim); line-height: 1.7; margin-bottom: 8px; }
+  .qa-a-inner p:last-child { margin-bottom: 0; }
+  .qa-a-inner strong { color: var(--amber); font-weight: 500; }
+  .qa-a-inner .kf { /* key fact */
+    display: inline-block; background: var(--amber-dim); border: 1px solid var(--amber-mid);
+    border-radius: 4px; padding: 1px 7px; font-family: var(--mono); font-size: 11px;
+    color: var(--amber); margin: 2px 2px;
+  }
+
+  /* ── TABLE ── */
+  .mini-table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  .mini-table th { font-family: var(--mono); font-size: 9px; color: var(--text-dimmer); letter-spacing: 0.06em; text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--border); text-transform: uppercase; }
+  .mini-table td { padding: 7px 8px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .mini-table tr:last-child td { border-bottom: none; }
+  .mini-table .hi { color: var(--text); font-weight: 500; }
+  .mini-table .amber { color: var(--amber); font-family: var(--mono); font-size: 11px; }
+
+  /* ── ALERT BOX ── */
+  .alert {
+    border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; font-size: 12.5px;
+    line-height: 1.6; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .alert.warn { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); color: #e8b4b0; }
+  .alert.info { background: rgba(79,163,224,0.08); border: 1px solid rgba(79,163,224,0.2); color: #a0c8e8; }
+  .alert.gold { background: var(--amber-dim); border: 1px solid var(--amber-mid); color: #e8d0a0; }
+  .alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+
+  /* ── BULLET LIST ── */
+  .b-list { padding: 0; list-style: none; margin: 8px 0; }
+  .b-list li { font-size: 13px; color: var(--text-dim); padding: 5px 0 5px 18px; position: relative; line-height: 1.5; border-bottom: 1px solid var(--border); }
+  .b-list li:last-child { border-bottom: none; }
+  .b-list li::before { content: '›'; position: absolute; left: 4px; color: var(--amber); }
+  .b-list li strong { color: var(--text); font-weight: 500; }
+
+  /* ── SECTION LABEL ── */
+  .sub-label { font-family: var(--mono); font-size: 10px; color: var(--text-dimmer); letter-spacing: 0.1em; text-transform: uppercase; margin: 18px 0 10px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+
+  /* ── QUICK KEYS ── */
+  .quick-keys { display: flex; flex-wrap: wrap; gap: 7px; margin: 10px 0; }
+  .qk {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 5px;
+    padding: 5px 11px; font-family: var(--mono); font-size: 11px; color: var(--text-dim);
+    cursor: default;
+  }
+  .qk .val { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="on-air"><div class="on-air-dot"></div>LIVE</div>
+      <div>
+        <div class="show-title">Invested Interest</div>
+        <div class="guest-tag">COREY PETTY // CRYPTO BRIEF // FEB 19, 2026</div>
+      </div>
+    </div>
+    <div class="btc-ticker">
+      <span>BTC</span>
+      <span class="btc-price">$66,941</span>
+      <span class="btc-change">▼ 47% ATH</span>
+    </div>
+  </div>
+
+  <!-- SEGMENT NAV -->
+  <nav class="seg-nav">
+    <button class="seg-btn active" onclick="showSeg(0,this)"><span class="num">01</span>FOUNDATIONS</button>
+    <button class="seg-btn" onclick="showSeg(1,this)"><span class="num">02</span>WHY IT MATTERS</button>
+    <button class="seg-btn" onclick="showSeg(2,this)"><span class="num">03</span>RISKS</button>
+    <button class="seg-btn" onclick="showSeg(3,this)"><span class="num">04</span>INSTITUTIONAL</button>
+    <button class="seg-btn" onclick="showSeg(4,this)"><span class="num">05</span>PORTFOLIO</button>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ╔══ SEG 1: FOUNDATIONS ══╗ -->
+    <div class="segment active" id="seg0">
+      <div class="seg-header">
+        <div class="seg-label">Segment 01</div>
+        <div class="seg-title">Foundations</div>
+        <div class="seg-goal">Make it understandable without dumbing it down</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">BTC Price Today</div><div class="stat-value">$66,941</div><div class="stat-sub">↓ 47% from $126,210 ATH</div></div>
+        <div class="stat-card green"><div class="stat-label">Total Crypto Market</div><div class="stat-value">~$2.3T</div><div class="stat-sub">≈ Apple's market cap</div></div>
+        <div class="stat-card blue"><div class="stat-label">BTC Dominance</div><div class="stat-value">~58%</div><div class="stat-sub">Most value in BTC</div></div>
+        <div class="stat-card"><div class="stat-label">BTC Ever Mined</div><div class="stat-value">19.99M</div><div class="stat-sub">Hard cap: 21M. No exceptions.</div></div>
+        <div class="stat-card"><div class="stat-label">Network Nodes</div><div class="stat-value">~15,000</div><div class="stat-sub">No single point of control</div></div>
+        <div class="stat-card red"><div class="stat-label">Hash Rate (Jan 2026)</div><div class="stat-value">1 ZH/s</div><div class="stat-sub">Most secure network ever built</div></div>
+      </div>
+
+      <div class="sub-label">Q&A Prep</div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">For someone who thinks Bitcoin is just "internet money" — what actually is it?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>Bitcoin solved a specific computer science problem called the <strong>double-spend problem</strong> — how to transfer value digitally without a bank verifying you haven't spent it twice. Before Bitcoin, you needed an intermediary. The blockchain replaces that with mathematical consensus across 15,000 computers worldwide.</p>
+          <p>Think of it as a <strong>global, tamper-proof ledger that no one controls</strong>. Every 10 minutes, a new page of transactions gets written in permanent ink — and every node on the network holds a copy. Changing history would require rewriting the ledger on thousands of computers simultaneously, which is why Bitcoin's security is effectively unbreakable.</p>
+          <p>It's not internet money in the sense of PayPal. It's more like <strong>digital property that you hold directly</strong> — no bank, no broker, no clearinghouse in between.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What is blockchain in plain English — is it just a ledger?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>A ledger is part of it, but that undersells it. A blockchain is a <strong>distributed ledger with three novel properties working together</strong>: it's replicated (thousands of copies), it's append-only (you can add but never change), and new entries require consensus from the network.</p>
+          <p>The "block" part is just how transactions get packaged — each block of transactions is cryptographically chained to the previous one. Modify any earlier block and every subsequent hash breaks. That's the tamper-evidence.</p>
+          <p>Ethereum extends this by adding <strong>programmable logic</strong> — "smart contracts" — code that executes automatically when conditions are met. If Bitcoin is the ledger, Ethereum is the ledger plus a programmable layer that can run financial applications, custody assets, enforce rules — without any company in the middle.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">For someone who understands stocks and bonds — what's the closest analogy?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>Bitcoin behaves most like a scarce commodity with network effects.</strong> It shares traits with gold (hard supply cap, no yield), with growth stocks (volatile, adoption-driven), and with currencies (used for payments). But it fits neatly into none of those boxes.</p>
+          <p>The most useful reframe for traditional investors: your brokerage relies on <strong>DTCC to settle stock trades in T+1</strong> business days. Bitcoin settles in ~10 minutes, 24/7/365, globally, with no counterparty. That settlement finality is valuable in ways traditional finance is only beginning to recognize.</p>
+          <p>Ethereum is closer to infrastructure equity — like owning a stake in the TCP/IP protocol, except it generates revenue (fees) and has programmable utility.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What's the difference between Bitcoin and Ethereum?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>Bitcoin is narrow by design.</strong> It does one thing — store and transfer value — and does it with maximum simplicity and security. Its creator Satoshi Nakamoto deliberately kept it limited. The supply is fixed at 21M, it runs on Proof of Work (energy-intensive mining), and it changes slowly. That conservatism is a feature, not a bug — it makes Bitcoin predictable and trustworthy as a store of value.</p>
+          <p><strong>Ethereum is a platform.</strong> It switched to Proof of Stake in 2022 (80% energy reduction), supports smart contracts, has thousands of applications built on top of it, and is actively upgrading. Its market cap is ~$238B vs Bitcoin's ~$1.34T. The tradeoff: more flexibility, more complexity, more surface area for bugs and failures.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Is crypto an asset class, a technology, a currency, or something else?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>All three simultaneously, depending on which token you're looking at.</strong> Bitcoin is primarily treated as a speculative asset and emerging store of value by institutional investors. Ethereum is closer to infrastructure — its token is what powers transaction fees across thousands of applications. Stablecoins (USDT, USDC) are currencies in practical use.</p>
+          <p>The top 10 cryptocurrencies include: Bitcoin (store of value), Ethereum (smart contract platform), Tether/USDC (dollar-pegged stablecoins with $258B combined supply), XRP (payments), Solana (high-speed applications). Each has a distinct use case. Treating them as a single "crypto" asset class is like treating the stock market and the bond market and the dollar as a single asset class.</p>
+          <p>Regulatorily, the U.S. is moving toward calling Bitcoin and Ethereum <strong>commodities</strong> (CFTC jurisdiction) and most other tokens <strong>securities or digital commodities</strong> (SEC/CFTC split). The CLARITY Act — pending Senate passage — would codify this distinction.</p>
+        </div></div>
+      </div>
+
+      <div class="sub-label">Top 10 Crypto by Market Cap (Feb 2026)</div>
+      <table class="mini-table">
+        <thead><tr><th>#</th><th>Asset</th><th>Market Cap</th><th>Primary Function</th></tr></thead>
+        <tbody>
+          <tr><td class="amber">1</td><td class="hi">Bitcoin (BTC)</td><td>$1.34T</td><td>Store of value, settlement</td></tr>
+          <tr><td class="amber">2</td><td class="hi">Ethereum (ETH)</td><td>$238B</td><td>Programmable finance platform</td></tr>
+          <tr><td class="amber">3</td><td class="hi">Tether (USDT)</td><td>$184B</td><td>Dollar-pegged stablecoin</td></tr>
+          <tr><td>4</td><td>XRP</td><td>$89B</td><td>Cross-border payments</td></tr>
+          <tr><td>5</td><td>BNB</td><td>$83B</td><td>Exchange utility token</td></tr>
+          <tr><td>6</td><td>USDC</td><td>$74B</td><td>Regulated stablecoin</td></tr>
+          <tr><td>7</td><td>Solana (SOL)</td><td>$47B</td><td>High-speed smart contracts</td></tr>
+          <tr><td>8</td><td>TRON</td><td>$27B</td><td>Stablecoin transfers</td></tr>
+          <tr><td>9</td><td>Dogecoin</td><td>$17B</td><td>Community/meme</td></tr>
+          <tr><td>10</td><td>Bitcoin Cash</td><td>$11B</td><td>Payments variant</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ╔══ SEG 2: WHY IT MATTERS ══╗ -->
+    <div class="segment" id="seg1">
+      <div class="seg-header">
+        <div class="seg-label">Segment 02</div>
+        <div class="seg-title">Why It Matters</div>
+        <div class="seg-goal">Move from "what it is" to "why a serious investor should care"</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card green"><div class="stat-label">Global Crypto Users</div><div class="stat-value">559M</div><div class="stat-sub">9.9% of world population</div></div>
+        <div class="stat-card"><div class="stat-label">Americans Owning Crypto</div><div class="stat-value">30%</div><div class="stat-sub">Up from ~20% in 2023</div></div>
+        <div class="stat-card"><div class="stat-label">Stablecoin Mkt Cap</div><div class="stat-value">$300B+</div><div class="stat-sub">+55% YoY, Jan 2026</div></div>
+        <div class="stat-card blue"><div class="stat-label">Stablecoin Txn Volume</div><div class="stat-value">$33T</div><div class="stat-sub">2025 — exceeded Visa volume</div></div>
+        <div class="stat-card"><div class="stat-label">Tokenized RWAs On-Chain</div><div class="stat-value">$19–36B</div><div class="stat-sub">+300%+ over 3 years</div></div>
+        <div class="stat-card green"><div class="stat-label">BlackRock BUIDL Fund</div><div class="stat-value">$2.9B</div><div class="stat-sub">U.S. Treasuries, on-chain</div></div>
+      </div>
+
+      <div class="sub-label">Q&A Prep</div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Why should someone nearing retirement even pay attention to this space?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>The most important reason isn't Bitcoin's price — it's what's happening to the <strong>underlying financial infrastructure</strong> they depend on. BlackRock, JPMorgan, Goldman Sachs, and BNY Mellon are all actively tokenizing financial instruments on blockchain rails. Nasdaq has filed to allow tokenized stock trading. Your retirement account in 10 years may hold assets that settle on blockchain infrastructure whether you actively chose crypto or not.</p>
+          <p>For direct portfolio exposure, BlackRock's recommendation for a 60/40 portfolio is <strong>1–2% in Bitcoin</strong> — enough to add meaningful asymmetric upside without destabilizing the portfolio. Fidelity suggests 2–5%. The argument isn't "get rich," it's "don't be the last institution to recognize a structural shift."</p>
+          <p>Bitcoin has delivered a long-term Sharpe ratio of <strong>0.96 vs. 0.65 for the S&P 500</strong> — better risk-adjusted returns over the period most institutions have data for. That's not a prediction, but it's not nothing either.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Is crypto more about speculation or infrastructure?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>In 2026 it's genuinely both, and they're separating.</strong> Bitcoin and speculative altcoins are primarily a market phenomenon — priced by sentiment, adoption curves, and macro liquidity. But underneath that market layer, stablecoin and blockchain infrastructure has reached genuine utility scale.</p>
+          <p>Stablecoin transaction volume hit <strong>$33 trillion in 2025</strong> — surpassing Visa's annual volume. Stablecoin issuers are now the 7th-largest purchasers of U.S. government debt. Visa runs 130+ stablecoin card programs across 40 countries. Stripe acquired Bridge (stablecoin infrastructure) for $1.1 billion. These aren't speculative bets — they're operational investments by companies who have examined the technology and chosen to build on it.</p>
+          <p>The honest framing: think of Bitcoin's price as the speculative layer, and stablecoins/tokenization as the infrastructure layer. The infrastructure layer is growing regardless of what Bitcoin does.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">How is blockchain already being used outside crypto trading?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>Financial settlements:</strong> JPMorgan's Kinexys platform processes tokenized fund settlements. Citi Token Services provide 24/7 USD cross-border clearing. Blockchain throughput on major networks now exceeds 3,400 transactions per second — matching Nasdaq — at Layer 2 transaction costs under $0.01 (down from $24 in 2021).</p>
+          <p><strong>Asset tokenization:</strong> BlackRock's BUIDL fund holds $2.9B in U.S. Treasuries on-chain. Franklin Templeton's BENJI fund: $650M. Goldman Sachs and BNY Mellon both launched tokenized money-market funds. McKinsey projects this market reaches <strong>$2 trillion by 2030</strong>.</p>
+          <p><strong>Cross-border payments:</strong> Global remittances total $892B annually with average fees over 6%. Stablecoins reduce this to fractions of a percent. 66% of global stablecoin supply is held in emerging markets, serving underbanked populations.</p>
+          <p><strong>Payments infrastructure:</strong> Treasury Secretary Bessent projects the stablecoin market reaching <strong>$2 trillion by 2028</strong>, positioning dollar-backed stablecoins as America's answer to China's digital yuan.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">If someone ignores crypto entirely — what are they potentially missing?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>Two different things, at two different time horizons. <strong>Short term (2–5 years):</strong> potential asymmetric return from a 1–5% portfolio allocation in an asset with volatile but historically strong risk-adjusted performance, accessible now via regulated ETFs at every major brokerage.</p>
+          <p><strong>Longer term (5–10 years):</strong> the financial system they depend on — settlement, custody, payments, asset management — is being rebuilt on blockchain infrastructure. That transformation is happening whether any individual investor participates or not. The question is whether they understand what's changing.</p>
+          <p>The adoption curve comparison: roughly where the internet was in <strong>1997–2000</strong>. Past proof-of-concept, before full mainstream integration. The people who understood TCP/IP in 1997 weren't all right about individual companies — but they were right about the direction of travel.</p>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ╔══ SEG 3: RISKS ══╗ -->
+    <div class="segment" id="seg2">
+      <div class="seg-header">
+        <div class="seg-label">Segment 03</div>
+        <div class="seg-title">Risks & Misconceptions</div>
+        <div class="seg-goal">Build trust by acknowledging risks openly and with intellectual honesty</div>
+      </div>
+
+      <div class="alert warn"><div class="alert-icon">⚠</div><div>Bybit hack (Feb 2025): <strong>$1.5B stolen</strong> — largest crypto heist ever. North Korea's Lazarus Group stole $2.02B total in 2025. Total industry theft: $3.4B. Security risk is real and persistent.</div></div>
+
+      <div class="stat-grid">
+        <div class="stat-card red"><div class="stat-label">SBF Sentence</div><div class="stat-value">25 yrs</div><div class="stat-sub">FTX fraud, ~$8B customer funds</div></div>
+        <div class="stat-card red"><div class="stat-label">Do Kwon Sentence</div><div class="stat-value">15 yrs</div><div class="stat-sub">Terra/Luna — $40–60B collapse</div></div>
+        <div class="stat-card"><div class="stat-label">FTX Creditor Recovery</div><div class="stat-value">120%</div><div class="stat-sub">Of petition-date value; BTC now 4× higher</div></div>
+        <div class="stat-card"><div class="stat-label">2025 Crypto Theft</div><div class="stat-value">$3.4B</div><div class="stat-sub">Concentrated in fewer, larger breaches</div></div>
+        <div class="stat-card red"><div class="stat-label">BTC–Nasdaq Correlation</div><div class="stat-value">0.35–0.60</div><div class="stat-sub">No longer uncorrelated hedge</div></div>
+        <div class="stat-card"><div class="stat-label">Tether Rating</div><div class="stat-value">"Weak"</div><div class="stat-sub">S&P 5/5; 12.5% volatile reserves</div></div>
+      </div>
+
+      <div class="sub-label">Q&A Prep</div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What have we learned from FTX and the 2022 crisis?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>The FTX/Terra/Celsius cluster of failures in 2022–2023 taught the industry three harsh lessons. <strong>First: custody is everything.</strong> FTX commingled customer funds with its proprietary trading arm — a practice illegal in traditional finance that went undetected because there was no regulation requiring segregation. The lesson: never hold crypto on an exchange you don't need to.</p>
+          <p><strong>Second: "algorithmic" stablecoins are not stablecoins.</strong> Terra/Luna's UST was backed by circular logic — its peg was maintained by minting/burning a volatile token. When confidence broke, the death spiral wiped $40–60 billion in days. The $300B stablecoin market today is overwhelmingly fiat-backed (Tether, USDC), a direct response to this failure.</p>
+          <p><strong>Third: counterparty concentration is catastrophic.</strong> Celsius, Voyager, BlockFi — all failed partly because they concentrated exposure to a single counterparty (often Three Arrows Capital) that blew up first. Both SBF (25 years) and Do Kwon (15 years) are now imprisoned. The legal deterrent is real.</p>
+          <p>The structural improvements: regulated ETFs with institutional-grade custody (Coinbase Custody), GENIUS Act requiring 100% reserve backing for stablecoins, improved DeFi collateralization. The February 2026 market selloff showed only $53M in near-liquidations vs. $340M in a comparable 2025 event — clear de-leveraging.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Is crypto still the "Wild West" or is it maturing?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>Meaningfully maturing, but maturity is relative. The Wild West analogy was accurate in 2021. Today's reality is more nuanced.</p>
+          <p><strong>What has genuinely improved:</strong> Spot ETFs with institutional custody bring the same safeguards as equity ETFs. GENIUS Act provides a federal stablecoin framework. SEC enforcement has shifted from "regulate by enforcement" to formal rulemaking under Chairman Atkins. The major fraudsters are imprisoned. DeFi protocols showed remarkable resilience in 2026's correction. 10 of 12 U.S. Bitcoin ETFs use Coinbase Custody as their custodian.</p>
+          <p><strong>What remains genuinely risky:</strong> North Korea stole $2.02B in crypto in 2025 — a state-level adversary that will not stop. The Bybit hack ($1.5B, February 2025) used social engineering rather than technical exploits, making even sophisticated operators vulnerable. Tether ($184B, 12.5% volatile reserves) is a systemic risk point. Market structure legislation (CLARITY Act) hasn't passed the Senate. Correlations with equities have increased, reducing diversification value.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What are the biggest risks investors misunderstand?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>1. Custodial risk vs. price risk.</strong> Most retail investors focus on price volatility. The more serious risk is losing access entirely — either through exchange failure, forgotten private keys, or hacks. Approximately 15% of all Bitcoin is permanently lost due to lost keys. "Not your keys, not your coins" is a genuine principle, not a slogan.</p>
+          <p><strong>2. Correlation is higher than marketed.</strong> Bitcoin's correlation with the Nasdaq 100 reached 0.35–0.60, and its 6-month rolling correlation with tech stocks spiked to 92% in September 2025. The "uncorrelated hedge" narrative is weakening. In a 2022-style risk-off environment, Bitcoin and equities may fall together.</p>
+          <p><strong>3. Stablecoin systemic risk.</strong> Tether ($184B) is the single most systemically important entity in crypto. It holds 12.5% of reserves in Bitcoin, gold, and secured loans — volatile assets. An S&P "Weak" rating. Attestations rather than full audits. An active DOJ investigation. A Tether de-peg event would cascade through every crypto market instantly.</p>
+          <p><strong>4. Tax complexity.</strong> Every crypto trade, swap, and DeFi interaction is a taxable event under IRS Notice 2014-21. Many retail investors don't realize they owe capital gains on altcoin-to-altcoin swaps even if they never converted to dollars. The wash sale rule currently doesn't apply to crypto — a unique advantage — but it's being debated legislatively.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What would make you bearish on crypto long-term?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>A few scenarios genuinely concern me. <strong>Quantum computing at scale</strong> would break the elliptic curve cryptography underlying Bitcoin's private key system. This is likely decades away and Bitcoin's protocol can upgrade preemptively — but it's not zero risk.</p>
+          <p><strong>Stablecoin systemic collapse.</strong> If Tether broke its peg — even briefly — the cascading liquidations across DeFi and centralized exchanges would be severe. The $300B stablecoin market is the financial plumbing of the entire crypto economy.</p>
+          <p><strong>Political reversal.</strong> The current U.S. administration is crypto-friendly. The November 2026 midterm elections could shift Congressional control. Market structure legislation (CLARITY Act) might not pass. A return to Biden-era SEC enforcement posture would be significantly negative.</p>
+          <p><strong>The four-year cycle may be broken.</strong> Bitcoin historically peaked 12–18 months after each halving. The April 2024 halving led to an October 2025 ATH of $126,210, but since then Bitcoin has corrected 47% while gold surged 65% to $4,970/oz. If institutional flows have smoothed away the halving cycle dynamics, the model many bulls rely on for timing becomes less predictive.</p>
+        </div></div>
+      </div>
+
+      <div class="sub-label">Regulatory Timeline — Key Milestones</div>
+      <table class="mini-table">
+        <thead><tr><th>Date</th><th>Development</th><th>Impact</th></tr></thead>
+        <tbody>
+          <tr><td>Jan 2024</td><td class="hi">Spot Bitcoin ETFs approved</td><td>$63.5B inflows in Year 1</td></tr>
+          <tr><td>Jul 2024</td><td class="hi">Spot Ethereum ETFs approved</td><td>~$13–17B AUM</td></tr>
+          <tr><td>Jan 2025</td><td>Trump EO on Digital Assets</td><td>Created AI/Crypto Czar; banned U.S. CBDC</td></tr>
+          <tr><td>Feb 2025</td><td>SEC drops Coinbase case</td><td>Enforcement posture shift</td></tr>
+          <tr><td>Mar 2025</td><td>Trump establishes SBR</td><td>~198K–328K BTC in reserve (forfeiture)</td></tr>
+          <tr><td>Apr 2025</td><td>SEC Chair Atkins sworn in</td><td>"Project Crypto" formal rulemaking launched</td></tr>
+          <tr><td>Jul 2025</td><td class="hi">GENIUS Act signed</td><td>First federal stablecoin law</td></tr>
+          <tr><td>Oct 2025</td><td>BTC ATH — $126,210</td><td>Post-halving cycle peak</td></tr>
+          <tr><td>Oct 2025</td><td>Solana ETFs launch</td><td>With staking features</td></tr>
+          <tr><td>Dec 2025</td><td class="hi">Vanguard opens to crypto ETFs</td><td>$11T platform unlocked</td></tr>
+          <tr><td>Feb 2026</td><td>BTC: $66,941 (today)</td><td>47% correction, extreme fear (8–13)</td></tr>
+          <tr><td>Jul 2026</td><td>EU MiCA fully enforceable</td><td>50+ firms licensed, €540M+ penalties issued</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ╔══ SEG 4: INSTITUTIONAL ══╗ -->
+    <div class="segment" id="seg3">
+      <div class="seg-header">
+        <div class="seg-label">Segment 04</div>
+        <div class="seg-title">Institutional Adoption & Macro</div>
+        <div class="seg-goal">Position crypto in the broader financial ecosystem</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card green"><div class="stat-label">Bitcoin ETF AUM</div><div class="stat-value">~$90B</div><div class="stat-sub">1.22M+ BTC held (6%+ supply)</div></div>
+        <div class="stat-card green"><div class="stat-label">ETF Cumul. Volume</div><div class="stat-value">~$1.5T</div><div class="stat-sub">Since Jan 2024 launch</div></div>
+        <div class="stat-card blue"><div class="stat-label">Strategy (MSTR) Holdings</div><div class="stat-value">714K BTC</div><div class="stat-sub">Cost: $54.35B (~$76K avg)</div></div>
+        <div class="stat-card"><div class="stat-label">Corporate BTC Holders</div><div class="stat-value">84 co.</div><div class="stat-sub">~1.13M BTC (5.4% supply)</div></div>
+        <div class="stat-card"><div class="stat-label">Ethereum ETF AUM</div><div class="stat-value">$13–17B</div><div class="stat-sub">Launched Jul 2024</div></div>
+        <div class="stat-card"><div class="stat-label">Pending Crypto ETF Filings</div><div class="stat-value">150+</div><div class="stat-sub">35 digital assets covered</div></div>
+      </div>
+
+      <div class="sub-label">Q&A Prep</div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">ETFs, institutional custody, corporate adoption — how significant is that shift?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>The January 2024 spot Bitcoin ETF launch was <strong>the most successful ETF debut in history</strong> — $63.5B in net inflows in Year 1, faster than any previous ETF including gold. Today those ETFs hold ~$90B in assets and over 1.22 million BTC — more than 6% of all Bitcoin that will ever exist, held in regulated institutional wrappers.</p>
+          <p>Vanguard opening its $11 trillion platform to crypto ETFs on December 2, 2025 was the watershed moment. Morgan Stanley's 15,000 financial advisors now proactively recommend crypto. Bank of America wealth advisors began recommending it in early 2026. When the world's largest asset managers move from "we won't touch it" to "here's how to size it," that's a structural shift, not a trend.</p>
+          <p>The institutional ownership data from Q3 2025 13F filings shows <strong>24% of Bitcoin ETF assets are held by institutional 13F filers</strong>, with financial advisors as the largest category — not hedge funds or retail speculators. The money flowing in is largely from traditional wealth management channels.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Are we early, mid-cycle, or late to this innovation?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>For speculative price performance: probably mid-cycle at best. Bitcoin hit $126,210 in October 2025 — that's not an "early" price. The easy money from sub-$1,000 Bitcoin is decades gone.</p>
+          <p>For <strong>infrastructure adoption</strong>: genuinely early. Tokenized real-world assets are at $19–36B against a projected $2T by 2030. The stablecoin market is $300B against a Treasury projection of $2T by 2028. DeFi total value locked is $105B against global financial assets of $900T+. These ratios suggest we're at very early infrastructure adoption.</p>
+          <p>The internet analogy holds: 1997 was "mid-cycle" for internet speculation (two years from the dot-com peak), but genuinely early for internet infrastructure adoption. The Amazons and Googles hadn't yet become what they became. The equivalent question in crypto: which projects survive the next decade to become indispensable infrastructure?</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">How do sovereign nations and central banks factor in?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>U.S. Strategic Bitcoin Reserve:</strong> Trump's March 2025 EO established it in concept, funded by ~198K–328K BTC from law enforcement seizures. However, it has not been formally implemented — it requires Congressional action and Treasury Sec. Bessent says there's no authority to purchase new BTC with public funds. The BITCOIN Act (Lummis) proposes buying 1M BTC over 5 years. Polymarket gives it 31% odds of formal establishment before 2027. State-level: Texas and New Hampshire signed reserve laws.</p>
+          <p><strong>El Salvador</strong> holds 7,565 BTC (~$635M) but revoked Bitcoin's legal tender status in January 2025 as an IMF loan condition — a cautionary tale about sovereign crypto adoption under financial pressure.</p>
+          <p><strong>CBDCs are fracturing geopolitically.</strong> The U.S. banned CBDC development. China's digital yuan processed 3.5B transactions totaling $2.4T and began paying interest on digital wallets in 2026. The EU's digital euro targets first issuance by 2029. 137 countries (98% of global GDP) are exploring CBDCs — but approaches range from privacy-preserving to surveillance tools. The U.S. strategy is essentially: let regulated private stablecoins be America's global digital dollar.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Is Bitcoin digital gold — or is that an oversimplification?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>It's both a useful analogy and a currently stressed one. The shared characteristics: <strong>fixed supply</strong> (21M BTC vs. gold's geological scarcity), <strong>no counterparty risk</strong> (neither is anyone's liability), <strong>self-custody possible</strong>, and increasing institutional recognition as a reserve asset.</p>
+          <p>Where the analogy breaks down in early 2026: <strong>gold is surging to ~$4,970/oz (65% gain in 2025)</strong> while Bitcoin corrected 47% from its ATH. Gold behaves as a hedge when macro risk rises; Bitcoin often sells off with equities. NYDIG's research calls Bitcoin a "liquidity barometer" rather than an inflation hedge — Bitcoin plunged 75% in 2022 when inflation hit 40-year highs while gold held steady. The 5-year correlation between Bitcoin and gold is actually <strong>negative 0.11</strong>.</p>
+          <p>JPMorgan still uses the "digital gold" framing and argues Bitcoin is undervalued relative to gold on a volatility-adjusted basis, projecting $165,000. State Street found that combining Bitcoin and gold in a portfolio (5% each) delivered superior risk-adjusted returns to either alone. Perhaps the honest answer: Bitcoin <em>aspires</em> to be digital gold and has some of its properties, but currently trades more like high-beta tech with gold-like supply constraints.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">How does crypto intersect with AI, fintech, and global payments?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>AI + crypto:</strong> The intersection is moving from hype to real infrastructure. Decentralized AI compute networks (Bittensor, Render Network) allow renting GPU capacity without centralized gatekeepers. AI agents are being given crypto wallets to conduct autonomous on-chain transactions. Vitalik Buterin at ETHDenver 2026 (yesterday) described blockchain as enabling "perfect markets" in an AI economy. Grayscale filed for a Bittensor (TAO) ETF. Crypto VCs say decentralized AI is "in a trough but real opportunities are emerging."</p>
+          <p><strong>Payments infrastructure:</strong> Stablecoin transaction volume ($33T in 2025) already exceeds Visa. Visa supports 130+ stablecoin card programs in 40+ countries with a $4.5B annualized settlement run rate. The Lightning Network (Bitcoin's payment layer) processes 8M+ monthly transactions with a 99%+ success rate and recently settled a <strong>$1M payment in 0.43 seconds</strong>.</p>
+          <p><strong>Fintech:</strong> Stripe paid $1.1B for Bridge (stablecoin infrastructure). PayPal launched its own stablecoin (PYUSD). Robinhood introduced tokenized stocks for European customers. The line between "fintech" and "crypto" is blurring — the infrastructure is converging.</p>
+        </div></div>
+      </div>
+    </div>
+
+    <!-- ╔══ SEG 5: PORTFOLIO ══╗ -->
+    <div class="segment" id="seg4">
+      <div class="seg-header">
+        <div class="seg-label">Segment 05</div>
+        <div class="seg-title">Portfolio & Planning</div>
+        <div class="seg-goal">Bring it back to planning, not speculation</div>
+      </div>
+
+      <div class="alert gold"><div class="alert-icon">★</div><div>Current market: BTC at $66,941, Fear & Greed Index 8–13 (extreme fear). Historically, extreme fear readings have preceded recoveries. This is when cautious accumulation makes more sense than momentum chasing.</div></div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">BlackRock Recommendation</div><div class="stat-value">1–2%</div><div class="stat-sub">For 60/40 portfolio; ≈ 1 "Mag 7" stock</div></div>
+        <div class="stat-card"><div class="stat-label">Fidelity Recommendation</div><div class="stat-value">2–5%</div><div class="stat-sub">Up to 7.5% for younger investors</div></div>
+        <div class="stat-card green"><div class="stat-label">BTC Long-Term Sharpe</div><div class="stat-value">0.96</div><div class="stat-sub">vs. S&P 500 at 0.65 (Fidelity)</div></div>
+        <div class="stat-card red"><div class="stat-label">BTC Annualized Volatility</div><div class="stat-value">~52–54%</div><div class="stat-sub">vs. gold ~15%, equities ~10.5%</div></div>
+        <div class="stat-card blue"><div class="stat-label">Optimal Allocation (Grayscale)</div><div class="stat-value">~5%</div><div class="stat-sub">Monte Carlo Sharpe ratio peak</div></div>
+        <div class="stat-card"><div class="stat-label">Lost Bitcoin (Est.)</div><div class="stat-value">~15%</div><div class="stat-sub">Permanently lost to forgotten keys</div></div>
+      </div>
+
+      <div class="sub-label">Allocation by Investor Profile</div>
+      <table class="mini-table">
+        <thead><tr><th>Profile</th><th>Allocation</th><th>Vehicle</th><th>Approach</th></tr></thead>
+        <tbody>
+          <tr><td class="hi">Conservative (60+)</td><td class="amber">1–2%</td><td>ETFs in retirement acct</td><td>Set, monitor quarterly</td></tr>
+          <tr><td class="hi">Moderate (40–60)</td><td class="amber">2–5%</td><td>ETFs + possible direct</td><td>DCA, rebalance quarterly</td></tr>
+          <tr><td class="hi">Aggressive (20–40)</td><td class="amber">5–7.5%</td><td>Mix ETFs + direct</td><td>DCA, 4+ year horizon</td></tr>
+        </tbody>
+      </table>
+      <div class="alert info" style="margin-top:10px"><div class="alert-icon">ℹ</div><div>Within a crypto allocation: conservative split is <strong>80% BTC / 15% ETH / 5% other</strong>. Bitcoin-first is the expert consensus starting point — longest track record, deepest liquidity, strongest institutional infrastructure.</div></div>
+
+      <div class="sub-label">Q&A Prep</div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">Does crypto belong in a diversified portfolio? What role does it serve?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p>The evidence suggests a small allocation improves the overall portfolio risk-return profile — not because crypto is "safe," but because of <strong>asymmetric return potential and partial non-correlation</strong>. A State Street study found a 60/40 portfolio with 5% Bitcoin and 5% gold delivered an 18.8% compound annual return versus 10% for traditional 60/40. WisdomTree confirmed in February 2026 that "small bitcoin allocations have historically improved portfolio risk/return metrics."</p>
+          <p>The role depends on how you size it. At <strong>1–2%, it's optionality</strong> — you participate in upside without meaningful downside impact on the overall portfolio if it goes to zero. At <strong>3–5%, it's a growth bet</strong> — meaningful enough to matter if the thesis is right. At higher allocations, it starts to dominate portfolio volatility.</p>
+          <p>Bitcoin's Sortino ratio of 1.86 — nearly double its Sharpe ratio — indicates most of its volatility is to the upside. For long-horizon investors who can ride drawdowns without panic-selling, that's an attractive asymmetry.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What's the difference between owning crypto directly vs. through ETFs?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>ETFs (IBIT, FBTC, etc.) — best for most traditional investors:</strong> Simple tax reporting (Form 1099-B), IRA and 401(k) eligibility, professional institutional-grade custody (Coinbase Custody holds most of them), no private key management required. IBIT charges 0.25% annually. Downside: no 24/7 trading, no participation in staking or DeFi yields, and counterparty risk spread across BlackRock, Coinbase, and your brokerage. Available at any brokerage account.</p>
+          <p><strong>Direct ownership ("self-custody") — for those who want full sovereignty:</strong> Eliminates all intermediary counterparty risk — critical lesson from FTX. You can access DeFi, earn staking yields, transact directly. Downside: full security responsibility shifts to you. Lost keys = lost Bitcoin, permanently. SMS 2FA is inadequate — hardware security keys required. Every transaction is a taxable event requiring careful tracking.</p>
+          <p><strong>Practical recommendation:</strong> ETFs in tax-advantaged retirement accounts (especially Roth IRAs — tax-free compounding on a volatile asset is powerful). Consider direct custody for additional exposure once you understand the technology. One major tax advantage of direct ownership: the <strong>wash sale rule doesn't currently apply to crypto</strong>, so you can harvest losses and immediately repurchase — unavailable with stocks.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">What mistakes do retail investors make when entering this space?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>1. Buying on FOMO at cycle peaks.</strong> Bitcoin hit $126,210 in October 2025; many retail investors bought near the top. The current 47% correction is within historical norms for Bitcoin cycles — but investors who bought at the peak and panic-sold at $60,000 realized those losses. Dollar-cost averaging systematically prevents this mistake.</p>
+          <p><strong>2. Overconcentrating in speculative altcoins.</strong> Memecoins and new tokens offer the potential for 10–100× returns and the near-certainty of eventual 90%+ losses. The "long tail" of crypto is a casino. Experienced investors concentrate in BTC/ETH first.</p>
+          <p><strong>3. Security negligence.</strong> SMS-based two-factor authentication can be defeated by SIM-swapping. Hardware security keys (YubiKey, etc.) are the minimum for any meaningful holdings. For significant self-custody, hardware wallets (Ledger, Trezor) are essential.</p>
+          <p><strong>4. Ignoring tax obligations.</strong> The IRS treats every crypto trade, swap, and DeFi interaction as a taxable event. Retail investors routinely underreport, especially on altcoin-to-altcoin swaps. The exchanges report to the IRS via 1099-B now. Crypto tax software (Koinly, TaxBit) is essentially mandatory.</p>
+          <p><strong>5. No exit strategy.</strong> Defining in advance at what price or portfolio percentage you will trim — before the emotion of a bull market — is the difference between realizing gains and giving them back.</p>
+        </div></div>
+      </div>
+
+      <div class="qa-card" onclick="toggleQA(this)">
+        <div class="qa-q"><span class="qa-icon">▶</span><span class="qa-q-text">For someone who's never owned crypto — what's the most prudent way to begin?</span></div>
+        <div class="qa-a"><div class="qa-a-inner">
+          <p><strong>Fidelity's Director of Research says it plainly:</strong> "We think everyone should start their understanding with bitcoin, and perhaps even their first investment." That's the consensus framework. Bitcoin first, everything else later if at all.</p>
+          <p><strong>Step 1:</strong> Decide on a 1–2% target allocation. Don't start with more than you can afford to lose entirely — even if you don't expect to.</p>
+          <p><strong>Step 2:</strong> Open a Roth IRA if you don't have one, or use an existing brokerage account. Buy IBIT (BlackRock Bitcoin ETF) or FBTC (Fidelity's) via dollar-cost averaging — weekly or biweekly purchases over 6–12 months. No special crypto knowledge required.</p>
+          <p><strong>Step 3:</strong> Set a minimum 4-year horizon — one full Bitcoin halving cycle. Expect 50%+ drawdowns. They are historically normal, not signals to sell. The current 47% drawdown from $126,210 to $66,941 is within that band.</p>
+          <p><strong>Step 4:</strong> Once comfortable with the exposure, consider reading more about self-custody and whether moving some holdings to a hardware wallet makes sense for your situation.</p>
+          <p>What you should <strong>not</strong> do as a beginner: buy altcoins, try to time the market, use leverage, or store meaningful funds on a centralized exchange you don't need to use for active trading.</p>
+        </div></div>
+      </div>
+
+      <div class="sub-label">The Numbers That Matter Most — Closing Points</div>
+      <ul class="b-list">
+        <li><strong>$90B in Bitcoin ETF assets</strong> — institutional infrastructure is real and growing</li>
+        <li><strong>$33T in stablecoin transaction volume</strong> — exceeded Visa in 2025; not speculation</li>
+        <li><strong>Fear & Greed at 8–13</strong> (extreme fear today) — historically precedes recoveries</li>
+        <li><strong>Gold up 65% in 2025</strong> while BTC corrected — the "digital gold" thesis under stress, but both can coexist in a portfolio</li>
+        <li><strong>30% of Americans own crypto</strong> — your clients' children may already be in the market</li>
+        <li>The core message: <strong>1–5% via regulated ETFs + DCA + 4-year horizon</strong> = asymmetric risk-reward with bounded downside</li>
+        <li>The biggest risk for cautious investors: not owning too much crypto — owning <em>none</em> while the financial system rebuilds on blockchain rails</li>
+      </ul>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<script>
+  function showSeg(idx, btn) {
+    document.querySelectorAll('.segment').forEach((s,i) => s.classList.toggle('active', i===idx));
+    document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelector('.content').scrollTo(0,0);
+  }
+  function toggleQA(card) {
+    const wasOpen = card.classList.contains('open');
+    // Optionally close others in same segment
+    // card.closest('.segment').querySelectorAll('.qa-card').forEach(c => c.classList.remove('open'));
+    card.classList.toggle('open', !wasOpen);
+  }
+</script>
+</body>
+</html>

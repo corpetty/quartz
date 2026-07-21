@@ -11,3 +11,6 @@ private/
 replit.nix
 .quartz/
 quartz/cli/tui/dist/
+
+# Obsidian smart-connections plugin cache
+.smart-env/

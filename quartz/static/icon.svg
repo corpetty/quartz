@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#161618"/>
+  
+  <!-- Left circle (Prior) -->
+  <circle cx="75" cy="100" r="45" fill="none" stroke="#7b97aa" stroke-width="6" opacity="0.8"/>
+  
+  <!-- Right circle (Likelihood) -->
+  <circle cx="125" cy="100" r="45" fill="none" stroke="#84a59d" stroke-width="6" opacity="0.8"/>
+  
+  <!-- Intersection highlight -->
+  <path d="M100 62 A45 45 0 0 1 100 138 A45 45 0 0 1 100 62" fill="#7b97aa" opacity="0.3"/>
+  
+  <!-- Conditional bar | -->
+  <rect x="96" y="55" width="8" height="90" fill="#ebebec" rx="2"/>
+</svg>

@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Insurance Investment Loop — Deep Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=JetBrains+Mono:wght@400;600&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e17;
+  --bg-secondary: #111827;
+  --bg-card: #151d2e;
+  --bg-card-hover: #1a2540;
+  --accent-red: #ef4444;
+  --accent-orange: #f97316;
+  --accent-amber: #f59e0b;
+  --accent-green: #22c55e;
+  --accent-emerald: #10b981;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #8b5cf6;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #1e293b;
+  --border-light: #2d3a4f;
+  --glow-red: rgba(239, 68, 68, 0.15);
+  --glow-green: rgba(34, 197, 94, 0.15);
+  --glow-blue: rgba(59, 130, 246, 0.15);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Sora', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+.noise-overlay {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999;
+}
+
+/* ——— HERO ——— */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(239,68,68,0.06) 0%, transparent 50%),
+              radial-gradient(ellipse at 70% 30%, rgba(59,130,246,0.04) 0%, transparent 50%),
+              radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.03) 0%, transparent 50%);
+  animation: drift 20s ease-in-out infinite;
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-2%, 1%) rotate(1deg); }
+  66% { transform: translate(1%, -1%) rotate(-0.5deg); }
+}
+
+.hero-content { position: relative; z-index: 2; max-width: 900px; }
+
+.hero-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.2s forwards;
+}
+
+.hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.4s forwards;
+}
+
+.hero h1 .accent { color: var(--accent-red); }
+
+.hero-sub {
+  font-size: 1.15rem;
+  color: var(--text-secondary);
+  font-weight: 300;
+  max-width: 650px;
+  margin: 0 auto 2.5rem;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.6s forwards;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.8s 0.8s forwards;
+}
+
+.hero-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.75rem;
+  text-align: center;
+  min-width: 180px;
+}
+
+.hero-stat .num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.8rem;
+  font-weight: 600;
+  display: block;
+}
+
+.hero-stat .num.red { color: var(--accent-red); }
+.hero-stat .num.green { color: var(--accent-green); }
+.hero-stat .num.blue { color: var(--accent-blue); }
+
+.hero-stat .label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 0.25rem;
+}
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  opacity: 0;
+  animation: fadeUp 0.8s 1.2s forwards;
+}
+
+.scroll-hint .arrow {
+  width: 1px;
+  height: 40px;
+  background: linear-gradient(to bottom, var(--accent-red), transparent);
+  animation: pulse-down 2s infinite;
+}
+
+@keyframes pulse-down {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ——— LAYOUT ——— */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+section {
+  padding: 6rem 0;
+  border-top: 1px solid var(--border);
+}
+
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent-blue);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.15;
+  margin-bottom: 1rem;
+}
+
+.section-desc {
+  font-size: 1.05rem;
+  color: var(--text-secondary);
+  max-width: 700px;
+  margin-bottom: 3rem;
+  font-weight: 300;
+}
+
+/* ——— MONEY FLOW VISUALIZATION ——— */
+.flow-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.flow-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.flow-header h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.5rem;
+}
+
+.flow-tabs {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.flow-tab {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'Sora', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: all 0.25s;
+}
+
+.flow-tab:hover { border-color: var(--border-light); color: var(--text-primary); }
+.flow-tab.active {
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+  color: white;
+}
+
+/* Sankey-style flow */
+.flow-diagram {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  min-height: 380px;
+  position: relative;
+}
+
+.flow-source {
+  width: 180px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  z-index: 2;
+}
+
+.flow-source .amount {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.flow-source .label {
+  font-size: 0.75rem;
+  opacity: 0.8;
+  margin-top: 0.25rem;
+}
+
+.flow-middle {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 1rem;
+  min-width: 200px;
+}
+
+.flow-stream {
+  display: flex;
+  align-items: center;
+  margin: 0.35rem 0;
+  position: relative;
+  transition: all 0.4s;
+}
+
+.flow-stream .bar {
+  height: 28px;
+  border-radius: 4px;
+  transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  min-width: 40px;
+}
+
+.flow-stream .bar-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  white-space: nowrap;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.flow-stream .bar-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  margin-left: auto;
+  padding-left: 1rem;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+
+.bar-commission { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.bar-mortality { background: linear-gradient(90deg, #ea580c, #f97316); }
+.bar-admin { background: linear-gradient(90deg, #d97706, #f59e0b); }
+.bar-overhead { background: linear-gradient(90deg, #7c3aed, #8b5cf6); }
+.bar-cashvalue { background: linear-gradient(90deg, #059669, #10b981); }
+
+.flow-dest {
+  width: 160px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.flow-dest-item {
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.flow-dest-item .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ——— TABS ——— */
+.product-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 0.35rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+}
+
+.product-tab {
+  padding: 0.75rem 1.5rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.25s;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  border: none;
+  background: transparent;
+  font-family: 'Sora', sans-serif;
+}
+
+.product-tab:hover { color: var(--text-primary); }
+.product-tab.active {
+  background: var(--bg-card);
+  color: var(--text-primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.4s; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ——— PRODUCT CARDS ——— */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.product-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+
+.product-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+}
+
+.product-card.red::before { background: linear-gradient(90deg, var(--accent-red), var(--accent-orange)); }
+.product-card.blue::before { background: linear-gradient(90deg, var(--accent-blue), var(--accent-cyan)); }
+.product-card.green::before { background: linear-gradient(90deg, var(--accent-green), var(--accent-emerald)); }
+.product-card.purple::before { background: linear-gradient(90deg, var(--accent-purple), var(--accent-blue)); }
+
+.product-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+  transform: translateY(-2px);
+}
+
+.product-card h4 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.product-card .subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.product-card .metric {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem;
+}
+
+.product-card .metric:last-child { border-bottom: none; }
+.product-card .metric .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+  font-size: 0.8rem;
+}
+
+.product-card .metric .val.bad { color: var(--accent-red); }
+.product-card .metric .val.warn { color: var(--accent-amber); }
+.product-card .metric .val.good { color: var(--accent-green); }
+
+/* ——— FEE STACK ——— */
+.fee-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 2rem 0;
+}
+
+.fee-layer {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 1rem;
+  align-items: center;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.fee-layer:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-light);
+}
+
+.fee-layer .name {
+  font-weight: 500;
+  font-size: 0.92rem;
+}
+
+.fee-layer .range {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  color: var(--accent-red);
+  font-weight: 600;
+}
+
+.fee-layer .impact-bar {
+  width: 120px;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.fee-layer .impact-bar .fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.fee-layer .detail {
+  grid-column: 1 / -1;
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  display: none;
+}
+
+.fee-layer.expanded .detail { display: block; animation: fadeIn 0.3s; }
+
+/* ——— CHARTS ——— */
+.chart-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.chart-container h3 {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.chart-container .chart-desc {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.chart-wrapper {
+  position: relative;
+  height: 400px;
+}
+
+.chart-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.chart-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 0.45rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  transition: all 0.2s;
+}
+
+.chart-btn:hover { border-color: var(--border-light); color: var(--text-primary); }
+.chart-btn.active { background: var(--accent-blue); border-color: var(--accent-blue); color: white; }
+
+/* ——— NM SECTION ——— */
+.nm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.nm-stat {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.nm-stat .big {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.nm-stat .small {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ——— COMPARISON TABLE ——— */
+.comparison-wrap {
+  overflow-x: auto;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  min-width: 600px;
+}
+
+.comparison-table thead {
+  background: var(--bg-card);
+}
+
+.comparison-table th {
+  padding: 1rem 1.25rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-table td {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.comparison-table tr:last-child td { border-bottom: none; }
+
+.comparison-table tr:hover td { background: var(--bg-card); }
+
+.comparison-table .highlight {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 600;
+}
+
+.comparison-table .pos { color: var(--accent-green); }
+.comparison-table .neg { color: var(--accent-red); }
+
+/* ——— CALLOUT ——— */
+.callout {
+  border-radius: 14px;
+  padding: 2rem;
+  margin: 2rem 0;
+  position: relative;
+}
+
+.callout.warn {
+  background: rgba(239, 68, 68, 0.06);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.callout.info {
+  background: rgba(59, 130, 246, 0.06);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+}
+
+.callout.good {
+  background: rgba(34, 197, 94, 0.06);
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.callout h4 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.callout p {
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+/* ——— CALCULATOR ——— */
+.calculator {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2.5rem;
+}
+
+.calc-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.calc-group label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.4rem;
+}
+
+.calc-group input, .calc-group select {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+}
+
+.calc-group input:focus, .calc-group select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.calc-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.calc-result {
+  background: var(--bg-secondary);
+  border-radius: 12px;
+  padding: 1.25rem;
+  text-align: center;
+}
+
+.calc-result .val {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: block;
+}
+
+.calc-result .lbl {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.25rem;
+}
+
+/* ——— PROSE ——— */
+.prose {
+  max-width: 800px;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.8;
+}
+
+.prose p { margin-bottom: 1.25rem; }
+.prose strong { color: var(--text-primary); font-weight: 600; }
+
+/* ——— LEGIT USE CASES ——— */
+.use-cases {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.25rem;
+  margin: 2rem 0;
+}
+
+.use-case {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.75rem;
+  transition: all 0.3s;
+  border-left: 3px solid var(--accent-green);
+}
+
+.use-case:hover { background: var(--bg-card-hover); }
+.use-case h4 { font-size: 0.95rem; margin-bottom: 0.5rem; }
+.use-case p { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.6; }
+
+/* ——— FOOTER ——— */
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.footer p {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ——— RESPONSIVE ——— */
+@media (max-width: 768px) {
+  .hero-stats { flex-direction: column; align-items: center; }
+  .flow-diagram { flex-direction: column; min-height: auto; }
+  .flow-source, .flow-dest { width: 100%; }
+  .flow-middle { padding: 1rem 0; }
+  .chart-wrapper { height: 300px; }
+  .fee-layer { grid-template-columns: 1fr auto; }
+  .fee-layer .impact-bar { display: none; }
+  section { padding: 4rem 0; }
+}
+
+/* ——— SCROLLBAR ——— */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* ——— OBSERVER ANIMATIONS ——— */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s, transform 0.7s;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.stagger.visible > *:nth-child(1) { transition-delay: 0.05s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(2) { transition-delay: 0.1s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(3) { transition-delay: 0.15s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(4) { transition-delay: 0.2s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(5) { transition-delay: 0.25s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(6) { transition-delay: 0.3s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(7) { transition-delay: 0.35s; opacity: 1; transform: translateY(0); }
+.stagger.visible > *:nth-child(8) { transition-delay: 0.4s; opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="noise-overlay"></div>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<div class="hero">
+  <div class="hero-content">
+    <div class="hero-label">Financial Analysis Report</div>
+    <h1>The Insurance <span class="accent">Investment Loop</span></h1>
+    <p class="hero-sub">How permanent life insurance products route your premiums through multiple extraction layers — and what it costs you over 30 years.</p>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="num red">50–90%</span>
+        <span class="label">Year 1 Commission</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num red">$0</span>
+        <span class="label">Year 1 Cash Value</span>
+      </div>
+      <div class="hero-stat">
+        <span class="num green">+$370K–$1.1M</span>
+        <span class="label">30yr BTID Advantage</span>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll to explore</span>
+    <div class="arrow"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ SECTION 1: MONEY FLOW ═══════════════ -->
+<section id="flow">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 01 — The Loop Visualized</div>
+      <h2 class="section-title">Where Every Dollar of Your Premium Goes</h2>
+      <p class="section-desc">Select a product type and time period to see how your $12,000 annual premium is allocated across fee layers before reaching your cash value.</p>
+    </div>
+
+    <div class="flow-container reveal">
+      <div class="flow-header">
+        <h3>Premium Allocation Flow</h3>
+        <div class="flow-tabs">
+          <button class="flow-tab active" data-period="year1">Year 1</button>
+          <button class="flow-tab" data-period="years2_10">Years 2–10</button>
+          <button class="flow-tab" data-period="years10plus">Years 10+</button>
+        </div>
+      </div>
+
+      <div class="product-tabs" id="flowProductTabs">
+        <button class="product-tab active" data-product="whole">Whole Life</button>
+        <button class="product-tab" data-product="iul">Indexed UL</button>
+        <button class="product-tab" data-product="vul">Variable UL</button>
+        <button class="product-tab" data-product="ul">Universal Life</button>
+      </div>
+
+      <div class="flow-diagram" id="flowDiagram">
+        <div class="flow-source">
+          <div class="amount">$12,000</div>
+          <div class="label">Annual Premium</div>
+        </div>
+        <div class="flow-middle" id="flowBars">
+          <!-- Populated by JS -->
+        </div>
+        <div class="flow-dest" id="flowDest">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="callout warn reveal">
+      <h4>⚠️ The Hidden Year-1 Shock</h4>
+      <p>For a typical whole life policy, up to <strong>90% of your first-year premium</strong> goes to agent commissions and overhead — leaving <strong>$0 in accessible cash value</strong>. Even in the best case, you're looking at 6–15 years just to break even on premiums paid. This is the core of the "loop" — your money passes through the insurance company's extraction gauntlet before a fraction becomes yours.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 2: FEE STACK ═══════════════ -->
+<section id="fees">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 02 — The Fee Gauntlet</div>
+      <h2 class="section-title">Eight Fee Layers Compounding Against You</h2>
+      <p class="section-desc">Each fee is individually defensible. Stacked together, they create a 2–4% annual drag that devastates long-term returns. Click any layer to expand details.</p>
+    </div>
+
+    <div class="fee-stack reveal stagger" id="feeStack">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="chart-container reveal">
+      <h3>Cumulative Fee Drag Over 30 Years</h3>
+      <p class="chart-desc">Annual fee percentages compound dramatically over time. A 3% annual drag on a $12,000/year investment costs over $400,000 in lost growth over 30 years.</p>
+      <div class="chart-wrapper">
+        <canvas id="feeDragChart"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 3: PRODUCT COMPARISON ═══════════════ -->
+<section id="products">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 03 — Product Deep Dive</div>
+      <h2 class="section-title">How Each Product Runs the Loop Differently</h2>
+      <p class="section-desc">Four variations of the same fundamental structure — each with its own tradeoffs, hidden costs, and marketing angles.</p>
+    </div>
+
+    <div class="product-grid reveal stagger">
+      <div class="product-card red">
+        <h4>Whole Life</h4>
+        <div class="subtitle">Fixed premiums, guaranteed cash value, dividends</div>
+        <div class="metric"><span>Transparency</span><span class="val bad">Opaque</span></div>
+        <div class="metric"><span>Year 1 Commission</span><span class="val bad">50–90%</span></div>
+        <div class="metric"><span>Typical IRR (20yr)</span><span class="val warn">2.4–4.5%</span></div>
+        <div class="metric"><span>Guaranteed Return</span><span class="val good">Yes (low)</span></div>
+        <div class="metric"><span>Investment Control</span><span class="val bad">None</span></div>
+        <div class="metric"><span>Lapse Rate (10yr)</span><span class="val bad">~45%</span></div>
+      </div>
+
+      <div class="product-card blue">
+        <h4>Universal Life (UL)</h4>
+        <div class="subtitle">Flexible premiums, declared interest rate</div>
+        <div class="metric"><span>Transparency</span><span class="val warn">Moderate</span></div>
+        <div class="metric"><span>Year 1 Commission</span><span class="val bad">40–70%</span></div>
+        <div class="metric"><span>Current Crediting Rate</span><span class="val warn">3–5%</span></div>
+        <div class="metric"><span>Guaranteed Minimum</span><span class="val warn">2–3%</span></div>
+        <div class="metric"><span>Investment Control</span><span class="val bad">None</span></div>
+        <div class="metric"><span>COI Risk</span><span class="val bad">Escalating</span></div>
+      </div>
+
+      <div class="product-card purple">
+        <h4>Indexed UL (IUL)</h4>
+        <div class="subtitle">Index-linked returns with caps &amp; floors</div>
+        <div class="metric"><span>Transparency</span><span class="val warn">Moderate</span></div>
+        <div class="metric"><span>Year 1 Commission</span><span class="val bad">30–50%</span></div>
+        <div class="metric"><span>Typical Cap Rate</span><span class="val warn">8–12%</span></div>
+        <div class="metric"><span>Floor</span><span class="val good">0% (no loss)</span></div>
+        <div class="metric"><span>Avg Crediting (hist.)</span><span class="val warn">5.8–6.4%</span></div>
+        <div class="metric"><span>Cap Guaranteed?</span><span class="val bad">No</span></div>
+      </div>
+
+      <div class="product-card green">
+        <h4>Variable UL (VUL)</h4>
+        <div class="subtitle">Sub-account investing, full market exposure</div>
+        <div class="metric"><span>Transparency</span><span class="val good">Highest</span></div>
+        <div class="metric"><span>Year 1 Commission</span><span class="val bad">20–45%</span></div>
+        <div class="metric"><span>M&E Charges</span><span class="val bad">0.55–0.90%</span></div>
+        <div class="metric"><span>Fund Expense Ratios</span><span class="val bad">0.10–0.94%</span></div>
+        <div class="metric"><span>Investment Control</span><span class="val good">Full</span></div>
+        <div class="metric"><span>Downside Risk</span><span class="val bad">Full market</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 4: NM DEEP DIVE ═══════════════ -->
+<section id="nm">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 04 — Northwestern Mutual</div>
+      <h2 class="section-title">Behind the Curtain at America's Largest Life Insurer</h2>
+      <p class="section-desc">NM's scale and stability are real — but the gap between marketing claims and actual policyholder returns tells a different story.</p>
+    </div>
+
+    <div class="nm-grid reveal stagger">
+      <div class="nm-stat">
+        <span class="big" style="color: var(--accent-blue)">$700B</span>
+        <span class="small">Total Assets</span>
+      </div>
+      <div class="nm-stat">
+        <span class="big" style="color: var(--accent-cyan)">5.1M</span>
+        <span class="small">Clients</span>
+      </div>
+      <div class="nm-stat">
+        <span class="big" style="color: var(--accent-green)">$9.2B</span>
+        <span class="small">2026 Dividend Payout</span>
+      </div>
+      <div class="nm-stat">
+        <span class="big" style="color: var(--accent-amber)">155</span>
+        <span class="small">Years of Dividends</span>
+      </div>
+      <div class="nm-stat">
+        <span class="big" style="color: var(--accent-red)">5.75%</span>
+        <span class="small">2026 Dividend Rate</span>
+      </div>
+      <div class="nm-stat">
+        <span class="big" style="color: var(--accent-red)">Lowest</span>
+        <span class="small">Among Major Mutuals</span>
+      </div>
+    </div>
+
+    <div class="chart-container reveal">
+      <h3>NM Dividend Rate vs. Competitors (2026)</h3>
+      <p class="chart-desc">Despite record total payouts, NM's per-policy dividend interest rate trails every major mutual competitor — reflecting their enormous base, not superior returns.</p>
+      <div class="chart-wrapper" style="height:300px;">
+        <canvas id="dividendChart"></canvas>
+      </div>
+    </div>
+
+    <div class="callout warn reveal">
+      <h4>⚠️ Real-World Policy Performance</h4>
+      <p>An actual NM whole life policy examined after 10 years showed an <strong>IRR of -4.45%</strong> vs. the illustrated -1.05%. A separate Bogleheads analysis of a $30K/year policy found a <strong>20-year surrender value IRR of just 2.39%</strong>. NM's own disclosure states: the dividend interest rate "is not the rate of return on a policy." As one Bogleheads member summarized: <strong>"What you get is bonds minus 2% fees."</strong></p>
+    </div>
+
+    <div class="prose reveal" style="margin-top: 2rem;">
+      <p><strong>The captive agent model:</strong> NM financial representatives are contractually required to sell primarily NM products. A November 2025 Guardian investigation found that <strong>20 of 21 sources</strong> said they were instructed to always recommend whole life insurance — even to young people without dependents. Only <strong>13% of new representatives survive past five years</strong>. The title "Financial Representative" is deliberately vague — only those with "Advisor" in their title provide fiduciary investment advisory services, and even then, not when selling insurance products.</p>
+      <p><strong>Commission incentives:</strong> On a $30,000/year whole life policy, year-one cash value was only $3,102 — meaning roughly <strong>90% of the first-year premium</strong> went to commissions, issue costs, and overhead. Agents also receive production bonuses, retirement contributions, health insurance tied to sales, and incentive trips.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 5: OPPORTUNITY COST ═══════════════ -->
+<section id="opportunity">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 05 — The Wealth Gap</div>
+      <h2 class="section-title">30-Year Opportunity Cost Analysis</h2>
+      <p class="section-desc">The same $1,000/month deployed two different ways produces dramatically different outcomes. Use the interactive calculator below.</p>
+    </div>
+
+    <div class="calculator reveal">
+      <h3 style="font-family:'DM Serif Display',serif; font-size:1.3rem; margin-bottom: 1.5rem;">Buy Term & Invest the Difference Calculator</h3>
+      <div class="calc-inputs">
+        <div class="calc-group">
+          <label>Monthly Budget</label>
+          <input type="number" id="calcBudget" value="1000" min="100" step="100">
+        </div>
+        <div class="calc-group">
+          <label>Term Insurance Cost / Month</label>
+          <input type="number" id="calcTerm" value="100" min="10" step="10">
+        </div>
+        <div class="calc-group">
+          <label>Investment Return (%)</label>
+          <input type="number" id="calcReturn" value="8" min="1" max="15" step="0.5">
+        </div>
+        <div class="calc-group">
+          <label>Time Horizon (Years)</label>
+          <input type="number" id="calcYears" value="30" min="5" max="40" step="1">
+        </div>
+        <div class="calc-group">
+          <label>Whole Life IRR (%)</label>
+          <input type="number" id="calcWLIrr" value="4" min="1" max="8" step="0.5">
+        </div>
+      </div>
+      <div class="calc-results" id="calcResults">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <div class="chart-container reveal" style="margin-top: 2rem;">
+      <h3>Wealth Accumulation: Whole Life vs. BTID</h3>
+      <p class="chart-desc">Interactive 30-year projection. Adjust the calculator above to update this chart in real-time.</p>
+      <div class="chart-wrapper">
+        <canvas id="wealthChart"></canvas>
+      </div>
+    </div>
+
+    <div class="comparison-wrap reveal">
+      <table class="comparison-table">
+        <thead>
+          <tr>
+            <th>Scenario</th>
+            <th>30-Year Value</th>
+            <th>vs. Whole Life</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>NM Whole Life</strong> (mid estimate)</td>
+            <td class="highlight">~$650,000</td>
+            <td class="highlight">Baseline</td>
+          </tr>
+          <tr>
+            <td>BTID @ 10% return</td>
+            <td class="highlight pos">~$1,776,535</td>
+            <td class="highlight pos">+$1,126,535 (+173%)</td>
+          </tr>
+          <tr>
+            <td>BTID @ 8% return</td>
+            <td class="highlight pos">~$1,223,588</td>
+            <td class="highlight pos">+$573,588 (+88%)</td>
+          </tr>
+          <tr>
+            <td>BTID @ 7% return</td>
+            <td class="highlight pos">~$1,020,179</td>
+            <td class="highlight pos">+$370,179 (+57%)</td>
+          </tr>
+          <tr>
+            <td>BTID @ 6% return</td>
+            <td class="highlight pos">~$854,078</td>
+            <td class="highlight pos">+$204,078 (+31%)</td>
+          </tr>
+          <tr>
+            <td><em>Break-even return needed</em></td>
+            <td class="highlight" style="color: var(--accent-amber);">~4.5–5%</td>
+            <td class="highlight" style="color: var(--text-muted);">S&P avg: 10.68%</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 6: INFINITE BANKING ═══════════════ -->
+<section id="ibc">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 06 — The Infinite Banking Myth</div>
+      <h2 class="section-title">"Be Your Own Bank" — Dissected</h2>
+    </div>
+
+    <div class="prose reveal">
+      <p>The Infinite Banking Concept (IBC) tells you to overfund a whole life policy, then borrow against the cash value for purchases — "recapturing" interest you'd pay to banks. <strong>Here's the mechanical reality:</strong></p>
+      <p>When you take a policy loan, the money <strong>does not come from your policy</strong>. It comes from the insurer's general fund, using your cash value as collateral. The insurer charges <strong>5–8% interest</strong>. Your cash value continues earning dividends separately, but you're paying interest to a corporation — not to yourself.</p>
+      <p>The endgame risk is severe: if your loan balance approaches your cash value, the policy may lapse, triggering a <strong>"tax bomb"</strong> — all accumulated gains become immediately taxable as ordinary income, with no remaining cash value to pay the bill.</p>
+      <p>According to the Society of Actuaries, <strong>~80% of whole life policies are surrendered before death</strong>, and <strong>45% are abandoned within 10 years</strong>. The vast majority never realize the theoretical benefits that sales illustrations project.</p>
+    </div>
+
+    <div class="callout info reveal" style="margin-top: 2rem;">
+      <h4>ℹ️ The Loan Mechanics Decoded</h4>
+      <p><strong>Step 1:</strong> You pay premiums into whole life → cash value grows slowly (after fees). <strong>Step 2:</strong> You request a "policy loan" → insurer lends from their general fund at 5–8%. <strong>Step 3:</strong> Your cash value is collateral, still earning ~4–5% dividends. <strong>Step 4:</strong> You pay interest to the insurance company, not yourself. <strong>Step 5:</strong> If you don't repay, outstanding loan + interest reduces your death benefit and may lapse the policy. The "arbitrage" between loan rate and dividend rate is thin to non-existent after expenses.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ SECTION 7: LEGITIMATE USES ═══════════════ -->
+<section id="legitimate">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Section 07 — Fair Assessment</div>
+      <h2 class="section-title">When These Products Genuinely Make Sense</h2>
+      <p class="section-desc">Despite structural criticisms, specific high-net-worth and estate planning scenarios justify permanent insurance — even fee-only fiduciaries agree.</p>
+    </div>
+
+    <div class="use-cases reveal stagger">
+      <div class="use-case">
+        <h4>🏛️ Estate Tax Liquidity (ILIT)</h4>
+        <p>Estates near the federal exemption (~$13.99M, potentially dropping to ~$7M in 2026) use Irrevocable Life Insurance Trusts to create liquidity for 40% estate taxes without forcing heirs to sell businesses or real estate.</p>
+      </div>
+      <div class="use-case">
+        <h4>♿ Special Needs Trust Funding</h4>
+        <p>Permanent insurance guarantees a death benefit whenever parents die, ensuring lifetime support for a disabled dependent. Term insurance may expire too soon — permanent coverage removes that uncertainty.</p>
+      </div>
+      <div class="use-case">
+        <h4>🏢 Business Succession / Key-Person</h4>
+        <p>Buy-sell agreements funded by life insurance provide immediate liquidity when a partner dies. This prevents forced asset liquidation and ensures business continuity during ownership transitions.</p>
+      </div>
+      <div class="use-case">
+        <h4>💰 Tax Shelter for Ultra-High Earners</h4>
+        <p>Those earning $300K+ who have maxed 401(k), IRA, backdoor Roth, HSA, and mega backdoor Roth can use whole life as an additional tax-sheltered vehicle. The "triple tax advantage" has no equivalent elsewhere.</p>
+      </div>
+      <div class="use-case">
+        <h4>🛡️ Creditor Protection</h4>
+        <p>States like Florida, Texas, and New York provide unlimited exemption for life insurance cash value — valuable for physicians, attorneys, and business owners in high-liability professions.</p>
+      </div>
+      <div class="use-case">
+        <h4>🧠 Behavioral Forced Savings</h4>
+        <p>The average mutual fund investor earned only ~2.5% over 20 years (Dalbar). Many who "buy term and invest the difference" simply spend it instead. Whole life's required premiums function as forced savings.</p>
+      </div>
+    </div>
+
+    <div class="callout good reveal">
+      <h4>✅ The Minimum Threshold</h4>
+      <p>Fee-only planners generally agree: permanent insurance begins making sense at incomes above <strong>$200K–$250K/year</strong>, and <strong>only after all tax-advantaged retirement accounts are fully funded</strong>. For everyone else, buy term and invest the difference in low-cost index funds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<div class="footer">
+  <div class="container">
+    <p>This analysis is for educational purposes only and does not constitute financial advice. Consult a fee-only fiduciary financial advisor for advice specific to your situation. Data sourced from Northwestern Mutual disclosures, industry publications, Kitces.com, NerdWallet, White Coat Investor, and SEC filings. All figures are approximate and subject to individual policy variation.</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════ DATA ═══════════════
+
+const flowData = {
+  whole: {
+    year1: [
+      { label: 'Agent Commission', pct: 70, color: 'bar-commission', range: '50–90%' },
+      { label: 'Mortality / COI', pct: 3, color: 'bar-mortality', range: '2–3%' },
+      { label: 'Admin Fees', pct: 4, color: 'bar-admin', range: '3–5%' },
+      { label: 'Overhead & Profit', pct: 10, color: 'bar-overhead', range: '5–15%' },
+      { label: 'Net Cash Value', pct: 13, color: 'bar-cashvalue', range: '0–25%' },
+    ],
+    years2_10: [
+      { label: 'Agent Commission', pct: 7, color: 'bar-commission', range: '3–10%' },
+      { label: 'Mortality / COI', pct: 5, color: 'bar-mortality', range: '3–7%' },
+      { label: 'Admin Fees', pct: 3, color: 'bar-admin', range: '2–3%' },
+      { label: 'Overhead & Profit', pct: 6, color: 'bar-overhead', range: '5–8%' },
+      { label: 'Net Cash Value', pct: 79, color: 'bar-cashvalue', range: '75–85%' },
+    ],
+    years10plus: [
+      { label: 'Agent Commission', pct: 1, color: 'bar-commission', range: '0–2%' },
+      { label: 'Mortality / COI', pct: 13, color: 'bar-mortality', range: '8–18%' },
+      { label: 'Admin Fees', pct: 2, color: 'bar-admin', range: '1–2%' },
+      { label: 'Overhead & Profit', pct: 4, color: 'bar-overhead', range: '3–5%' },
+      { label: 'Net Cash Value', pct: 80, color: 'bar-cashvalue', range: '75–88%' },
+    ],
+  },
+  iul: {
+    year1: [
+      { label: 'Premium Load', pct: 7, color: 'bar-admin', range: '5–9%' },
+      { label: 'Agent Commission', pct: 40, color: 'bar-commission', range: '30–50%' },
+      { label: 'Cost of Insurance', pct: 3, color: 'bar-mortality', range: '2–3%' },
+      { label: 'Admin / Policy Expenses', pct: 10, color: 'bar-overhead', range: '6–13%' },
+      { label: 'Net Cash Value', pct: 40, color: 'bar-cashvalue', range: '40–60%' },
+    ],
+    years2_10: [
+      { label: 'Premium Load', pct: 5, color: 'bar-admin', range: '4–7%' },
+      { label: 'Agent Commission', pct: 4, color: 'bar-commission', range: '2–5%' },
+      { label: 'Cost of Insurance', pct: 5, color: 'bar-mortality', range: '3–8%' },
+      { label: 'Admin / Policy Expenses', pct: 4, color: 'bar-overhead', range: '3–6%' },
+      { label: 'Net Cash Value', pct: 82, color: 'bar-cashvalue', range: '78–88%' },
+    ],
+    years10plus: [
+      { label: 'Premium Load', pct: 4, color: 'bar-admin', range: '3–5%' },
+      { label: 'Agent Commission', pct: 1, color: 'bar-commission', range: '0–1%' },
+      { label: 'Cost of Insurance', pct: 20, color: 'bar-mortality', range: '10–30%+' },
+      { label: 'Admin / Policy Expenses', pct: 2, color: 'bar-overhead', range: '1–2%' },
+      { label: 'Net Cash Value', pct: 73, color: 'bar-cashvalue', range: '63–85%' },
+    ],
+  },
+  vul: {
+    year1: [
+      { label: 'Agent Commission', pct: 33, color: 'bar-commission', range: '20–45%' },
+      { label: 'M&E Charges', pct: 7, color: 'bar-mortality', range: '0.55–0.90%/yr' },
+      { label: 'Fund Expenses', pct: 5, color: 'bar-admin', range: '0.10–0.94%/yr' },
+      { label: 'COI + Admin', pct: 10, color: 'bar-overhead', range: '8–12%' },
+      { label: 'Net to Sub-Accounts', pct: 45, color: 'bar-cashvalue', range: '40–55%' },
+    ],
+    years2_10: [
+      { label: 'Agent Commission', pct: 5, color: 'bar-commission', range: '2–8%' },
+      { label: 'M&E Charges', pct: 7, color: 'bar-mortality', range: '0.55–0.90%/yr' },
+      { label: 'Fund Expenses', pct: 5, color: 'bar-admin', range: '0.10–0.94%/yr' },
+      { label: 'COI + Admin', pct: 8, color: 'bar-overhead', range: '5–10%' },
+      { label: 'Net to Sub-Accounts', pct: 75, color: 'bar-cashvalue', range: '70–85%' },
+    ],
+    years10plus: [
+      { label: 'Agent Commission', pct: 1, color: 'bar-commission', range: '0–1%' },
+      { label: 'M&E Charges', pct: 7, color: 'bar-mortality', range: '0.55–0.90%/yr' },
+      { label: 'Fund Expenses', pct: 5, color: 'bar-admin', range: '0.10–0.94%/yr' },
+      { label: 'COI + Admin', pct: 15, color: 'bar-overhead', range: '10–20%' },
+      { label: 'Net to Sub-Accounts', pct: 72, color: 'bar-cashvalue', range: '65–80%' },
+    ],
+  },
+  ul: {
+    year1: [
+      { label: 'Agent Commission', pct: 55, color: 'bar-commission', range: '40–70%' },
+      { label: 'Cost of Insurance', pct: 3, color: 'bar-mortality', range: '2–4%' },
+      { label: 'Admin Fees', pct: 7, color: 'bar-admin', range: '5–9%' },
+      { label: 'Overhead', pct: 5, color: 'bar-overhead', range: '3–7%' },
+      { label: 'Net Cash Value', pct: 30, color: 'bar-cashvalue', range: '20–40%' },
+    ],
+    years2_10: [
+      { label: 'Agent Commission', pct: 5, color: 'bar-commission', range: '2–8%' },
+      { label: 'Cost of Insurance', pct: 6, color: 'bar-mortality', range: '3–8%' },
+      { label: 'Admin Fees', pct: 4, color: 'bar-admin', range: '2–5%' },
+      { label: 'Overhead', pct: 5, color: 'bar-overhead', range: '3–7%' },
+      { label: 'Net Cash Value', pct: 80, color: 'bar-cashvalue', range: '75–88%' },
+    ],
+    years10plus: [
+      { label: 'Agent Commission', pct: 1, color: 'bar-commission', range: '0–1%' },
+      { label: 'Cost of Insurance', pct: 22, color: 'bar-mortality', range: '12–35%+' },
+      { label: 'Admin Fees', pct: 2, color: 'bar-admin', range: '1–3%' },
+      { label: 'Overhead', pct: 3, color: 'bar-overhead', range: '2–4%' },
+      { label: 'Net Cash Value', pct: 72, color: 'bar-cashvalue', range: '58–85%' },
+    ],
+  },
+};
+
+const feeData = [
+  { name: 'Premium Loads (Front-End)', range: '5–9%', impact: 70, gradient: 'linear-gradient(90deg, #dc2626, #ef4444)',
+    detail: 'Deducted from each premium payment before any dollar enters your cash value. Essentially a "sales tax" paid to the insurance company. Common in UL and IUL products. Some whole life policies hide this in the opaque premium structure.' },
+  { name: 'First-Year Agent Commission', range: '50–120%', impact: 100, gradient: 'linear-gradient(90deg, #dc2626, #f97316)',
+    detail: 'The single largest cost and primary reason cash value is $0 in year one. On a $12,000 annual premium, agents can earn $6,000–$14,400 in the first year alone. This is why agents are incentivized to sell permanent over term insurance.' },
+  { name: 'Renewal Commissions (Yrs 2–10)', range: '3–10%', impact: 40, gradient: 'linear-gradient(90deg, #ea580c, #f97316)',
+    detail: 'Ongoing trail commissions paid to the selling agent for policy persistence. Creates an incentive for agents to keep you in the policy, not necessarily because it\'s optimal for you.' },
+  { name: 'Cost of Insurance (COI)', range: 'Escalating with age', impact: 85, gradient: 'linear-gradient(90deg, #d97706, #f59e0b)',
+    detail: 'Monthly mortality charge based on your age, health, and "net amount at risk" (death benefit minus cash value). Starts small but grows exponentially — at ages 60–70+, COI can consume most or all of your index credits in an IUL, eroding cash value precisely when you expected to draw income.' },
+  { name: 'Administrative & Policy Fees', range: '$5–15/mo + per-unit', impact: 30, gradient: 'linear-gradient(90deg, #7c3aed, #8b5cf6)',
+    detail: 'Monthly flat fees plus per-$1,000-of-face-amount charges. Small individually, but they compound over decades and are deducted regardless of policy performance.' },
+  { name: 'M&E Risk Charges (VUL)', range: '0.55–0.90%/yr', impact: 55, gradient: 'linear-gradient(90deg, #6366f1, #818cf8)',
+    detail: 'Mortality and Expense risk charge applied annually against VUL sub-account assets. This is in addition to COI charges — it covers the insurer\'s guarantee obligations and profit margin on the variable product wrapper.' },
+  { name: 'Fund Management Fees (VUL)', range: '0.10–0.94%/yr', impact: 50, gradient: 'linear-gradient(90deg, #2563eb, #3b82f6)',
+    detail: 'Expense ratios on the mutual-fund-like sub-accounts inside VUL policies. Compare this to 0.03–0.04% for a Vanguard S&P 500 index fund — that\'s 3–25x more expensive for similar market exposure.' },
+  { name: 'General Account Spread', range: '~1–2% invisible', impact: 65, gradient: 'linear-gradient(90deg, #0891b2, #06b6d4)',
+    detail: 'The difference between what the insurer earns on its bond portfolio and what it credits to your policy. This cost never appears on any statement. NM\'s general account earns ~5%+ while crediting policyholders ~4–4.5% — the spread funds company surplus, reserves, and overhead.' },
+];
+
+// ═══════════════ FLOW DIAGRAM ═══════════════
+
+let currentProduct = 'whole';
+let currentPeriod = 'year1';
+
+function renderFlow() {
+  const data = flowData[currentProduct][currentPeriod];
+  const barsEl = document.getElementById('flowBars');
+  const destEl = document.getElementById('flowDest');
+
+  barsEl.innerHTML = '';
+  destEl.innerHTML = '';
+
+  const destColors = {
+    'bar-commission': { bg: 'rgba(239,68,68,0.1)', dot: '#ef4444', label: 'Insurance Co & Agent' },
+    'bar-mortality': { bg: 'rgba(249,115,22,0.1)', dot: '#f97316', label: 'Mortality Pool' },
+    'bar-admin': { bg: 'rgba(245,158,11,0.1)', dot: '#f59e0b', label: 'Admin & Overhead' },
+    'bar-overhead': { bg: 'rgba(139,92,246,0.1)', dot: '#8b5cf6', label: 'Company Profit' },
+    'bar-cashvalue': { bg: 'rgba(16,185,129,0.1)', dot: '#10b981', label: 'Your Cash Value' },
+  };
+
+  data.forEach((item, i) => {
+    const stream = document.createElement('div');
+    stream.className = 'flow-stream';
+    stream.innerHTML = `
+      <div class="bar ${item.color}" style="width: 0%; flex-shrink:0;">
+        <span class="bar-label">${item.label}</span>
+      </div>
+      <span class="bar-value">$${Math.round(12000 * item.pct / 100).toLocaleString()} (${item.range})</span>
+    `;
+    barsEl.appendChild(stream);
+
+    setTimeout(() => {
+      stream.querySelector('.bar').style.width = `${Math.max(item.pct, 8)}%`;
+    }, 100 + i * 80);
+  });
+
+  const destMap = {};
+  data.forEach(item => {
+    const key = item.color === 'bar-cashvalue' ? 'bar-cashvalue' :
+                item.color === 'bar-mortality' ? 'bar-mortality' :
+                item.color === 'bar-overhead' || item.color === 'bar-admin' ? 'bar-admin' : 'bar-commission';
+    if (!destMap[key]) destMap[key] = 0;
+    destMap[key] += item.pct;
+  });
+
+  Object.entries(destMap).forEach(([key, pct]) => {
+    const info = destColors[key] || destColors['bar-admin'];
+    const el = document.createElement('div');
+    el.className = 'flow-dest-item';
+    el.style.background = info.bg;
+    el.innerHTML = `<span class="dot" style="background:${info.dot}"></span>${info.label}`;
+    destEl.appendChild(el);
+  });
+}
+
+document.querySelectorAll('.flow-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.flow-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentPeriod = tab.dataset.period;
+    renderFlow();
+  });
+});
+
+document.querySelectorAll('#flowProductTabs .product-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('#flowProductTabs .product-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentProduct = tab.dataset.product;
+    renderFlow();
+  });
+});
+
+renderFlow();
+
+// ═══════════════ FEE STACK ═══════════════
+
+const feeStackEl = document.getElementById('feeStack');
+feeData.forEach((fee, i) => {
+  const el = document.createElement('div');
+  el.className = 'fee-layer';
+  el.innerHTML = `
+    <div class="name">${fee.name}</div>
+    <div class="range">${fee.range}</div>
+    <div class="impact-bar"><div class="fill" style="width: 0%; background: ${fee.gradient};"></div></div>
+    <div class="detail">${fee.detail}</div>
+  `;
+  el.addEventListener('click', () => {
+    el.classList.toggle('expanded');
+  });
+  feeStackEl.appendChild(el);
+
+  setTimeout(() => {
+    el.querySelector('.fill').style.width = `${fee.impact}%`;
+  }, 300 + i * 100);
+});
+
+// ═══════════════ CHARTS ═══════════════
+
+Chart.defaults.color = '#94a3b8';
+Chart.defaults.borderColor = '#1e293b';
+Chart.defaults.font.family = "'Sora', sans-serif";
+
+// Fee Drag Chart
+const feeDragCtx = document.getElementById('feeDragChart').getContext('2d');
+function computeGrowth(annual, rate, years) {
+  const vals = [];
+  let total = 0;
+  for (let y = 1; y <= years; y++) {
+    total = (total + annual) * (1 + rate);
+    vals.push(Math.round(total));
+  }
+  return vals;
+}
+
+const years30 = Array.from({length:30}, (_, i) => `Yr ${i+1}`);
+new Chart(feeDragCtx, {
+  type: 'line',
+  data: {
+    labels: years30,
+    datasets: [
+      {
+        label: 'Index Fund (0.04% fee)',
+        data: computeGrowth(12000, 0.0796, 30),
+        borderColor: '#22c55e',
+        backgroundColor: 'rgba(34,197,94,0.08)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 0,
+      },
+      {
+        label: 'Insurance Product (~3% drag)',
+        data: computeGrowth(12000, 0.05, 30),
+        borderColor: '#ef4444',
+        backgroundColor: 'rgba(239,68,68,0.08)',
+        fill: true,
+        tension: 0.3,
+        borderWidth: 2.5,
+        pointRadius: 0,
+      },
+    ],
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        borderColor: '#334155',
+        borderWidth: 1,
+        padding: 12,
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`
+        }
+      }
+    },
+    scales: {
+      y: {
+        ticks: { callback: v => `$${(v/1000).toFixed(0)}K` },
+        grid: { color: 'rgba(30,41,59,0.5)' },
+      },
+      x: {
+        grid: { display: false },
+        ticks: { maxTicksLimit: 10 },
+      }
+    }
+  }
+});
+
+// Dividend Comparison Chart
+const divCtx = document.getElementById('dividendChart').getContext('2d');
+new Chart(divCtx, {
+  type: 'bar',
+  data: {
+    labels: ['MassMutual', 'New York Life', 'Guardian', 'Penn Mutual', 'NW Mutual'],
+    datasets: [{
+      label: '2026 Dividend Rate',
+      data: [6.60, 6.40, 6.25, 6.22, 5.75],
+      backgroundColor: ['#3b82f6', '#3b82f6', '#3b82f6', '#3b82f6', '#ef4444'],
+      borderRadius: 6,
+      barPercentage: 0.65,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e293b',
+        callbacks: { label: ctx => `${ctx.parsed.x}%` }
+      }
+    },
+    scales: {
+      x: {
+        min: 5,
+        max: 7,
+        ticks: { callback: v => `${v}%` },
+        grid: { color: 'rgba(30,41,59,0.5)' },
+      },
+      y: {
+        grid: { display: false },
+        ticks: { font: { size: 13, weight: '500' } },
+      }
+    }
+  }
+});
+
+// Wealth Comparison Chart
+const wealthCtx = document.getElementById('wealthChart').getContext('2d');
+let wealthChart;
+
+function buildWealthChart() {
+  const budget = parseFloat(document.getElementById('calcBudget').value) || 1000;
+  const termCost = parseFloat(document.getElementById('calcTerm').value) || 100;
+  const returnRate = parseFloat(document.getElementById('calcReturn').value) || 8;
+  const years = parseInt(document.getElementById('calcYears').value) || 30;
+  const wlIrr = parseFloat(document.getElementById('calcWLIrr').value) || 4;
+
+  const investMonthly = budget - termCost;
+  const annualInvest = investMonthly * 12;
+  const annualWL = budget * 12;
+
+  const labels = [];
+  const btidData = [];
+  const wlData = [];
+  let btidTotal = 0;
+  let wlTotal = 0;
+
+  for (let y = 1; y <= years; y++) {
+    labels.push(`Yr ${y}`);
+    btidTotal = (btidTotal + annualInvest) * (1 + returnRate / 100);
+    // WL: 0 first year, then gradual build
+    if (y === 1) {
+      wlTotal = annualWL * 0.05;
+    } else if (y <= 5) {
+      wlTotal = (wlTotal + annualWL) * (1 + wlIrr / 100) * 0.85;
+    } else {
+      wlTotal = (wlTotal + annualWL) * (1 + wlIrr / 100) * 0.95;
+    }
+    btidData.push(Math.round(btidTotal));
+    wlData.push(Math.round(wlTotal));
+  }
+
+  // Update results
+  const gap = btidTotal - wlTotal;
+  const pctGap = ((gap / wlTotal) * 100).toFixed(0);
+  document.getElementById('calcResults').innerHTML = `
+    <div class="calc-result">
+      <span class="val" style="color: var(--accent-green)">$${Math.round(btidTotal).toLocaleString()}</span>
+      <span class="lbl">BTID Portfolio Value</span>
+    </div>
+    <div class="calc-result">
+      <span class="val" style="color: var(--accent-amber)">$${Math.round(wlTotal).toLocaleString()}</span>
+      <span class="lbl">Whole Life Cash Value</span>
+    </div>
+    <div class="calc-result">
+      <span class="val" style="color: var(--accent-red)">+$${Math.round(gap).toLocaleString()}</span>
+      <span class="lbl">BTID Advantage</span>
+    </div>
+    <div class="calc-result">
+      <span class="val" style="color: var(--accent-red)">+${pctGap}%</span>
+      <span class="lbl">Percentage Gain</span>
+    </div>
+  `;
+
+  if (wealthChart) wealthChart.destroy();
+  wealthChart = new Chart(wealthCtx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: `BTID @ ${returnRate}%`,
+          data: btidData,
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.08)',
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2.5,
+          pointRadius: 0,
+        },
+        {
+          label: `Whole Life (~${wlIrr}% IRR)`,
+          data: wlData,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.08)',
+          fill: true,
+          tension: 0.3,
+          borderWidth: 2.5,
+          pointRadius: 0,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { position: 'top', labels: { usePointStyle: true, padding: 20, font: { size: 12 } } },
+        tooltip: {
+          backgroundColor: '#1e293b',
+          borderColor: '#334155',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: ctx => `${ctx.dataset.label}: $${ctx.parsed.y.toLocaleString()}`
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: { callback: v => v >= 1000000 ? `$${(v/1000000).toFixed(1)}M` : `$${(v/1000).toFixed(0)}K` },
+          grid: { color: 'rgba(30,41,59,0.5)' },
+        },
+        x: {
+          grid: { display: false },
+          ticks: { maxTicksLimit: 10 },
+        }
+      }
+    }
+  });
+}
+
+// Bind calculator inputs
+document.querySelectorAll('.calc-group input').forEach(input => {
+  input.addEventListener('input', buildWealthChart);
+});
+
+buildWealthChart();
+
+// ═══════════════ SCROLL REVEAL ═══════════════
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+</script>
+</body>
+</html>

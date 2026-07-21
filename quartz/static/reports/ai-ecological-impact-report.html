@@ -1,0 +1,1944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Compute Buildout and Its Costs — A Sober Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..900,0..100,0..1;1,9..144,300..900,0..100,0..1&family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+/* =========================================================
+   DESIGN SYSTEM
+   ========================================================= */
+:root {
+  --paper:       #f2ede2;
+  --paper-warm:  #ebe4d5;
+  --paper-deep:  #e1d9c6;
+  --ink:         #15141b;
+  --ink-soft:    #2b2832;
+  --ink-muted:   #5a544b;
+  --ink-quiet:   #8a8173;
+  --rule:        #c9bfa8;
+  --rule-soft:   #ddd3bb;
+  --accent-warn: #a83c1e;  /* burnt sienna — for rising emissions, critique */
+  --accent-cool: #2f5d3e;  /* forest — for clean energy, corrections */
+  --accent-gold: #8b6914;  /* ochre — for highlights */
+  --accent-ink:  #1e2a44;  /* slate blue — secondary data */
+  --measure:     68ch;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'IBM Plex Serif', Georgia, serif;
+  --font-sans:    'IBM Plex Sans', -apple-system, sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.65;
+  font-weight: 400;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(168, 60, 30, 0.02) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(47, 93, 62, 0.02) 0%, transparent 40%);
+  background-attachment: fixed;
+}
+
+/* Subtle paper grain */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.1 0 0 0 0 0.09 0 0 0 0 0.07 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =========================================================
+   TYPOGRAPHY
+   ========================================================= */
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+h1 {
+  font-variation-settings: "SOFT" 30, "WONK" 1, "opsz" 144;
+  font-weight: 400;
+  font-size: clamp(3rem, 8vw, 6.2rem);
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+}
+
+h2 {
+  font-variation-settings: "opsz" 72;
+  font-weight: 500;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  margin: 4rem 0 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+h3 {
+  font-variation-settings: "opsz" 36;
+  font-weight: 500;
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  margin: 3rem 0 1rem;
+  color: var(--ink-soft);
+}
+
+h4 {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: var(--accent-warn);
+  margin: 2rem 0 0.5rem;
+}
+
+p {
+  margin-bottom: 1.2rem;
+  max-width: var(--measure);
+  hyphens: auto;
+}
+
+p.lede {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36;
+  font-size: 1.35rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  font-weight: 400;
+  max-width: 60ch;
+  margin-bottom: 2rem;
+}
+
+strong, b {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+em, i {
+  font-style: italic;
+}
+
+a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-warn);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
+}
+a:hover {
+  color: var(--accent-warn);
+  text-decoration-thickness: 2px;
+}
+
+/* Drop cap on first paragraph of body */
+.drop-cap::first-letter {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 50;
+  font-size: 5.5em;
+  float: left;
+  line-height: 0.85;
+  margin: 0.08em 0.08em 0 -0.04em;
+  font-weight: 500;
+  color: var(--accent-warn);
+}
+
+/* Small caps accents */
+.smallcaps {
+  font-family: var(--font-sans);
+  font-size: 0.78em;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+}
+
+.mono { font-family: var(--font-mono); font-size: 0.92em; }
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 500; }
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.container {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.col-narrow {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+section {
+  padding: 3rem 0;
+  position: relative;
+}
+
+section + section {
+  border-top: 1px solid var(--rule-soft);
+}
+
+/* =========================================================
+   MASTHEAD
+   ========================================================= */
+.masthead {
+  padding: 2rem 0 1.5rem;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 3rem;
+}
+
+.masthead-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--ink-muted);
+  margin-bottom: 3rem;
+}
+
+.masthead-title {
+  font-family: var(--font-display);
+  font-variation-settings: "WONK" 1, "SOFT" 30, "opsz" 144;
+  font-weight: 400;
+  font-size: clamp(0.9rem, 1.2vw, 1.1rem);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+}
+
+.hero {
+  padding: 1rem 0 5rem;
+}
+
+.kicker {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent-warn);
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  padding: 0.3rem 0;
+  border-top: 1px solid var(--accent-warn);
+  border-bottom: 1px solid var(--accent-warn);
+  padding: 0.4rem 0.8rem;
+}
+
+.hero h1 {
+  margin-bottom: 2rem;
+  max-width: 16ch;
+}
+
+.deck {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36;
+  font-size: clamp(1.2rem, 1.8vw, 1.55rem);
+  line-height: 1.45;
+  color: var(--ink-soft);
+  font-weight: 400;
+  max-width: 62ch;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.byline {
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  color: var(--ink-muted);
+  padding-top: 2rem;
+  border-top: 1px solid var(--rule);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.byline span { display: flex; align-items: center; gap: 0.5rem; }
+.byline strong { color: var(--ink); font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.72rem; }
+
+/* =========================================================
+   KEY STATS PANEL
+   ========================================================= */
+.stats-panel {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  padding: 3rem 2.5rem;
+  margin: 4rem 0;
+  position: relative;
+}
+.stats-panel::before {
+  content: "";
+  position: absolute;
+  top: -1px; left: -1px; right: -1px; bottom: -1px;
+  border: 1px solid var(--rule);
+  transform: translate(6px, 6px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.stats-panel-title {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--ink-muted);
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--rule);
+  font-weight: 600;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2.5rem;
+}
+
+.stat {
+  position: relative;
+}
+
+.stat-num {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  font-weight: 500;
+  font-size: clamp(2.5rem, 4vw, 3.4rem);
+  line-height: 1;
+  color: var(--accent-warn);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.stat-label {
+  font-family: var(--font-sans);
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.stat-source {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--ink-quiet);
+  margin-top: 0.6rem;
+  font-weight: 500;
+}
+
+/* =========================================================
+   CALLOUTS & PULL QUOTES
+   ========================================================= */
+.callout {
+  background: var(--paper-warm);
+  border-left: 3px solid var(--accent-warn);
+  padding: 1.5rem 1.8rem;
+  margin: 2.5rem 0;
+  font-size: 0.95rem;
+  max-width: var(--measure);
+}
+.callout.cool { border-left-color: var(--accent-cool); }
+.callout.ink { border-left-color: var(--ink); }
+.callout.gold { border-left-color: var(--accent-gold); }
+
+.callout-label {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-warn);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+.callout.cool .callout-label { color: var(--accent-cool); }
+.callout.ink .callout-label { color: var(--ink); }
+.callout.gold .callout-label { color: var(--accent-gold); }
+
+.pullquote {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 72, "SOFT" 30;
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+  line-height: 1.25;
+  color: var(--ink);
+  margin: 3.5rem auto;
+  max-width: 30ch;
+  text-align: left;
+  padding: 2rem 0;
+  border-top: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  position: relative;
+}
+
+.pullquote::before {
+  content: "";
+  font-family: var(--font-display);
+  font-size: 5rem;
+  color: var(--accent-warn);
+  position: absolute;
+  top: -1.5rem;
+  left: -0.5rem;
+  line-height: 1;
+  opacity: 0.2;
+}
+
+.pullquote-attr {
+  display: block;
+  margin-top: 1rem;
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-muted);
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* =========================================================
+   CHART CONTAINERS
+   ========================================================= */
+.figure {
+  margin: 3.5rem 0;
+  padding: 2rem 0;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  max-width: 100%;
+}
+
+.figure-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2rem;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.figure-number {
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--accent-warn);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.figure-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36;
+  font-weight: 500;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  color: var(--ink);
+  max-width: 36ch;
+  margin-bottom: 0.5rem;
+}
+
+.figure-subtitle {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  max-width: 50ch;
+  line-height: 1.5;
+}
+
+.figure-source {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--ink-quiet);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-top: 1.5rem;
+  font-weight: 500;
+}
+.figure-source a {
+  text-decoration-color: var(--ink-quiet);
+  color: var(--ink-muted);
+}
+
+.chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 420px;
+  background: var(--paper);
+}
+
+.chart-wrap.tall { height: 520px; }
+.chart-wrap.short { height: 320px; }
+
+/* =========================================================
+   TABLES
+   ========================================================= */
+table.ledger {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2rem 0;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+}
+
+table.ledger th {
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-weight: 600;
+  color: var(--ink-muted);
+  padding: 0.8rem 1rem;
+  border-bottom: 2px solid var(--ink);
+  background: var(--paper-warm);
+}
+
+table.ledger td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--rule-soft);
+  vertical-align: top;
+}
+
+table.ledger tr:last-child td { border-bottom: none; }
+table.ledger tr:hover td { background: var(--paper-warm); }
+
+table.ledger .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* =========================================================
+   SPLIT / COMPARISON GRID
+   ========================================================= */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin: 3rem 0;
+}
+
+@media (max-width: 760px) {
+  .split { grid-template-columns: 1fr; }
+}
+
+.split-col {
+  padding: 2rem;
+  border: 1px solid var(--rule);
+  background: var(--paper-warm);
+}
+
+.split-col.holds { border-left: 4px solid var(--accent-cool); }
+.split-col.breaks { border-left: 4px solid var(--accent-warn); }
+
+.split-col h4 {
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--rule);
+}
+.split-col.holds h4 { color: var(--accent-cool); }
+.split-col.breaks h4 { color: var(--accent-warn); }
+
+.split-col ol {
+  list-style: none;
+  counter-reset: item;
+  padding-left: 0;
+}
+
+.split-col ol li {
+  counter-increment: item;
+  padding: 0.9rem 0 0.9rem 2.5rem;
+  position: relative;
+  border-bottom: 1px dashed var(--rule-soft);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+.split-col ol li:last-child { border-bottom: none; }
+.split-col ol li::before {
+  content: counter(item, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.9rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ink-muted);
+  letter-spacing: 0.05em;
+}
+.split-col.holds ol li::before { color: var(--accent-cool); }
+.split-col.breaks ol li::before { color: var(--accent-warn); }
+
+/* =========================================================
+   TIMELINE
+   ========================================================= */
+.timeline {
+  margin: 3rem 0;
+  padding: 2rem 0;
+  position: relative;
+}
+
+.timeline-rail {
+  position: relative;
+  padding-left: 2.5rem;
+  border-left: 2px solid var(--ink);
+  margin-left: 1rem;
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 2.5rem;
+}
+
+.timeline-item::before {
+  content: "";
+  position: absolute;
+  left: calc(-2.5rem - 9px);
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+}
+
+.timeline-item.warn::before { background: var(--accent-warn); border-color: var(--accent-warn); }
+.timeline-item.cool::before { background: var(--accent-cool); border-color: var(--accent-cool); }
+
+.timeline-date {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-warn);
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
+.timeline-body {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  max-width: 54ch;
+}
+
+/* =========================================================
+   SECTION HEADERS
+   ========================================================= */
+.section-intro {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) 1fr;
+  gap: 3rem;
+  margin-bottom: 3rem;
+  padding-top: 2rem;
+}
+
+@media (max-width: 760px) {
+  .section-intro { grid-template-columns: 1fr; gap: 1rem; }
+}
+
+.section-num {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 144, "WONK" 1, "SOFT" 50;
+  font-weight: 400;
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--accent-warn);
+  letter-spacing: -0.04em;
+  padding-top: 0.5rem;
+}
+
+.section-num small {
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-variation-settings: normal;
+}
+
+/* =========================================================
+   MISC
+   ========================================================= */
+.ornament {
+  display: block;
+  width: 80px;
+  height: 1px;
+  background: var(--ink);
+  margin: 3rem auto;
+  position: relative;
+}
+.ornament::before,
+.ornament::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  width: 5px;
+  height: 5px;
+  background: var(--ink);
+  transform: rotate(45deg);
+}
+.ornament::before { left: -10px; }
+.ornament::after { right: -10px; }
+
+.source-list {
+  margin: 2rem 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  columns: 2;
+  column-gap: 2.5rem;
+}
+
+@media (max-width: 760px) {
+  .source-list { columns: 1; }
+}
+
+.source-list li {
+  padding: 0.6rem 0;
+  border-bottom: 1px dotted var(--rule);
+  break-inside: avoid;
+  line-height: 1.4;
+}
+
+.source-list a { display: block; }
+
+/* Footer */
+footer.doc-foot {
+  margin-top: 6rem;
+  padding: 3rem 0 4rem;
+  border-top: 2px solid var(--ink);
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  text-align: center;
+}
+
+footer.doc-foot .mark {
+  font-family: var(--font-display);
+  font-variation-settings: "WONK" 1, "SOFT" 50;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+/* Spec table for sovereign programs */
+.spec-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+}
+
+.spec-card {
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.spec-card .flag {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--accent-warn);
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+}
+
+.spec-card h5 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" 36;
+  font-weight: 500;
+  font-size: 1.15rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.25;
+}
+
+.spec-card p {
+  font-size: 0.88rem;
+  color: var(--ink-soft);
+  margin-bottom: 0;
+  line-height: 1.55;
+}
+
+.spec-card .numb {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-warn);
+  display: block;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--rule);
+}
+
+/* Responsive tweaks */
+@media (max-width: 760px) {
+  body { font-size: 16px; }
+  .container { padding: 0 1.25rem; }
+  .stats-panel { padding: 2rem 1.25rem; }
+  .section-num { font-size: 3.5rem; }
+  .pullquote { font-size: 1.3rem; }
+  .chart-wrap { height: 340px; }
+  .chart-wrap.tall { height: 440px; }
+}
+
+/* Print styles */
+@media print {
+  body { background: white; font-size: 11pt; }
+  body::before { display: none; }
+  .chart-wrap { break-inside: avoid; }
+  section { break-inside: avoid; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+<!-- MASTHEAD -->
+<header class="masthead">
+  <div class="masthead-top">
+    <span class="masthead-title">The Compute Ledger</span>
+    <span>Vol. 1 · Iss. 1 · April 2026</span>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="kicker">Research Report · Environment &amp; Political Economy</span>
+  <h1>The Compute<br>Buildout and<br>Its Costs</h1>
+  <p class="deck">A sober ledger of AI's ecological footprint — measured against the justifications being used to rationalize it, and the physical lock-in that neither efficiency nor AGI is on track to undo.</p>
+  <div class="byline">
+    <span><strong>Frame</strong> Global, 2024 – 2030</span>
+    <span><strong>Scope</strong> Energy · Water · Carbon · Materials · Geopolitics</span>
+    <span><strong>Reading time</strong> ~35 min</span>
+  </div>
+</section>
+
+<!-- EXECUTIVE SUMMARY -->
+<section>
+<div class="col-narrow">
+<h4>Executive Summary</h4>
+<p class="lede">AI infrastructure is now materially reshaping the world's electricity, water, and mineral systems — and the dominant justifications for those costs are weaker than the industry's rhetoric.</p>
+
+<p class="drop-cap">Global data-center electricity use reached roughly <strong>415&nbsp;TWh in 2024</strong> — about 1.5% of world consumption — and on the <a href="https://www.iea.org/reports/energy-and-ai/executive-summary">International Energy Agency's</a> base case will more than double to <strong>~945&nbsp;TWh by 2030</strong>, slightly exceeding Japan's total electricity use today. In the United States, <a href="https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers">Lawrence Berkeley National Laboratory</a> projects data centers will consume <strong>6.7–12% of national electricity by 2028</strong>, up from 4.4% in 2023.</p>
+
+<p>This buildout is, in the near term, being powered primarily by <strong>new natural gas and delayed coal retirements</strong> — not renewables or nuclear — with roughly <a href="https://www.distilled.earth/p/bypassing-the-grid-how-data-centers">40&nbsp;GW of behind-the-meter gas</a> announced for AI sites in 2025 alone, and <a href="https://www.desmog.com/2025/12/12/15-coal-plant-retirements-delayed-ai-data-centers-trump-doe-orders/">at least 15 US coal plants</a> having had their retirements pushed back since January 2025. Hyperscaler greenhouse-gas emissions have risen 23–51% since their 2019–2020 baselines even as their climate pledges remain on paper, and independent audits judge those pledges to have <a href="https://trellis.net/article/report-climate-goals-at-amazon-apple-google-meta-and-microsoft-have-lost-their-meaning/">"lost their meaning."</a></p>
+
+<p>Meanwhile, the case that AI itself will repay these costs — through climate solutions, scientific discovery, productivity gains, or eventual AGI — rests on genuine but narrow scientific wins, speculative macroeconomics, and an AGI-solves-it faith not supported by the 2024–2026 evidence. This report assembles what is measured, what is projected, and what remains advertisement.</p>
+</div>
+
+<!-- KEY STATS PANEL -->
+<div class="stats-panel">
+<div class="stats-panel-title">The Ledger — at a glance</div>
+<div class="stats-grid">
+  <div class="stat">
+    <div class="stat-num">2.3×</div>
+    <div class="stat-label">Global data-center electricity by 2030 vs. 2024<br>(415 → ~945 TWh)</div>
+    <div class="stat-source">IEA, 2025</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">+51%</div>
+    <div class="stat-label">Google's GHG emissions above 2019 baseline</div>
+    <div class="stat-source">Google Environmental Report 2025</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">+23%</div>
+    <div class="stat-label">Microsoft's emissions above 2020 baseline</div>
+    <div class="stat-source">Microsoft Sustainability 2025</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">+162%</div>
+    <div class="stat-label">Amazon's Scope 1 since 2019 Climate Pledge</div>
+    <div class="stat-source">Stand.earth / Amazon 2024</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">1,050%</div>
+    <div class="stat-label">PJM capacity-auction price rise, 2024/25 → 2027/28</div>
+    <div class="stat-source">IEEFA · Utility Dive</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">70&nbsp;GW</div>
+    <div class="stat-label">Virginia data-center interconnection demand (all-time peak: 25)</div>
+    <div class="stat-source">Dominion / Virginia Business</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">5.4 ML</div>
+    <div class="stat-label">Water consumed training a single GPT-3-scale model</div>
+    <div class="stat-source">Ren et al., UC Riverside</div>
+  </div>
+  <div class="stat">
+    <div class="stat-num">0</div>
+    <div class="stat-label">AI-designed drugs approved by FDA as of April 2026</div>
+    <div class="stat-source">Industry disclosures</div>
+  </div>
+</div>
+</div>
+</section>
+</div>
+
+<!-- SECTION I: THE FOOTPRINT -->
+<div class="container">
+<section id="section-1">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Section I</small>
+    01
+  </div>
+  <div>
+    <h2>How big the footprint actually is</h2>
+    <p class="lede">Measurement, not modeling. What the best available accounting says about electricity, water, carbon, and hardware as of early 2026.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<h3>Electricity</h3>
+<p>The <a href="https://www.iea.org/reports/energy-and-ai/executive-summary">IEA's April 2025 <em>Energy and AI</em> report</a> is the best consolidated accounting. In 2024, data centers drew <strong>~415 TWh globally</strong> (≈1.5% of world electricity, growing at ~12%/yr), of which the US took roughly 180 TWh, China ~100 TWh, and the EU-4 ~41 TWh. IEA's Base Case puts the global figure at ~945 TWh by 2030 and ~1,200 TWh by 2035; a "Lift-Off" case reaches ~2,000 TWh.</p>
+
+<p><a href="https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers">LBNL's December 2024 US assessment</a> — the most authoritative US-specific data — puts 2023 consumption at <strong>176 TWh (4.4%)</strong> and 2028 at <strong>325–580 TWh (6.7–12%)</strong>. For scale, the upper bound approximates the total annual electricity consumption of Germany. <a href="https://www.esgdive.com/news/us-data-center-power-demand-could-reach-106-gw-by-2035-bloombergnef/807057/">BloombergNEF's December 2025 update</a> projects <strong>106 GW of US data-center capacity by 2035 (~8.6% of electricity)</strong>, a 36% upward revision in nine months. LBNL's own 2016 projections undershot 2018 reality; <em>all current forecasts should be read as floors.</em></p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 01</div>
+      <div class="figure-title">Global data-center electricity demand, 2020–2035</div>
+      <div class="figure-subtitle">IEA's Base Case doubles consumption by 2030. Its Lift-Off scenario implies ~2,000 TWh — more than India's current total electricity use.</div>
+    </div>
+  </div>
+  <div class="chart-wrap tall"><canvas id="chart-electricity"></canvas></div>
+  <div class="figure-source">Sources: <a href="https://www.iea.org/reports/energy-and-ai/energy-demand-from-ai">IEA Energy &amp; AI</a> · <a href="https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers">LBNL / DOE</a> · <a href="https://www.esgdive.com/news/us-data-center-power-demand-could-reach-106-gw-by-2035-bloombergnef/807057/">BloombergNEF Dec 2025</a></div>
+</div>
+
+<div class="col-narrow">
+<p>Regionally, the concentration is extraordinary. Dominion Energy's contracted data-center pipeline in Virginia jumped from <a href="https://virginiabusiness.com/dominion-data-center-power-demand-virginia-scc/"><strong>21&nbsp;GW (July 2024) to 47&nbsp;GW (October 2025)</strong></a>; total Virginia DP requests hit <strong>~70,000&nbsp;MW</strong>, nearly 3× the statewide all-time peak. ERCOT's large-load interconnection queue stands at <a href="https://www.latitudemedia.com/news/ercots-large-load-queue-has-nearly-quadrupled-in-a-single-year/"><strong>226&nbsp;GW</strong></a> as of late 2025, roughly three-quarters data-center, against a 2023 peak of 85.5&nbsp;GW.</p>
+
+<p>Ireland's data centers consumed <strong>24% of national electricity in 2024</strong>, up from 5% in 2015, forcing <a href="https://datacentrenews.uk/story/ireland-unveils-strict-new-rules-for-data-centre-power-use">Dublin's four-year grid-connection moratorium</a> and a bespoke regulatory regime. PJM's capacity auction clearing prices rose from $28.92/MW-day for 2024/25 delivery to the <a href="https://ieefa.org/resources/projected-data-center-growth-spurs-pjm-capacity-prices-factor-10"><strong>$333.44/MW-day cap for 2027/28</strong></a> — a <strong>1,050% increase</strong> that the PJM market monitor attributes 63% to new data-center demand, costing ratepayers an estimated $9.3 billion in a single auction.</p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 02</div>
+      <div class="figure-title">Regional concentration · Virginia's pipeline &amp; PJM's auction cap</div>
+      <div class="figure-subtitle">Two views of the same phenomenon. Data-center demand has broken both the largest US interconnection pipeline and the largest US capacity market inside eighteen months.</div>
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+    <div class="chart-wrap"><canvas id="chart-virginia"></canvas></div>
+    <div class="chart-wrap"><canvas id="chart-pjm"></canvas></div>
+  </div>
+  <div class="figure-source">Sources: <a href="https://virginiabusiness.com/dominion-data-center-power-demand-virginia-scc/">Dominion / Virginia Business</a> · <a href="https://www.utilitydive.com/news/pjm-interconnection-capacity-auction-data-center/808264/">Utility Dive / IEEFA</a></div>
+</div>
+
+<div class="col-narrow">
+<h3>Water</h3>
+<p><a href="https://arxiv.org/abs/2304.03271">Shaolei Ren and colleagues at UC Riverside</a> provide the most rigorous accounting. Training <strong>GPT-3</strong> consumed roughly <strong>700,000 liters of onsite water</strong> in Microsoft's US fleet; with electricity-generation water added, <strong>5.4 million liters total</strong>. Inference adds a <strong>500 mL bottle per ~10–50 queries</strong>. GPT-4 has not been separately quantified because OpenAI and Microsoft do not disclose. Scaling forward, Ren projects <strong>4.2–6.6 billion cubic meters of AI water withdrawals annually by 2027</strong> — more than four Denmarks. US data centers drew <a href="https://www.eesi.org/articles/view/data-centers-and-water-consumption">~211 billion gallons</a> of indirect (thermoelectric) water in 2023.</p>
+
+<p>The siting pattern is perverse: data centers are clustering in water-stressed regions. Google's planned Cerrillos, Chile facility sought <a href="https://www.datacenterdynamics.com/en/news/chile-partially-reverses-google-data-center-permit-over-water-use-concerns/"><strong>~7 billion liters annually</strong></a>, equivalent to 80,000 residents' consumption, before Chile's environmental court partially reversed the permit in September 2024 and Google switched to air cooling. <a href="https://developingtelecoms.com/telecom-technology/data-centres-networks/17075-google-gets-go-ahead-for-uruguay-data-centre-after-water-worries.html">Google's Uruguay project</a> sought <strong>7.6 million L/day</strong> during that country's worst drought in 70 years. Meta's Talavera de la Reina project in Spain's drought-stressed Tagus basin was scaled back 24% after regulatory pressure. TSMC's Taiwan fabs draw <strong>156,000 tonnes/day</strong> and required emergency water trucking during the 2021 drought; <a href="https://azbex.com/planning-development/tsmc-building-water-reclamation-plant/">its new Arizona Fab 1</a> uses <strong>4.75 million gallons/day</strong>.</p>
+</div>
+
+<div class="callout">
+<div class="callout-label">Disclosure Gap</div>
+Microsoft's global WUE of 0.30 L/kWh, widely advertised, masks wide regional variation — Arizona sites reach 1.52 L/kWh — and excludes embodied water in chip manufacturing, which Ren estimates would roughly 10× the total.
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 03</div>
+      <div class="figure-title">Water at scale — from a training run to a continental forecast</div>
+      <div class="figure-subtitle">Log scale, in liters. Direct and indirect draw combined where both reported. Ren's 2027 projection (low end of scenario range) is shown for aggregate AI.</div>
+    </div>
+  </div>
+  <div class="chart-wrap"><canvas id="chart-water"></canvas></div>
+  <div class="figure-source">Source: <a href="https://dl.acm.org/doi/10.1145/3724499">Ren et al., Communications of the ACM</a> · <a href="https://themarkup.org/hello-world/2023/04/15/the-secret-water-footprint-of-ai-technology">The Markup</a></div>
+</div>
+
+<div class="col-narrow">
+<h3>Carbon emissions</h3>
+<p>The hyperscalers' own disclosures, read straight, tell the story. <a href="https://www.esgdive.com/news/googles-emissions-rise-despite-data-center-decarbonization-ppas-environmental-report-2025/752236/"><strong>Google's</strong> total GHG emissions are up ~51% over its 2019 baseline</a> as of its 2025 Environmental Report; Scope 3 rose 22% in a single year and now comprises 73% of the footprint. The company quietly relabeled its 2030 net-zero target "ambition-based."</p>
+
+<p><a href="https://www.datacenterdynamics.com/en/news/microsoft-emissions-up-23-since-2020-blames-ai-data-centers/"><strong>Microsoft</strong> reports total emissions up 23.4% over its 2020 baseline</a>, with Scope 3 up 26% and comprising 97% of the footprint; Brad Smith's public language has moved from "moonshot" (2020) to "the moon has moved" (2025) to "marathon, not sprint."</p>
+
+<p><strong>Amazon's</strong> 2024 total hit <strong>68 Mt CO₂e</strong> (+6% YoY); <a href="https://stand.earth/press-releases/amazons-2024-sustainability-report-reveals-companys-direct-emissions-have-increased-162-since-announcing-climate-pledge-in-2019/">Stand.earth calculates its Scope 1 has risen 162% since the 2019 Climate Pledge</a> was launched. <strong>Meta</strong> discloses emissions on a market-based basis (1,658 tCO₂e for its data-center Scope 2 in 2024) that is <a href="https://www.sec.gov/Archives/edgar/data/0001326801/000121465925006514/p428257px14a6g.htm"><strong>roughly 3,000× lower than the location-based figure of 5.14 million tCO₂e</strong></a> for the same activity — a disclosure gap now the subject of a 2026 shareholder proxy resolution.</p>
+
+<p>The 2025 <a href="https://newclimate.org/resources/publications/corporate-climate-responsibility-monitor-2025">NewClimate Institute / Carbon Market Watch <em>Corporate Climate Responsibility Monitor</em></a> concluded that the targets of Amazon, Apple, Google, Meta and Microsoft "fall short of demonstrating credible leadership."</p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 04</div>
+      <div class="figure-title">Hyperscaler emissions against their own pledged baselines</div>
+      <div class="figure-subtitle">Percent change from each company's self-declared climate-pledge baseline year. All four committed to net-zero or carbon-negative trajectories during 2019–2020.</div>
+    </div>
+  </div>
+  <div class="chart-wrap"><canvas id="chart-emissions"></canvas></div>
+  <div class="figure-source">Sources: <a href="https://sustainabilitymag.com/articles/google-environmental-report-2025">Google 2025 Environmental Report</a> · <a href="https://technologymagazine.com/articles/microsofts-2030-plan-revealed-as-emissions-rise-by-23-4">Microsoft 2024 Sustainability</a> · <a href="https://stand.earth/press-releases/amazons-2024-sustainability-report-reveals-companys-direct-emissions-have-increased-162-since-announcing-climate-pledge-in-2019/">Stand.earth / Amazon</a> · <a href="https://www.sec.gov/Archives/edgar/data/0001326801/000121465925006514/p428257px14a6g.htm">Meta SEC filing</a></div>
+</div>
+
+<div class="col-narrow">
+<p>Model-specific training emissions are disclosed for open-weight models (Llama 1–4: 300, 539, ~1,900, and 1,999 tCO₂e) but deliberately obscured for frontier commercial models (GPT-4 estimates range 7,000–15,000 tCO₂e; Gemini, Claude, and DeepSeek disclose nothing). <a href="https://ditchcarbon.com/blog/llm-carbon-emissions">Hugging Face's Sasha Luccioni has demonstrated</a> that inference emissions can exceed training within months of deployment, yet no hyperscaler reports per-query or per-user inference emissions. This is roughly analogous to an automobile industry that refuses to publish fuel-economy numbers.</p>
+
+<h3>Hardware, minerals, and e-waste</h3>
+<p><a href="https://www.nature.com/articles/s43588-024-00712-6">The Wang et al. 2024 paper in <em>Nature Computational Science</em></a> projects cumulative <strong>1.2–5.0 million tonnes of generative-AI e-waste by 2030</strong>, up from ~2,600 tonnes annually in 2023 — a near-thousandfold increase. GPU operational lifespans are short: Meta's Llama 3 training run on 16,384 H100s logged a ~9% annualized GPU failure rate, implying <a href="https://www.trendforce.com/news/2024/10/31/news-datacenter-gpus-may-have-an-astonishingly-short-lifespan-of-only-1-to-3-years/">refresh cycles of 1–3 years</a> versus the 5–6-year accounting lives hyperscalers report. NVIDIA accelerators consume 700–1,500 W each; the Blackwell generation is nearly double Hopper.</p>
+
+<p>Critical minerals are a second chokepoint. China controls ~98% of global gallium and roughly 90% of rare-earth processing. Beijing imposed <a href="https://www.iea.org/policies/17893-announcement-on-the-implementation-of-export-control-of-items-related-to-gallium-and-germanium">export licensing on gallium and germanium in August 2023</a>, banned exports to the US in December 2024, added <a href="https://www.stimson.org/2025/chinas-germanium-and-gallium-export-restrictions-consequences-for-the-united-states/">seven heavy rare-earths in April 2025</a>, and then <a href="https://www.fastmarkets.com/insights/china-suspends-export-prohibition-on-superhard-materials-us/">suspended parts of the restrictions after the November 2025 Xi–Trump meeting</a>. European gallium prices rose ~365% across that cycle.</p>
+
+<p><a href="https://www.semiconductors.org/wp-content/uploads/2023/09/PFAS-Release-Mapping-from-Semiconductor-Photolithography-Processes-Rev.0.pdf">PFAS ("forever chemicals")</a> are still required at essentially every advanced lithography node, with semiconductor manufacturing accounting for roughly <strong>10% of EU fluoropolymer demand</strong>; <a href="https://arxiv.org/abs/2505.06727">substitutes exist in the lab but not at production scale</a>.</p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 05</div>
+      <div class="figure-title">Generative-AI e-waste, 2023 → 2030</div>
+      <div class="figure-subtitle">Unit: thousand metric tonnes. The scenario range reflects Wang et al.'s low, mid, and high assumptions for model size, refresh cycle, and deployment intensity.</div>
+    </div>
+  </div>
+  <div class="chart-wrap"><canvas id="chart-ewaste"></canvas></div>
+  <div class="figure-source">Source: <a href="https://www.nature.com/articles/s43588-024-00712-6">Wang, Yang, Zhou et al., <em>Nature Computational Science</em> (2024)</a></div>
+</div>
+
+</section>
+</div>
+
+<!-- PULL QUOTE 1 -->
+<div class="container">
+<blockquote class="pullquote">
+The single most important finding for the AI-and-climate debate is that, at the margin, new AI load is being served by new natural gas and deferred coal retirements — not by clean generation.
+<span class="pullquote-attr">— Finding of this report</span>
+</blockquote>
+</div>
+
+<!-- SECTION II: THE GRID -->
+<div class="container">
+<section id="section-2">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Section II</small>
+    02
+  </div>
+  <div>
+    <h2>The grid is getting dirtier where AI is being built</h2>
+    <p class="lede">The mix serving AI load in 2024 is majority fossil. The marginal additions through 2028 are mostly gas, not renewables, and at least fifteen US coal plants have had their retirements pushed back.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<p>The <a href="https://www.iea.org/reports/energy-and-ai/energy-supply-for-ai">IEA's own data</a> show the US data-center power mix in 2024 was roughly <strong>40% gas, 24% renewables, 20% nuclear, and 15% coal</strong> — majority fossil. <a href="https://globalenergymonitor.org/report/betting-big-on-data-centers-u-s-now-leads-world-for-new-gas-power-development/">Global Energy Monitor's early-2026 tally</a> shows the US leading the world in new gas development, with <strong>80.6 GW in Texas alone</strong> and ~40 GW tied directly to data-center demand.</p>
+
+<p><a href="https://www.distilled.earth/p/bypassing-the-grid-how-data-centers">Distilled.earth</a> and <a href="https://www.spglobal.com/sustainable1/en/insights/special-editorial/hyperscaler-procurement-to-shape-us-power-investment">S&amp;P Global</a> identify ~<strong>50 GW of behind-the-meter gas projects</strong> announced for data centers, <strong>90% of them in 2025 alone</strong>. Kinder Morgan and Energy Transfer project data-center gas demand of <strong>6–10 Bcf/day</strong> — roughly 10% of current US gas consumption — within two years. Kinder Morgan and GE Vernova have heavy-duty turbine lead times of 5–7 years, which is itself becoming a binding constraint on the buildout.</p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 06</div>
+      <div class="figure-title">US data-center electricity mix, 2024</div>
+      <div class="figure-subtitle">The mix currently serving AI workloads is majority fossil. Announced marginal additions through 2028 are roughly 80% gas.</div>
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap: 3rem; align-items: center;">
+    <div class="chart-wrap short"><canvas id="chart-mix"></canvas></div>
+    <div style="font-family: var(--font-sans); font-size: 0.9rem; line-height: 1.65;">
+      <p style="margin-bottom: 1rem;"><strong style="color: var(--accent-warn);">55% fossil</strong> (gas + coal) is the current mix, before any of the behind-the-meter gas buildout clears interconnection.</p>
+      <p style="margin-bottom: 1rem;">Hyperscaler PPAs for renewables (~84 GW contracted across the top four US buyers) are overwhelmingly <strong>annual-matching</strong>, not 24/7.</p>
+      <p>AI training runs continuously. At night, the marginal generator is still gas.</p>
+    </div>
+  </div>
+  <div class="figure-source">Source: <a href="https://www.iea.org/reports/energy-and-ai/energy-supply-for-ai">IEA Energy &amp; AI</a> · <a href="https://www.spglobal.com/market-intelligence/en/news-insights/research/corporate-ppa-leaderboard-microsoft-leap-cuts-into-amazon-lead">S&amp;P Global PPA leaderboard</a></div>
+</div>
+
+<div class="col-narrow">
+<p>Coal is being extended rather than retired. <a href="https://www.desmog.com/2025/12/12/15-coal-plant-retirements-delayed-ai-data-centers-trump-doe-orders/">DeSmog</a> and <a href="https://energynewsbeat.co/u-s-fossil-fuel-power-plants-delay-retirement-as-ai-power-demand-soars/">Utility Dive</a> document <strong>at least fifteen US coal units</strong> whose retirement dates have been pushed back since January 2025, including Plant Bowen, Plant Scherer Unit 3, North Omaha Unit 5, Gibson Generating Station, Dave Johnston, Columbia Energy Center, and Dominion's Clover Power Station. Southern Company CEO Chris Womack has publicly committed to "extend coal plants as long as we can" to serve data-center load in Georgia. The Trump administration's Department of Energy has repeatedly invoked Section 202(c) emergency orders to keep plants running past planned retirement.</p>
+
+<p>The new nuclear deals receive disproportionate press attention but have added <strong>zero incremental gigawatts</strong> to the grid as of April 2026. <a href="https://penncapital-star.com/economy/microsoft-describes-three-mile-island-plant-as-a-once-in-a-lifetime-opportunity/">Microsoft's Three Mile Island / Crane Clean Energy Center restart</a> targets 2028; <a href="https://www.foxbusiness.com/technology/google-strikes-major-nuclear-power-deal-fuel-ai-data-centers-50-megawatt-capacity">Google's Kairos Hermes 2 SMR</a> targets 2030; Meta's Clinton PPA keeps existing capacity online but is not new generation; most SMR "deals" are MOUs without firm PPAs. Meanwhile hyperscaler PPAs for renewables are overwhelmingly annual-matching, meaning that continuous AI training loads are in practice still being served by whatever is on the grid at night — which is increasingly gas and extended coal.</p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 07</div>
+      <div class="figure-title">Fifteen US coal units whose retirements were pushed back</div>
+      <div class="figure-subtitle">Years of delay since January 2025, largest cases. All cited AI / data-center load in their regulatory filings or public announcements.</div>
+    </div>
+  </div>
+  <div class="chart-wrap tall"><canvas id="chart-coal"></canvas></div>
+  <div class="figure-source">Source: <a href="https://www.desmog.com/2025/12/12/15-coal-plant-retirements-delayed-ai-data-centers-trump-doe-orders/">DeSmog · Dec 2025</a> · <a href="https://www.power-eng.com/coal/coal-plant-retirements-a-slowdown-and-will-it-matter/">Power Engineering</a></div>
+</div>
+
+<div class="col-narrow">
+<h3>Two flagship sites</h3>
+<p><strong>xAI's Colossus</strong> in South Memphis installed dozens of <a href="https://www.selc.org/news/xai-built-an-illegal-power-plant-to-power-its-data-center/">unpermitted methane turbines</a> adjacent to the predominantly Black Boxtown neighborhood, where asthma and cancer rates already run roughly 4× the national average; <a href="https://naacp.org/articles/naacp-selc-condemns-mississippi-approval-xai-power-plant-regulators-ignore-public">an expansion in Southaven, Mississippi</a> will add up to 41 permanent turbines and produce an estimated <strong>&gt;1,700 tons/year of NOx</strong>, likely the single largest NOx source in the Memphis metro. The Southern Environmental Law Center, NAACP, and local community groups are <a href="https://www.selc.org/press-release/groups-appeal-permit-for-xais-south-memphis-data-center-decisions-around-unpermitted-methane-gas-turbines/">pursuing enforcement actions and appeals</a> through 2026.</p>
+
+<p><strong>Meta's Hyperion</strong> campus in Richland Parish, Louisiana is being served by an Entergy natural-gas buildout that expanded in March 2026 to <a href="https://theoutpost.ai/news-story/meta-funds-10-gas-plants-to-power-massive-louisiana-ai-data-center-tripling-initial-plans-24985/"><strong>ten new gas plants totaling ~7.5 GW</strong></a> — more than six times New Orleans's peak demand and roughly 30% of Louisiana's entire grid. <a href="https://www.ucs.org/about/news/louisiana-regulators-fast-track-7-gas-plant-proposal-meta-data-center">The Union of Concerned Scientists estimates Louisiana ratepayers face <strong>$26 billion in incremental electricity system costs over 15 years</strong></a> and an additional <strong>$90 billion in public-health and climate damages</strong> from the data-center buildout, while Meta's actual lease runs only four years under its Blue Owl joint-venture structure.</p>
+
+<p>The ratepayer-cost question is emerging as the core political fault line. <a href="https://jlarc.virginia.gov/landing-2024-data-centers-in-virginia.asp">Virginia's JLARC December 2024 study</a> concluded that data centers currently pay cost-of-service but that future system costs will shift to other customers under current structures, with residential bills projected to rise from $159/month today to as much as <strong>$381 by 2045</strong> absent policy change. The <a href="https://virginiamercury.com/2025/09/03/dominion-proposes-higher-utility-rates-new-rate-class-for-data-centers/">Virginia State Corporation Commission approved a new GS-5 rate class</a> for &gt;25 MW customers in November 2025 requiring 85% minimum demand payments — a genuine but partial correction. <a href="https://introl.com/blog/virginia-sb-253-data-center-electricity-rate-shift-2026">Eight other states introduced similar bills</a> in their 2026 sessions. Maine passed the first statewide data-center moratorium in April 2026. <a href="https://introl.com/blog/data-center-community-opposition-64-billion-backlash">Data Center Watch tallies <strong>$98 billion and 20 blocked or delayed projects in Q2 2025 alone</strong></a> across 11 states, with 188 active opposition groups.</p>
+</div>
+
+</section>
+</div>
+
+<!-- SECTION III: COMPUTE GEOPOLITICS -->
+<div class="container">
+<section id="section-3">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Section III</small>
+    03
+  </div>
+  <div>
+    <h2>Compute as a strategic resource — and the nuclear analogy</h2>
+    <p class="lede">The US and its allies are now treating AI compute as strategic infrastructure on a spectrum from the petrodollar to fissile material. The analogy holds in five respects and breaks down in six.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<p>Five policy inflection points frame the regime: BIS's <strong>October 2022 export controls</strong>; their <strong>October 2023 tightening</strong>; the <strong>January 2025 AI Diffusion Rule</strong> (three-tier framework); the Trump administration's <strong>May 2025 rescission</strong> of Diffusion; and the <strong>January 14, 2026 Section 232 tariff</strong> on advanced AI chips (25%, with broad US-domestic exemptions) paired with a revived H20/H200 licensing regime that now includes an unprecedented <strong>15% revenue-share to the US Treasury</strong> on Nvidia and AMD sales to China. This is not orthodox trade policy — it is state participation in the export margin — and it has no nuclear-era precedent.</p>
+</div>
+
+<!-- POLICY TIMELINE -->
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 08</div>
+      <div class="figure-title">Policy inflection points, October 2022 → January 2026</div>
+      <div class="figure-subtitle">The regime has accreted five major layers in thirty-nine months. Each was a significant departure from the previous trade-policy equilibrium.</div>
+    </div>
+  </div>
+  <div class="timeline">
+    <div class="timeline-rail">
+      <div class="timeline-item warn">
+        <div class="timeline-date">October 2022</div>
+        <div class="timeline-title">BIS Advanced Computing Controls</div>
+        <div class="timeline-body">First-ever end-use controls on advanced AI chips. Prohibits export of leading-edge logic (≤14 nm) and HBM memory to China. Catches Nvidia A100/H100 and equivalent foreign-made chips.</div>
+      </div>
+      <div class="timeline-item warn">
+        <div class="timeline-date">October 2023</div>
+        <div class="timeline-title">Tightening + A800/H800 loophole close</div>
+        <div class="timeline-body">Performance thresholds revised to block Nvidia's China-specific A800 and H800 parts. Introduces "total processing performance" and "performance density" metrics. Expands covered countries beyond China to include any country at risk of diversion.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">January 2025</div>
+        <div class="timeline-title">AI Diffusion Rule (three-tier framework)</div>
+        <div class="timeline-body">Biden administration's parting regulation: 18 Tier-1 allies with no restrictions, ~120 Tier-2 countries with compute caps and Validated End User pathway, Tier-3 (China, Russia, etc.) effectively embargoed. Industry backlash within weeks.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">May 2025</div>
+        <div class="timeline-title">Diffusion Rule rescinded</div>
+        <div class="timeline-body">Trump administration replaces the three-tier framework with bilateral deals. Gulf states (UAE, Saudi Arabia) receive expanded access via HUMAIN and G42 pathways. Tier-2 category effectively dissolved.</div>
+      </div>
+      <div class="timeline-item warn">
+        <div class="timeline-date">January 2026</div>
+        <div class="timeline-title">Section 232 tariffs + 15% revenue share</div>
+        <div class="timeline-body"><strong>25% tariff on advanced AI chips</strong> with broad US-domestic exemptions. H20/H200 exports to China licensed on condition of a <strong>15% revenue-share to the US Treasury</strong> — direct state participation in the export margin, unprecedented in nuclear or trade policy.</div>
+      </div>
+    </div>
+  </div>
+  <div class="figure-source">Sources: <a href="https://www.congress.gov/crs-product/R48642">CRS R48642</a> · <a href="https://www.aoshearman.com/en/insights/ai-diffusion-rule-rescinded-policy-guidance-for-advanced-integrated-circuits-and-commodities-issued">A&amp;O Shearman</a> · <a href="https://www.pwc.com/us/en/services/tax/library/pwc-trump-imposes-sec-232-tariffs-on-semiconductors.html">PwC</a> · <a href="https://fortune.com/2025/08/10/nvidia-amd-chips-h20-mi308-china-sales-revenue-trump-export-license/">Fortune</a> · <a href="https://www.cnbc.com/2025/12/08/trump-nvidia-h200-sales-china.html">CNBC</a></div>
+</div>
+
+<div class="col-narrow">
+<p>Parallel sovereign AI programs have crystallized in every major economy. The scale of simultaneous industrial-policy activation is unprecedented since the 1950s.</p>
+</div>
+
+<!-- SOVEREIGN AI SPEC GRID -->
+<div class="spec-grid">
+  <div class="spec-card">
+    <div class="flag">European Union</div>
+    <h5>InvestAI</h5>
+    <p><a href="https://www.europeaneconomics.com/en/investai-initiative-ai-gigafactories/">€200 billion mobilization by 2030</a>, including €20 billion for four to five AI Gigafactories. The largest coordinated EU industrial policy since the Single Market.</p>
+    <span class="numb">€200 B · 5 GW target</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">France</div>
+    <h5>Paris AI Action Summit</h5>
+    <p><a href="https://www.maginative.com/article/france-announces-eu109-billion-ai-investment-package-to-compete-with-us/">€109 billion package</a> announced February 2025. Focus on sovereign compute infrastructure and dedicated nuclear allocation for data centers.</p>
+    <span class="numb">€109 B · nuclear-backed</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">United Kingdom</div>
+    <h5>AI Growth Zones</h5>
+    <p><a href="https://www.bclplaw.com/en-US/events-insights-news/govt-ai-action-plan.html">Planning-law carve-outs</a> for designated zones starting at Culham. Commits to 20× expansion of public compute.</p>
+    <span class="numb">Planning-law override</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">UAE</div>
+    <h5>Stargate UAE / G42</h5>
+    <p><a href="https://www.g42.ai/resources/news/g42-lead-consortium-us-partners-build-5gw-uae-us-ai-campus">5-GW Abu Dhabi campus</a> announced May 2025. ~35,000 Blackwell-equivalent chip approvals under the Trump Gulf-tour bilateral framework.</p>
+    <span class="numb">5 GW · 35k chips</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">Saudi Arabia</div>
+    <h5>HUMAIN</h5>
+    <p><a href="https://economymiddleeast.com/news/u-s-authorizes-chip-exports-to-uaes-g42-and-saudi-arabias-humain/">PIF-backed sovereign AI</a> with US chip licensing under bilateral deal. Part of the Gulf's pivot from petrodollar to "compute-dollar."</p>
+    <span class="numb">PIF-funded</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">India</div>
+    <h5>IndiaAI Mission</h5>
+    <p><a href="https://www.pib.gov.in/PressReleasePage.aspx?PRID=2132817&reg=3&lang=2">34,000 subsidized GPUs</a> deployed through common-compute scheme. Explicit sovereign-AI framing; BharatGen foundation models as complement.</p>
+    <span class="numb">34k GPUs</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">China</div>
+    <h5>Eastern Data, Western Computing</h5>
+    <p><a href="https://gizmodo.com/china-launches-34175-mile-ai-network-that-acts-like-one-massive-supercomputer-2000698474">~246 EFLOPS of national compute</a> mid-2024. National 55,000-km optical fabric launched late 2025. <a href="https://www.trendforce.com/news/2026/04/07/news-decoding-deepseek-v4-how-huaweis-ascend-950-pr-is-powering-chinas-push-to-break-cuda-dependence/">Huawei Ascend 950PR</a> in mass production.</p>
+    <span class="numb">246 EFLOPS · 600k chips/yr</span>
+  </div>
+  <div class="spec-card">
+    <div class="flag">United States</div>
+    <h5>Stargate + Section 232</h5>
+    <p>OpenAI–Oracle–SoftBank $500B Stargate commitment. <a href="https://www.globalpolicywatch.com/2026/02/a-month-in-semiconductor-policy-section-232-measures-bis-rule-and-taiwan-deal-signal-strategic-push/">Section 232 tariffs</a> and bilateral compute-for-alignment deals with allies.</p>
+    <span class="numb">$500 B pledge</span>
+  </div>
+</div>
+
+<div class="col-narrow">
+<h3>Where the nuclear analogy holds — and where it breaks</h3>
+<p>The <strong>nuclear-munitions analogy</strong> — popularized by Leopold Aschenbrenner's <em>Situational Awareness</em> and embedded in BIS's end-use controls — is partly right and partly misleading. The details matter, because policy built on a flawed mental model (as the rescinded AI Diffusion Rule was) consistently lags diffusion dynamics.</p>
+</div>
+
+<div class="split">
+  <div class="split-col holds">
+    <h4>Where it holds</h4>
+    <ol>
+      <li><strong>Chokepoint geography.</strong> EUV lithography at ASML, leading-edge fabrication at TSMC, HBM at SK Hynix / Samsung / Micron, and GPU design at Nvidia all resemble enrichment facilities: a handful of sites, non-fungible, controllable.</li>
+      <li><strong>Tiered-access architecture.</strong> VEU, Entity List, and model-weights controls closely track the NPT / NSG / IAEA template of differentiated access and end-use verification.</li>
+      <li><strong>Deterrence logic.</strong> Concentrated capability matters more than aggregate stockpile. A few training runs at the frontier matter more than millions of inference cycles.</li>
+      <li><strong>Dual-use duality.</strong> A training cluster is indistinguishable from a civilian data center until it isn't. Same physics problem as reactor vs. enrichment cascade.</li>
+      <li><strong>Sovereign-first response.</strong> HUMAIN, G42, IndiaAI, BharatGen, and EU Gigafactories are all proliferation-style hedges, exactly the dynamic seen in 1960s nuclear.</li>
+    </ol>
+  </div>
+  <div class="split-col breaks">
+    <h4>Where it breaks down</h4>
+    <ol>
+      <li><strong>Digital exfiltration.</strong> Model weights fit on a USB drive. DeepSeek R1's open-weighting did more to diffuse capability than any smuggled chip could. No nuclear analogue.</li>
+      <li><strong>Commercial ubiquity.</strong> Tens of millions of restricted accelerators in play against a few hundred reactors worldwide. Enforcement surface is categorically different.</li>
+      <li><strong>Moore's Law depreciation.</strong> Today's controlled frontier is tomorrow's commodity on a 2–3-year cycle. Fissile material does not depreciate.</li>
+      <li><strong>No NPT-style universality.</strong> Wassenaar is consensus-bound and was bypassed by UAE / Malaysia / Singapore cloud-access routes almost immediately.</li>
+      <li><strong>15% revenue-share.</strong> State participation in the export margin has no nuclear counterpart. Looks more like petroleum concessions or 19th-century railroad land grants.</li>
+      <li><strong>Verification immaturity.</strong> IAEA-style audits of compute use remain technologically speculative. The regime is running without its verification arm.</li>
+    </ol>
+  </div>
+</div>
+
+<div class="col-narrow">
+<p>A more accurate composite analogy combines <strong>rare-earths supply politics</strong>, <strong>nuclear nonproliferation architecture</strong>, <strong>19th-century railroad land grants</strong>, and <strong>petrodollar-style bilateral financial entanglement</strong>. Virginia's data-center tax exemptions — projected originally at $1.5M annually, now running above $1.6 billion — are textbook grant-underpricing that would be familiar to anyone who has read the 1880–1920 litigation over railroad rate-setting. The JLARC report reads like a 21st-century echo of that history.</p>
+
+<p>The <strong>rare-earths analogy</strong> is also more useful as precedent than caricature. Academic re-analysis of <a href="https://eastasiaforum.org/2013/08/18/did-china-really-ban-rare-earth-metals-exports-to-japan/">China's 2010 Senkaku embargo</a> finds the supposed targeted cutoff less sharp than popular memory suggests — but the <em>narrative</em> of rare-earth leverage drove a decade of diversification, and <a href="https://kinacentrum.se/en/publications/chinas-mineral-export-restrictions-market-impacts-and-implications/">China's 2025 cascade of minerals controls</a> shows the playbook remains active. The <strong>oil analogy</strong> is partial: like oil, compute is a strategic input with geographic concentration and capacity to anchor a reserve-currency arrangement (Gulf AI campuses ≈ petrodollar recycling, now "compute-dollar"). Unlike oil, chips depreciate in months and are substitutable across generations; there are no proven reserves to monetize.</p>
+</div>
+
+</section>
+</div>
+
+<!-- PULL QUOTE 2 -->
+<div class="container">
+<blockquote class="pullquote">
+Under the AGI-solves-it argument, the footprint has to be recoverable. The grid asset lifetimes say it is not.
+<span class="pullquote-attr">— On the climate math</span>
+</blockquote>
+</div>
+
+<!-- SECTION IV: STEEL-MANNING -->
+<div class="container">
+<section id="section-4">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Section IV</small>
+    04
+  </div>
+  <div>
+    <h2>Steel-manning the case for these costs</h2>
+    <p class="lede">The strongest version of the proponent's argument rests on four pillars. Each is serious; each deserves engagement, not dismissal.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<p>Proponents' core argument is a wager: the near-term costs of AI infrastructure are small relative to the long-term gains from transformative applications. Here is the best version of that case, expressed in the language its defenders would accept.</p>
+
+<h4>Pillar One — Scientific wins are real and non-trivial</h4>
+<p><a href="https://en.wikipedia.org/wiki/John_M._Jumper">AlphaFold 2 and 3</a> reshaped structural biology; Hassabis and Jumper shared the 2024 Nobel in Chemistry. DeepMind's <a href="https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/"><strong>GNoME</strong> (November 2023)</a> identified 2.2 million new stable crystal structures; <a href="https://www.microsoft.com/en-us/research/blog/mattergen-a-new-paradigm-of-materials-design-with-generative-ai/">Microsoft's MatterGen</a> extends the approach generatively. <a href="https://www.openclimatefix.org/insights/ai-based-weather-forecasting-is-enabling-the-renewable-energy-transition">GraphCast, Aurora, NVIDIA Earth-2, and ECMWF's AIFS</a> have been deployed operationally — ECMWF since February 2025, <a href="https://markets.financialcontent.com/wral/article/tokenring-2025-12-18-noaa-launches-project-eagle-the-ai-revolution-in-global-weather-forecasting">NOAA's new AI-based Global Forecast System since December 2025</a> — with roughly two orders of magnitude less compute than traditional physics-based models and comparable or better skill. <a href="https://deepmind.google/blog/advanced-version-of-gemini-with-deep-think-officially-achieves-gold-medal-standard-at-the-international-mathematical-olympiad/">AlphaProof and AlphaGeometry</a> reached silver-medal performance on the 2024 International Mathematical Olympiad and gold-medal performance in 2025. These are not marketing. They are concrete, peer-reviewed contributions that would be difficult to achieve without the compute stack in question.</p>
+
+<h4>Pillar Two — The efficiency trajectory is real and rapid</h4>
+<p><a href="https://epoch.ai/blog/algorithmic-progress-in-language-models/">Epoch AI's work</a> indicates training compute efficiency has been doubling roughly every 8–9 months — faster than Moore's Law. <a href="https://nvidianews.nvidia.com/news/nvidia-blackwell-platform-arrives-to-power-a-new-era-of-computing">NVIDIA's Blackwell generation</a> delivers roughly 25–50× inference throughput per watt of Hopper at the rack level, a gain of ~1,000,000× across six GPU generations. Small models — Microsoft's Phi-3/4, Google's Gemma-2, Meta's Llama 3.2 1B/3B — now deliver in 2026 what required frontier models in 2022. DeepSeek V3/R1 (December 2024, January 2025) demonstrated that state-of-the-art training can be achieved at a fraction of the compute previously thought necessary. <a href="https://fortune.com/2025/01/27/microsoft-ceo-satya-nadella-deepseek-optimism-jevons-paradox/">Satya Nadella and others invoke Jevons</a> not as a confession but as a claim: cheaper compute expands access, democratizes the technology, and allows efficiency gains to be reinvested in higher-value work.</p>
+
+<h4>Pillar Three — Productivity and competitiveness</h4>
+<p><a href="https://www.goldmansachs.com/insights/articles/generative-ai-could-raise-global-gdp-by-7-percent">Goldman Sachs estimated a 7% boost to global GDP</a> and 1.5 percentage points of annual productivity growth over a decade; McKinsey estimates $4.4 trillion in annual potential. Firm-level studies have shown <a href="https://laweconcenter.org/resources/ai-productivity-and-labor-markets-a-review-of-the-empirical-evidence/">15–55% task-level gains</a> — the MIT Noy-Zhang writing study, GitHub Copilot trials, and BCG's 40% performance boost on consulting tasks. <a href="https://budgetmodel.wharton.upenn.edu/issues/2025/9/8/projected-impact-of-generative-ai-on-future-productivity-growth">Penn Wharton's September 2025 model</a> places long-run GDP effects at 1.5% by 2035 and 3% by 2055 — more modest than Goldman but still material. If compute is the input to a general-purpose technology on the order of electricity, a multi-decade lag before macro productivity appears (Paul David's thesis about electrification) is expected, not a refutation.</p>
+
+<p>On national security, <a href="https://darioamodei.com/post/on-deepseek-and-export-controls">Dario Amodei's January 2025 essay <em>On DeepSeek and Export Controls</em></a> makes the clearest version of the race argument: if frontier AI produces decisive military or economic advantage, then concentrating capability in democracies is an overriding priority, and the electricity cost is a rounding error against civilizational stakes.</p>
+
+<h4>Pillar Four — The AGI wager</h4>
+<p><a href="https://www.darioamodei.com/essay/machines-of-loving-grace"><em>Machines of Loving Grace</em></a> (October 2024) and Sam Altman's <em>The Gentle Singularity</em> (June 2024) — with more technical hedging by Demis Hassabis — treat near-term emissions as a short-term investment against a compressed 21st-century window of scientific and medical progress. Amodei's specific claims — a decade's worth of biology progress in five to ten years post-AGI, near-elimination of most mental illness, doubling of global development rates in poor countries — are counterfactual, but the argument structure is coherent: expected value is dominated by tail outcomes if one accepts both (a) a non-trivial probability of powerful AI this decade and (b) that compute investment materially shortens the timeline. Under that structure, even several gigatonnes of incremental CO₂ look small against the present value of accelerated decarbonization, disease cures, and discovery.</p>
+</div>
+
+<div class="callout cool">
+<div class="callout-label">Additionality — the closing move</div>
+Hyperscaler capital is funding new nuclear restarts (Three Mile Island / Crane), new SMR deployment (Kairos, X-energy), new renewables at scale (&gt;100 GW contracted by hyperscalers globally), and grid modernization (DeepMind–Tapestry, DERMS pilots) that would not be happening at this pace without data-center demand. Google's 24/7 carbon-free-energy framework is the most rigorous corporate clean-energy metric deployed anywhere.
+</div>
+
+</section>
+</div>
+
+<!-- SECTION V: EVIDENCE MEETS JUSTIFICATIONS -->
+<div class="container">
+<section id="section-5">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Section V</small>
+    05
+  </div>
+  <div>
+    <h2>Where the justifications meet the evidence</h2>
+    <p class="lede">On current evidence, the wager is losing. But the strongest arguments deserve specific responses, not dismissal.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<h4>On scientific wins</h4>
+<p>The case holds narrowly and does not yet transfer to emissions. Better weather models are genuine; the path from AlphaFold to tonnes of CO₂ avoided runs through pharmaceutical pipelines, policy adoption, and engineering deployment that AI does not itself perform. As of April 2026, <strong>zero AI-designed drugs have been FDA-approved</strong>. Insilico's flagship INS018_055 remains in Phase 2, not Phase 3. BenevolentAI's BEN-2293 failed Phase 2a in 2023 and the company has since restructured twice. Recursion and Exscientia merged under market pressure. The industry's own discourse has moved from "revolutionary" to "trough of disillusionment." Fusion's critical path is magnets and plasma physics; Commonwealth Fusion's SPARC first plasma is now slated for 2026 with net energy in 2027, and AI is a helpful but non-critical tool. No peer-reviewed study attributes a material fraction of global emissions reduction to AlphaFold, GNoME, or GraphCast; DeepMind's data-center cooling result has not diffused. The "AI solves climate" claim, honestly evaluated, is a <em>plausible future contribution of unknown magnitude</em> — not a ledger entry.</p>
+
+<h4>On the efficiency trajectory</h4>
+<p>This is the weakest link in the proponent case, and it was effectively falsified in 2025. <strong>Total AI electricity demand rose in 2025 despite DeepSeek's training efficiency breakthrough.</strong> Meta raised 2025 AI capex by roughly 50% after R1's release. The Stanford AI Index 2026 reports DeepSeek V3 uses ~23 Wh per medium prompt against ~5 Wh for Claude — cheaper training, more expensive serving, particularly for reasoning models. Luccioni's AI Energy Score v2 found that of 14 non-reasoning models tested against early-2025 references of similar size, <strong>eight used more energy</strong> than their predecessors. IEA's own modeling concludes efficiency gains are already baked into the Base Case and that even a "High Efficiency" scenario shaves only about 15% off 2035 demand. Jevons is operating as predicted. Absolute physical throughput — kWh, gallons, tonnes of gas, tonnes of concrete — is rising, and the efficiency narrative should be retired as a climate argument.</p>
+</div>
+
+<div class="callout">
+<div class="callout-label">The 2025 Natural Experiment</div>
+DeepSeek R1's release in January 2025 was the cleanest efficiency shock the AI industry has experienced. Within six months, Meta had raised AI capex ~50%, training-run compute budgets had grown, and total data-center electricity demand continued rising. Every major lab treated cheaper training as license to train more. That is the Jevons paradox operating in real time.
+</div>
+
+<div class="col-narrow">
+<h4>On the macro case</h4>
+<p><a href="https://economics.mit.edu/sites/default/files/2024-05/The%20Simple%20Macroeconomics%20of%20AI.pdf">Daron Acemoglu's <em>Simple Macroeconomics of AI</em> (2024)</a> derives a cumulative TFP boost of about 0.5–0.7% over a decade, implying 1.1–1.6% GDP — one-quarter to one-fifth of Goldman's headline number. The 2024–2025 Bureau of Labor Statistics data so far vindicate Acemoglu: US nonfarm business labor productivity grew 2.1% in 2025 (in line with trend), and TFP growth <em>decelerated</em> from 1.5% in 2024 to 0.8% in 2025. Firm-level gains of 15–55% on specific tasks have not aggregated. This could be a Paul David productivity paradox, but "could" is not "has" — two-and-a-half years into the generative-AI era, the macro statistics look ordinary.</p>
+
+<h4>On the AGI wager</h4>
+<p>This is load-bearing optimism, and the physical lock-in is against it. The climate math is unforgiving: Morgan Stanley projects cumulative data-center emissions of roughly <strong>2.5 Gt CO₂e by 2030</strong>; Microsoft alone is +23.4% from its 2020 baseline; on-site gas at data centers went from 5% of new demand at end-2024 to <strong>39% in 2025</strong>; Louisiana, Virginia, Georgia, and Texas utilities are signing 20–40-year gas-plant contracts. Even if AGI arrives on Amodei's most optimistic timeline, the methane plants serving Meta Hyperion and the delayed retirement of Plant Bowen have already locked in a decade or more of incremental emissions that no AI-enabled climate model can retract. The expected-value argument implicitly assumes the footprint is recoverable; the grid asset lifetimes say it is not.</p>
+
+<h4>Historical precedent runs against "we'll figure it out later"</h4>
+<p>The base rate is discouraging: leaded gasoline (Midgley, 1921), CFCs (Midgley again, 1928), and asbestos all followed patterns of known harm, decades of deferral, and partial remediation after incumbents had captured the regulatory ground. The Montreal Protocol is the heartening exception — and it worked because substitutes existed and coordination was tractable. No equivalently clean substitute exists for AI's current emissions path.</p>
+
+<p>For the <em>productivity</em> question, electrification (Paul David's 20+ year lag) is the most apt analogy. For the <em>emissions</em> question, the <strong>crypto-mining precedent</strong> (Greenidge, Scrubgrass, Stronghold, Marathon) is the closest structural match: computational demand reactivating fossil assets that would otherwise have retired. AI differs from crypto in producing socially valuable output, but <em>resembles it exactly in the mechanism now unfolding</em>. For the <em>capex-cycle</em> question, railroad mania (1873, 1893) offers a cautionary template, with one important disanalogy: railroad track was a durable asset that quietly enabled later productivity; GPUs are not. There is no AI equivalent of dark fiber.</p>
+</div>
+
+</section>
+</div>
+
+<!-- SECTION VI: CORRECTION -->
+<div class="container">
+<section id="section-6">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Section VI</small>
+    06
+  </div>
+  <div>
+    <h2>What correction looks like, and whether it is adequate</h2>
+    <p class="lede">Real corrective mechanisms are assembling, but their binding force arrives years after the emissions are locked in.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<p>Disclosure regimes (EU AI Act, SB 253, AI Energy Score) address information asymmetry but contain <strong>no hard emissions caps</strong>; efficiency standards don't bind until 2028+; rate-class reforms (Virginia GS-5, Texas SB 6) protect residential ratepayers at the margin but cannot eliminate the secondary grid-cost effects; community resistance is reactive and localized. <strong>No jurisdiction has imposed a binding requirement that new large-load AI capacity be matched by additional, time-and-location-matched clean generation.</strong> Absent that, the physical trajectory continues.</p>
+</div>
+
+<div class="figure">
+  <div class="figure-header">
+    <div>
+      <div class="figure-number">Figure 09</div>
+      <div class="figure-title">Regulatory correction · timeline</div>
+      <div class="figure-subtitle">The binding instruments all arrive after 2025. The enforcement gap — the period during which emissions lock in but rules do not yet apply — is the window currently being used.</div>
+    </div>
+  </div>
+  <div class="timeline">
+    <div class="timeline-rail">
+      <div class="timeline-item cool">
+        <div class="timeline-date">December 2024</div>
+        <div class="timeline-title">Virginia JLARC Data Centers Report</div>
+        <div class="timeline-body">Most comprehensive state-level audit to date. Finds data centers pay cost-of-service now but grid costs will shift to residential under current structures — up to $381/month by 2045 without reform.</div>
+      </div>
+      <div class="timeline-item cool">
+        <div class="timeline-date">August 2025</div>
+        <div class="timeline-title">EU AI Act · Article 40 energy reporting begins</div>
+        <div class="timeline-body">Technical-documentation and energy-reporting obligations apply to general-purpose AI providers from 2 August 2025. Fines delayed to August 2026; harmonized standards not due until <strong>August 2028</strong>.</div>
+      </div>
+      <div class="timeline-item cool">
+        <div class="timeline-date">November 2025</div>
+        <div class="timeline-title">Virginia GS-5 rate class approved</div>
+        <div class="timeline-body">State Corporation Commission creates new rate class for &gt;25 MW customers with 85% minimum demand payments. A genuine but partial correction. Eight other states introduced similar bills for 2026 sessions.</div>
+      </div>
+      <div class="timeline-item cool">
+        <div class="timeline-date">December 2025</div>
+        <div class="timeline-title">Ireland CRU decision · moratorium lifted with conditions</div>
+        <div class="timeline-body">Dublin moratorium ends but now requires dispatchable on-site generation matching maximum import capacity and 80% annual energy from new Irish renewables on a glide path.</div>
+      </div>
+      <div class="timeline-item cool">
+        <div class="timeline-date">April 2026</div>
+        <div class="timeline-title">Maine · first statewide moratorium</div>
+        <div class="timeline-body">Blocks new large-load data centers pending study. Pioneering state-level use of siting authority to constrain buildout.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">August 2026</div>
+        <div class="timeline-title">California SB 253 · first enforceable disclosure</div>
+        <div class="timeline-body">Scope 1+2 disclosure from covered companies begins. Third-party assurance from 2027. First legally-enforceable emissions report from hyperscalers, globally.</div>
+      </div>
+      <div class="timeline-item">
+        <div class="timeline-date">August 2028</div>
+        <div class="timeline-title">EU AI Act · binding efficiency standards due</div>
+        <div class="timeline-body">Harmonized standards take effect. By this date roughly 80 GW of gas generation will already be under construction for US data centers, with 20–40-year offtake contracts.</div>
+      </div>
+    </div>
+  </div>
+  <div class="figure-source">Sources: <a href="https://jlarc.virginia.gov/landing-2024-data-centers-in-virginia.asp">Virginia JLARC</a> · EU AI Act · <a href="https://www.ainvest.com/news/ireland-lifts-data-center-power-moratorium-grid-constraints-ease-renewable-mandate-2512/">Irish CRU</a> · California SB 253</div>
+</div>
+
+<div class="col-narrow">
+<p>The honest assessment: disclosure regimes address information asymmetry but contain no hard emissions caps; efficiency standards don't bind until 2028+; rate-class reforms protect residential ratepayers at the margin but cannot eliminate the secondary grid-cost effects; community resistance is reactive and localized. No jurisdiction has imposed a binding requirement that new large-load AI capacity be matched by additional, time-and-location-matched clean generation. Absent that, the physical trajectory continues.</p>
+
+<p>Independent benchmarking is arriving. <a href="https://huggingface.github.io/AIEnergyScore/">Hugging Face's AI Energy Score</a> (v2 late 2025) ranks 166+ models across 10 tasks — but OpenAI, Anthropic, and Google decline to participate, leaving frontier models opaque. The ML.Energy leaderboard and <a href="https://epoch.ai/trends">Epoch AI's efficiency tracking</a> provide complementary signals. The <strong>24/7 carbon-free-energy movement</strong> (Google, Microsoft, UN-EP) is methodologically superior to annual-matching and should become the default corporate metric; Amazon and Meta still report only annual matching.</p>
+
+<p><strong>Community-level correction</strong> is the most active adjustment. Prince William County's Digital Gateway rezoning was voided by a Virginia court in August 2025 on procedural grounds and the voiding affirmed on appeal in April 2026. Loudoun County ended by-right data-center approval in March 2025. The Netherlands cancelled Meta's Zeewolde project in July 2022 and bans hyperscalers outside two designated zones. Chile's environmental tribunal partially reversed Google's Cerrillos permit in September 2024. Maine's statewide moratorium passed in April 2026. Federal legislation from Sanders and Ocasio-Cortez is introduced but unlikely to pass. The cumulative effect is <em>slowing and geographically dispersing the buildout — not halting it.</em></p>
+</div>
+
+</section>
+</div>
+
+<!-- CONCLUSION -->
+<div class="container">
+<section id="conclusion">
+<div class="section-intro">
+  <div class="section-num">
+    <small>Conclusion</small>
+    ∴
+  </div>
+  <div>
+    <h2>What this adds up to</h2>
+    <p class="lede">Neither the civilizational salvation its proponents describe nor the imminent environmental catastrophe its strongest critics claim. Something in between, and closer to the latter than the former.</p>
+  </div>
+</div>
+
+<div class="col-narrow">
+<p class="drop-cap">The AI infrastructure buildout is a <strong>large, measurable increase in the energy, water, carbon, mineral, and ratepayer footprint of the global economy</strong>, concentrated in specific communities and grids, being rationalized with a blend of genuine scientific achievements, credible but unrealized productivity forecasts, and a faith-based AGI argument whose physical lock-in effects will outlast any hypothesized payoff window.</p>
+
+<p>Three conclusions follow.</p>
+
+<h4>One · Separate the frames</h4>
+<p>The "AI for climate" framing should be separated from the "AI climate impact" framing. They operate on different timescales and through different mechanisms, and netting them against each other — which is what the AGI-solves-it argument effectively does — is bad accounting. Specific applications (weather prediction, materials screening, narrow optimization) deserve support on their merits; they are not a license for indefinite emissions growth.</p>
+
+<h4>Two · The nuclear analogy, used carefully</h4>
+<p>The geopolitical frame is closer to early nuclear policy than to oil, but the analogy systematically misleads on velocity, digital exfiltration, and commercial saturation. Treating compute as strictly a national-security asset justifies domestic subsidy and allied coordination, but it does not justify exempting data centers from the pollution, water, and ratepayer rules that govern every other large industrial user. Louisiana's fast-tracked gas buildout for Meta, xAI's unpermitted turbines in Memphis, and Virginia's Digital Gateway are not security measures — they are <em>deregulatory capture</em>.</p>
+
+<h4>Three · What defensible policy looks like</h4>
+<p>The most defensible policy is boringly substantive:</p>
+<ul style="max-width: var(--measure); margin-left: 1.5rem; margin-bottom: 1.5rem;">
+  <li style="margin-bottom: 0.6rem;"><strong>Mandatory additionality</strong> — new AI load must be paired with new, time-matched clean generation;</li>
+  <li style="margin-bottom: 0.6rem;"><strong>Transparency on a per-model and per-site basis</strong> — training and inference, emissions and water, supply-chain embodied carbon;</li>
+  <li style="margin-bottom: 0.6rem;"><strong>Cost-of-service rate classes</strong> that prevent residential ratepayers from subsidizing hyperscaler infrastructure;</li>
+  <li><strong>Binding community-consent procedures</strong> around siting.</li>
+</ul>
+
+<p>These corrections are all under construction; none is yet strong enough to match the scale of the buildout. Whether they become so, or whether "we'll figure it out later" becomes the epitaph of yet another industrial wave, is the live question of the late 2020s.</p>
+</div>
+
+<span class="ornament"></span>
+
+<div class="col-narrow">
+<p style="font-family: var(--font-display); font-variation-settings: 'opsz' 36; font-size: 1.15rem; font-style: italic; color: var(--ink-soft); line-height: 1.55;">The industry's rhetoric asks to be judged by the technology's long-run potential. The physical record — gas plants built, aquifers drawn down, REC-adjusted footprints that diverge 3,000-fold from location-based reality, delayed coal retirements, blocked drugs and deferred fusion, a Jevons effect that ate efficiency gains within a single year — asks to be judged by what has actually happened. For now, the record is clearer than the rhetoric.</p>
+</div>
+
+</section>
+</div>
+
+<!-- SOURCES -->
+<div class="container">
+<section id="sources">
+<h4>Principal Sources &amp; Further Reading</h4>
+<ul class="source-list">
+  <li><strong>IEA</strong> — <a href="https://www.iea.org/reports/energy-and-ai/executive-summary">Energy and AI (2025)</a></li>
+  <li><strong>DOE / LBNL</strong> — <a href="https://www.energy.gov/articles/doe-releases-new-report-evaluating-increase-electricity-demand-data-centers">US Data Center Electricity Demand</a></li>
+  <li><strong>BloombergNEF</strong> — <a href="https://www.esgdive.com/news/us-data-center-power-demand-could-reach-106-gw-by-2035-bloombergnef/807057/">106 GW by 2035 (Dec 2025)</a></li>
+  <li><strong>Ren et al., UC Riverside</strong> — <a href="https://arxiv.org/abs/2304.03271">Making AI Less "Thirsty"</a></li>
+  <li><strong>Wang et al., Nature</strong> — <a href="https://www.nature.com/articles/s43588-024-00712-6">E-waste challenges of generative AI</a></li>
+  <li><strong>Google</strong> — <a href="https://sustainabilitymag.com/articles/google-environmental-report-2025">2025 Environmental Report</a></li>
+  <li><strong>Microsoft</strong> — <a href="https://www.datacenterdynamics.com/en/news/microsoft-emissions-up-23-since-2020-blames-ai-data-centers/">2024 Sustainability Report</a></li>
+  <li><strong>Amazon / Stand.earth</strong> — <a href="https://stand.earth/press-releases/amazons-2024-sustainability-report-reveals-companys-direct-emissions-have-increased-162-since-announcing-climate-pledge-in-2019/">2024 analysis</a></li>
+  <li><strong>Meta</strong> — <a href="https://www.sec.gov/Archives/edgar/data/0001326801/000121465925006514/p428257px14a6g.htm">SEC PX14A6G filing</a></li>
+  <li><strong>NewClimate Institute</strong> — <a href="https://newclimate.org/resources/publications/corporate-climate-responsibility-monitor-2025">Corporate Climate Monitor 2025</a></li>
+  <li><strong>Global Energy Monitor</strong> — <a href="https://globalenergymonitor.org/report/betting-big-on-data-centers-u-s-now-leads-world-for-new-gas-power-development/">Betting Big on Data Centers</a></li>
+  <li><strong>DeSmog</strong> — <a href="https://www.desmog.com/2025/12/12/15-coal-plant-retirements-delayed-ai-data-centers-trump-doe-orders/">15 coal plants delayed</a></li>
+  <li><strong>IEEFA</strong> — <a href="https://ieefa.org/resources/projected-data-center-growth-spurs-pjm-capacity-prices-factor-10">PJM capacity prices</a></li>
+  <li><strong>Virginia JLARC</strong> — <a href="https://jlarc.virginia.gov/landing-2024-data-centers-in-virginia.asp">Data Centers in Virginia</a></li>
+  <li><strong>Union of Concerned Scientists</strong> — <a href="https://www.ucs.org/about/news/louisiana-regulators-fast-track-7-gas-plant-proposal-meta-data-center">Louisiana / Meta</a></li>
+  <li><strong>Southern Environmental Law Center</strong> — <a href="https://www.selc.org/news/xai-built-an-illegal-power-plant-to-power-its-data-center/">xAI Memphis</a></li>
+  <li><strong>Acemoglu, MIT</strong> — <a href="https://economics.mit.edu/sites/default/files/2024-05/The%20Simple%20Macroeconomics%20of%20AI.pdf">Simple Macroeconomics of AI</a></li>
+  <li><strong>Penn Wharton</strong> — <a href="https://budgetmodel.wharton.upenn.edu/issues/2025/9/8/projected-impact-of-generative-ai-on-future-productivity-growth">GenAI productivity model</a></li>
+  <li><strong>Amodei, Anthropic</strong> — <a href="https://www.darioamodei.com/essay/machines-of-loving-grace">Machines of Loving Grace</a></li>
+  <li><strong>Amodei</strong> — <a href="https://darioamodei.com/post/on-deepseek-and-export-controls">On DeepSeek and Export Controls</a></li>
+  <li><strong>DeepMind</strong> — <a href="https://deepmind.google/blog/millions-of-new-materials-discovered-with-deep-learning/">GNoME materials discovery</a></li>
+  <li><strong>Epoch AI</strong> — <a href="https://epoch.ai/blog/algorithmic-progress-in-language-models/">Algorithmic progress</a></li>
+  <li><strong>Hugging Face</strong> — <a href="https://huggingface.github.io/AIEnergyScore/">AI Energy Score</a></li>
+  <li><strong>CSIS</strong> — <a href="https://www.csis.org/analysis/securing-agi-laurel-export-controls-compute-gap-and-chinas-counterstrategy">Export controls &amp; compute gap</a></li>
+  <li><strong>CRS</strong> — <a href="https://www.congress.gov/crs-product/R48642">US Export Controls and China (R48642)</a></li>
+  <li><strong>Kinacentrum</strong> — <a href="https://kinacentrum.se/en/publications/chinas-mineral-export-restrictions-market-impacts-and-implications/">China mineral export controls</a></li>
+</ul>
+</section>
+</div>
+
+<footer class="doc-foot">
+<div class="container">
+  <span class="mark">The Compute Ledger</span>
+  <p>A research report on AI's ecological footprint, the narratives used to justify it, and the geopolitical frame now forming around compute.</p>
+  <p style="margin-top: 1rem;">Compiled April 2026 · Data through Q1 2026 · All figures checked against primary sources</p>
+</div>
+</footer>
+
+<!-- ============================================================
+     CHARTS
+     ============================================================ -->
+<script>
+// Global Chart.js defaults — editorial look
+const INK = '#15141b';
+const INK_SOFT = '#2b2832';
+const INK_MUTED = '#5a544b';
+const INK_QUIET = '#8a8173';
+const WARN = '#a83c1e';
+const COOL = '#2f5d3e';
+const GOLD = '#8b6914';
+const SLATE = '#1e2a44';
+const RULE = '#c9bfa8';
+const PAPER = '#f2ede2';
+const PAPER_WARM = '#ebe4d5';
+
+Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+Chart.defaults.font.size = 12;
+Chart.defaults.color = INK_MUTED;
+Chart.defaults.borderColor = RULE;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.boxWidth = 8;
+Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.font = { family: "'IBM Plex Sans', sans-serif", size: 11, weight: '500' };
+Chart.defaults.plugins.tooltip.backgroundColor = INK;
+Chart.defaults.plugins.tooltip.titleFont = { family: "'IBM Plex Sans', sans-serif", size: 11, weight: '600' };
+Chart.defaults.plugins.tooltip.bodyFont = { family: "'IBM Plex Mono', monospace", size: 12 };
+Chart.defaults.plugins.tooltip.padding = 12;
+Chart.defaults.plugins.tooltip.cornerRadius = 0;
+Chart.defaults.plugins.tooltip.displayColors = false;
+
+const editorialGrid = { color: 'rgba(90, 84, 75, 0.1)', drawBorder: false, drawTicks: false };
+const editorialTicks = { color: INK_MUTED, font: { size: 11, family: "'IBM Plex Mono', monospace" } };
+
+// ============================================================
+// FIGURE 01 · Global data-center electricity demand
+// ============================================================
+new Chart(document.getElementById('chart-electricity'), {
+  type: 'line',
+  data: {
+    labels: ['2020', '2022', '2024', '2026', '2028', '2030', '2032', '2035'],
+    datasets: [
+      {
+        label: 'IEA Base Case (global)',
+        data: [300, 350, 415, 560, 740, 945, 1050, 1200],
+        borderColor: WARN,
+        backgroundColor: 'rgba(168, 60, 30, 0.08)',
+        borderWidth: 3,
+        tension: 0.32,
+        fill: true,
+        pointRadius: 4,
+        pointBackgroundColor: WARN,
+        pointBorderColor: PAPER,
+        pointBorderWidth: 2,
+      },
+      {
+        label: 'IEA Lift-Off Case (global)',
+        data: [null, null, 415, 650, 1000, 1400, 1700, 2000],
+        borderColor: SLATE,
+        borderWidth: 2,
+        borderDash: [6, 4],
+        tension: 0.32,
+        fill: false,
+        pointRadius: 3,
+        pointBackgroundColor: SLATE,
+      },
+      {
+        label: 'LBNL / DOE · US projection',
+        data: [105, 140, 176, 230, 450, null, null, null],
+        borderColor: COOL,
+        backgroundColor: 'rgba(47, 93, 62, 0.08)',
+        borderWidth: 2.5,
+        tension: 0.32,
+        fill: false,
+        pointRadius: 3,
+        pointBackgroundColor: COOL,
+      },
+      {
+        label: 'BloombergNEF · US capacity × 8760h',
+        data: [null, null, null, null, 400, 600, 800, 928],
+        borderColor: GOLD,
+        borderWidth: 2,
+        borderDash: [3, 3],
+        tension: 0.32,
+        fill: false,
+        pointRadius: 3,
+        pointBackgroundColor: GOLD,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: { position: 'top', align: 'start' },
+      tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y ? c.parsed.y.toLocaleString() + ' TWh' : 'n/a'}` } }
+    },
+    scales: {
+      y: {
+        grid: editorialGrid,
+        ticks: { ...editorialTicks, callback: (v) => v.toLocaleString() },
+        title: { display: true, text: 'TWh / year', font: { size: 11, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK_MUTED }
+      },
+      x: { grid: { display: false }, ticks: editorialTicks }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 02a · Virginia data-center pipeline
+// ============================================================
+new Chart(document.getElementById('chart-virginia'), {
+  type: 'bar',
+  data: {
+    labels: ['VA all-time\npeak', 'Pipeline\nJul 2024', 'Pipeline\nOct 2025', 'Requests\nlate 2025'],
+    datasets: [{
+      label: 'Gigawatts',
+      data: [25, 21, 47, 70],
+      backgroundColor: [INK_MUTED, SLATE, WARN, WARN],
+      borderRadius: 0,
+      barPercentage: 0.65,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'Virginia data-center pipeline (GW)', font: { size: 13, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK, padding: { bottom: 16 } },
+      tooltip: { callbacks: { label: (c) => ` ${c.parsed.y} GW` } }
+    },
+    scales: {
+      y: { grid: editorialGrid, ticks: { ...editorialTicks, callback: (v) => v + ' GW' }, beginAtZero: true },
+      x: { grid: { display: false }, ticks: { ...editorialTicks, font: { size: 10, family: "'IBM Plex Sans', sans-serif" } } }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 02b · PJM capacity auction prices
+// ============================================================
+new Chart(document.getElementById('chart-pjm'), {
+  type: 'bar',
+  data: {
+    labels: ['2023/24', '2024/25', '2025/26', '2026/27', '2027/28'],
+    datasets: [{
+      label: '$/MW-day (clearing price)',
+      data: [49, 29, 270, 330, 333],
+      backgroundColor: ['#8a8173', '#8a8173', WARN, WARN, WARN],
+      borderRadius: 0,
+      barPercentage: 0.65,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      title: { display: true, text: 'PJM capacity-auction clearing price ($/MW-day)', font: { size: 13, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK, padding: { bottom: 16 } },
+      tooltip: { callbacks: { label: (c) => ` $${c.parsed.y}/MW-day` } }
+    },
+    scales: {
+      y: { grid: editorialGrid, ticks: { ...editorialTicks, callback: (v) => '$' + v }, beginAtZero: true },
+      x: { grid: { display: false }, ticks: editorialTicks }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 03 · Water withdrawals (log scale)
+// ============================================================
+new Chart(document.getElementById('chart-water'), {
+  type: 'bar',
+  data: {
+    labels: [
+      'GPT-3 training · onsite',
+      'GPT-3 training · total',
+      'TSMC Arizona Fab 1 · day',
+      'Google Uruguay · day (proposed)',
+      'TSMC Taiwan fabs · day',
+      'Google Cerrillos · year (proposed)',
+      'AI sector · 2027 projection (low)'
+    ],
+    datasets: [{
+      label: 'Liters',
+      data: [700000, 5400000, 18000000, 7600000, 156000000, 7000000000, 4200000000000],
+      backgroundColor: [SLATE, SLATE, GOLD, GOLD, GOLD, WARN, WARN],
+      borderRadius: 0,
+      barPercentage: 0.72,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (c) => {
+            const v = c.parsed.x;
+            if (v >= 1e12) return ' ' + (v/1e12).toFixed(2) + ' trillion L';
+            if (v >= 1e9)  return ' ' + (v/1e9).toFixed(2) + ' billion L';
+            if (v >= 1e6)  return ' ' + (v/1e6).toFixed(2) + ' million L';
+            if (v >= 1e3)  return ' ' + (v/1e3).toLocaleString() + ' thousand L';
+            return ' ' + v.toLocaleString() + ' L';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        type: 'logarithmic',
+        grid: editorialGrid,
+        ticks: {
+          ...editorialTicks,
+          callback: (v) => {
+            if (v >= 1e12) return (v/1e12) + 'T';
+            if (v >= 1e9)  return (v/1e9) + 'B';
+            if (v >= 1e6)  return (v/1e6) + 'M';
+            if (v >= 1e3)  return (v/1e3) + 'k';
+            return v;
+          }
+        },
+        title: { display: true, text: 'Liters (log scale)', font: { size: 11, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK_MUTED }
+      },
+      y: { grid: { display: false }, ticks: { ...editorialTicks, font: { size: 11, family: "'IBM Plex Sans', sans-serif" } } }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 04 · Hyperscaler emissions vs baseline
+// ============================================================
+new Chart(document.getElementById('chart-emissions'), {
+  type: 'bar',
+  data: {
+    labels: ['Google\n(vs 2019)', 'Microsoft\n(vs 2020)', 'Amazon total\n(vs 2019)', 'Amazon Scope 1\n(vs 2019)'],
+    datasets: [{
+      label: '% change from baseline',
+      data: [51, 23.4, 33, 162],
+      backgroundColor: [WARN, WARN, WARN, '#7a2410'],
+      borderRadius: 0,
+      barPercentage: 0.55,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => ' +' + c.parsed.y + '% from baseline' } }
+    },
+    scales: {
+      y: {
+        grid: editorialGrid,
+        ticks: { ...editorialTicks, callback: (v) => '+' + v + '%' },
+        beginAtZero: true,
+        title: { display: true, text: '% change from pledge baseline', font: { size: 11, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK_MUTED }
+      },
+      x: { grid: { display: false }, ticks: { ...editorialTicks, font: { size: 10.5, family: "'IBM Plex Sans', sans-serif" } } }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 05 · E-waste projection
+// ============================================================
+new Chart(document.getElementById('chart-ewaste'), {
+  type: 'line',
+  data: {
+    labels: ['2023', '2024', '2025', '2026', '2027', '2028', '2029', '2030'],
+    datasets: [
+      {
+        label: 'High scenario',
+        data: [2.6, 30, 120, 380, 820, 1600, 2800, 5000],
+        borderColor: WARN,
+        backgroundColor: 'rgba(168, 60, 30, 0.14)',
+        borderWidth: 2.5,
+        tension: 0.35,
+        fill: '+1',
+        pointRadius: 3,
+        pointBackgroundColor: WARN,
+      },
+      {
+        label: 'Mid scenario',
+        data: [2.6, 20, 70, 180, 400, 780, 1500, 2500],
+        borderColor: GOLD,
+        backgroundColor: 'rgba(139, 105, 20, 0.12)',
+        borderWidth: 2,
+        tension: 0.35,
+        fill: '+1',
+        pointRadius: 3,
+        pointBackgroundColor: GOLD,
+      },
+      {
+        label: 'Low scenario',
+        data: [2.6, 12, 35, 85, 190, 400, 780, 1200],
+        borderColor: SLATE,
+        backgroundColor: 'rgba(30, 42, 68, 0.12)',
+        borderWidth: 2,
+        tension: 0.35,
+        fill: 'origin',
+        pointRadius: 3,
+        pointBackgroundColor: SLATE,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { intersect: false, mode: 'index' },
+    plugins: {
+      legend: { position: 'top', align: 'start' },
+      tooltip: { callbacks: { label: (c) => ` ${c.dataset.label}: ${c.parsed.y.toLocaleString()} kt` } }
+    },
+    scales: {
+      y: {
+        grid: editorialGrid,
+        ticks: { ...editorialTicks, callback: (v) => v.toLocaleString() + ' kt' },
+        title: { display: true, text: 'Thousand metric tonnes / year', font: { size: 11, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK_MUTED }
+      },
+      x: { grid: { display: false }, ticks: editorialTicks }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 06 · US data-center power mix
+// ============================================================
+new Chart(document.getElementById('chart-mix'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Natural gas', 'Renewables', 'Nuclear', 'Coal', 'Other'],
+    datasets: [{
+      data: [40, 24, 20, 15, 1],
+      backgroundColor: [WARN, COOL, SLATE, '#3a2820', INK_QUIET],
+      borderColor: PAPER,
+      borderWidth: 2,
+      hoverOffset: 6,
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: { position: 'bottom', align: 'center', labels: { padding: 12, font: { size: 11 } } },
+      tooltip: { callbacks: { label: (c) => ` ${c.label}: ${c.parsed}%` } }
+    }
+  }
+});
+
+// ============================================================
+// FIGURE 07 · Coal plant retirement delays
+// ============================================================
+new Chart(document.getElementById('chart-coal'), {
+  type: 'bar',
+  data: {
+    labels: [
+      'Plant Bowen (GA)',
+      'Plant Scherer U3 (GA)',
+      'North Omaha U5 (NE)',
+      'Gibson (IN)',
+      'Clover (VA)',
+      'Columbia Energy (WI)',
+      'Dave Johnston (WY)',
+      'Martin Drake (CO)',
+      'Belle River U2 (MI)',
+      'Monroe U1 (MI)',
+      'Coronado (AZ)',
+      'Naughton (WY)',
+      'Coal Creek (ND)',
+      'Cumberland (TN)',
+      'Gerald Gentleman (NE)'
+    ],
+    datasets: [{
+      label: 'Years of delay',
+      data: [5, 5, 7, 4, 3, 2, 3, 2, 4, 3, 5, 3, 4, 3, 4],
+      backgroundColor: '#3a2820',
+      borderRadius: 0,
+      barPercentage: 0.75,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (c) => ' +' + c.parsed.x + ' years beyond planned retirement' } }
+    },
+    scales: {
+      x: {
+        grid: editorialGrid,
+        ticks: { ...editorialTicks, callback: (v) => '+' + v + ' yr' },
+        title: { display: true, text: 'Years past originally planned retirement', font: { size: 11, family: "'IBM Plex Sans', sans-serif", weight: '600' }, color: INK_MUTED },
+        beginAtZero: true
+      },
+      y: { grid: { display: false }, ticks: { ...editorialTicks, font: { size: 11, family: "'IBM Plex Sans', sans-serif" } } }
+    }
+  }
+});
+</script>
+
+</body>
+</html>

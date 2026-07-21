@@ -1,0 +1,1987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICE Distribution Across America | Interactive Report</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson@3"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --bg-card-hover: #22222e;
+            --bg-insight: #1a1520;
+            --text-primary: #f0f0f5;
+            --text-secondary: #a0a0b0;
+            --text-muted: #606070;
+            --accent-red: #e63946;
+            --accent-red-dim: #b82d38;
+            --accent-orange: #f4a261;
+            --accent-blue: #457b9d;
+            --accent-teal: #2a9d8f;
+            --accent-purple: #7b68ee;
+            --accent-yellow: #e9c46a;
+            --border-color: #2a2a3a;
+            --gradient-dark: linear-gradient(135deg, #0a0a0f 0%, #1a1a24 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Serif 4', Georgia, serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.7;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        .serif { font-family: 'Source Serif 4', Georgia, serif; }
+        .sans { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+
+        /* Header */
+        .hero {
+            background: var(--gradient-dark);
+            border-bottom: 1px solid var(--border-color);
+            padding: 5rem 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(230, 57, 70, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(69, 123, 157, 0.06) 0%, transparent 40%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--accent-red);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .eyebrow::before {
+            content: '';
+            width: 40px;
+            height: 2px;
+            background: var(--accent-red);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2.5rem, 6vw, 4rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        h1 span {
+            color: var(--accent-red);
+        }
+
+        .subtitle {
+            font-size: 1.35rem;
+            color: var(--text-secondary);
+            font-weight: 300;
+            line-height: 1.6;
+        }
+
+        .byline {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Key Stats Bar */
+        .stats-bar {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .stat-value {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 2.25rem;
+            font-weight: 500;
+            color: var(--accent-red);
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-family: -apple-system, sans-serif;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .stat-change {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--accent-orange);
+            margin-top: 0.25rem;
+        }
+
+        /* Main Content */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+        }
+
+        /* Article sections */
+        .article-section {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .article-section p {
+            font-size: 1.15rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .article-section p:last-child {
+            margin-bottom: 0;
+        }
+
+        .lead-paragraph {
+            font-size: 1.35rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .lead-paragraph::first-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            float: left;
+            line-height: 0.8;
+            padding-right: 0.75rem;
+            color: var(--accent-red);
+        }
+
+        /* Wide sections for visualizations */
+        .wide-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .full-width-section {
+            width: 100%;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+        }
+
+        .full-width-section .inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Section Headers */
+        .section-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        h2 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        h3 {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .section-desc {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        /* Insight Boxes */
+        .insight-box {
+            background: linear-gradient(135deg, rgba(230, 57, 70, 0.08) 0%, rgba(26, 26, 36, 0.9) 100%);
+            border-left: 4px solid var(--accent-red);
+            border-radius: 0 8px 8px 0;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+        }
+
+        .insight-box.teal {
+            background: linear-gradient(135deg, rgba(42, 157, 143, 0.08) 0%, rgba(26, 26, 36, 0.9) 100%);
+            border-left-color: var(--accent-teal);
+        }
+
+        .insight-box.orange {
+            background: linear-gradient(135deg, rgba(244, 162, 97, 0.08) 0%, rgba(26, 26, 36, 0.9) 100%);
+            border-left-color: var(--accent-orange);
+        }
+
+        .insight-box.purple {
+            background: linear-gradient(135deg, rgba(123, 104, 238, 0.08) 0%, rgba(26, 26, 36, 0.9) 100%);
+            border-left-color: var(--accent-purple);
+        }
+
+        .insight-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent-red);
+            margin-bottom: 0.5rem;
+        }
+
+        .insight-box.teal .insight-label { color: var(--accent-teal); }
+        .insight-box.orange .insight-label { color: var(--accent-orange); }
+        .insight-box.purple .insight-label { color: var(--accent-purple); }
+
+        .insight-text {
+            font-size: 1.1rem;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        /* Big Number Callout */
+        .big-number-callout {
+            text-align: center;
+            padding: 3rem 2rem;
+            margin: 2rem 0;
+        }
+
+        .big-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: clamp(4rem, 12vw, 8rem);
+            font-weight: 500;
+            color: var(--accent-red);
+            line-height: 1;
+        }
+
+        .big-number-label {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Comparison visual */
+        .dichotomy-visual {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 2rem;
+            align-items: center;
+            padding: 2rem;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin: 2rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .dichotomy-visual {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+            .dichotomy-vs { transform: rotate(90deg); }
+        }
+
+        .dichotomy-side {
+            text-align: center;
+        }
+
+        .dichotomy-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 3.5rem;
+            font-weight: 500;
+            line-height: 1;
+        }
+
+        .dichotomy-number.red { color: var(--accent-red); }
+        .dichotomy-number.muted { color: var(--text-muted); }
+
+        .dichotomy-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .dichotomy-change {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .dichotomy-change.up { color: var(--accent-red); }
+        .dichotomy-change.flat { color: var(--text-muted); }
+
+        .dichotomy-vs {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            padding: 1rem;
+        }
+
+        /* Map Container */
+        .map-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        #us-map {
+            width: 100%;
+            height: 500px;
+        }
+
+        #us-map svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: -apple-system, sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .legend-gradient {
+            width: 120px;
+            height: 12px;
+            border-radius: 2px;
+            background: linear-gradient(to right, #1a1a24, #e63946);
+        }
+
+        /* Map Controls */
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .map-btn {
+            padding: 0.5rem 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-secondary);
+            font-family: -apple-system, sans-serif;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .map-btn:hover, .map-btn.active {
+            background: var(--accent-red);
+            border-color: var(--accent-red);
+            color: white;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 1000;
+            min-width: 220px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            font-family: -apple-system, sans-serif;
+        }
+
+        .tooltip.visible {
+            opacity: 1;
+        }
+
+        .tooltip-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .tooltip-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            padding: 0.25rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tooltip-row:last-child {
+            border-bottom: none;
+        }
+
+        .tooltip-label {
+            color: var(--text-muted);
+        }
+
+        .tooltip-value {
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        /* Charts Grid */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 500px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            transition: border-color 0.2s;
+        }
+
+        .chart-card:hover {
+            border-color: var(--accent-red-dim);
+        }
+
+        .chart-card h3 {
+            font-family: -apple-system, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-subtitle {
+            font-family: -apple-system, sans-serif;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+
+        .chart-full {
+            grid-column: 1 / -1;
+        }
+
+        .chart-full .chart-container {
+            height: 350px;
+        }
+
+        /* Narrative Cards */
+        .narrative-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .narrative-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .narrative-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-2px);
+        }
+
+        .narrative-card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .narrative-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(230, 57, 70, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .narrative-card h4 {
+            font-family: -apple-system, sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.3;
+        }
+
+        .narrative-card p {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Argument Section */
+        .argument-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin: 2rem 0;
+            overflow: hidden;
+        }
+
+        .argument-header {
+            padding: 1.25rem 1.5rem;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .argument-header:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .argument-header h4 {
+            font-family: -apple-system, sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .argument-quote {
+            color: var(--accent-orange);
+        }
+
+        .argument-toggle {
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            transition: transform 0.3s;
+        }
+
+        .argument-content {
+            padding: 1.5rem;
+            display: none;
+        }
+
+        .argument-section.open .argument-content {
+            display: block;
+        }
+
+        .argument-section.open .argument-toggle {
+            transform: rotate(45deg);
+        }
+
+        .argument-content p {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .argument-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .data-point {
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin: 1rem 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            border-left: 3px solid var(--accent-teal);
+        }
+
+        /* Data Tables */
+        .data-table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-family: -apple-system, sans-serif;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: -apple-system, sans-serif;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: var(--bg-secondary);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tr:hover td {
+            background: var(--bg-card-hover);
+        }
+
+        .highlight-cell {
+            color: var(--accent-red);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        /* Field Office Markers */
+        .office-marker {
+            fill: var(--accent-orange);
+            stroke: var(--bg-primary);
+            stroke-width: 1.5;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .office-marker:hover {
+            fill: #fff;
+            r: 6;
+        }
+
+        .facility-marker {
+            fill: var(--accent-purple);
+            stroke: var(--bg-primary);
+            stroke-width: 1;
+            opacity: 0.7;
+        }
+
+        /* Timeline */
+        .timeline-section {
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border-color);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2rem;
+            top: 0.25rem;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            border: 2px solid var(--bg-card);
+        }
+
+        .timeline-date {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-orange);
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-title {
+            font-family: -apple-system, sans-serif;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .timeline-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Pull Quote */
+        .pull-quote {
+            border-left: 4px solid var(--accent-orange);
+            padding: 1.5rem 2rem;
+            margin: 2.5rem 0;
+            background: rgba(244, 162, 97, 0.05);
+        }
+
+        .pull-quote p {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.5rem;
+            font-style: italic;
+            line-height: 1.5;
+            color: var(--text-primary);
+        }
+
+        .pull-quote cite {
+            display: block;
+            margin-top: 1rem;
+            font-family: -apple-system, sans-serif;
+            font-size: 0.9rem;
+            font-style: normal;
+            color: var(--text-muted);
+        }
+
+        /* Methodology Note */
+        .methodology {
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 2rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .methodology h4 {
+            font-family: -apple-system, sans-serif;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-family: -apple-system, sans-serif;
+        }
+
+        footer a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .sources {
+            margin-bottom: 2rem;
+        }
+
+        .sources h4 {
+            margin-bottom: 0.75rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .sources ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 2rem 1rem;
+            }
+            
+            .article-section {
+                padding: 2rem 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.75rem;
+            }
+
+            #us-map {
+                height: 350px;
+            }
+
+            .big-number {
+                font-size: 4rem;
+            }
+
+            .dichotomy-number {
+                font-size: 2.5rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <header class="hero">
+        <div class="hero-content">
+            <div class="eyebrow">Data Investigation • February 2026</div>
+            <h1>The Detention <span>Expansion</span></h1>
+            <p class="subtitle">2025 saw ICE's budget nearly triple and its workforce double. But deportations barely moved. Where is all that capacity going—and what does the geographic distribution reveal about what's actually happening?</p>
+            <div class="byline">Data compiled from TRAC Immigration, ICE Statistics, Vera Institute, and Congressional records</div>
+        </div>
+    </header>
+
+    <div class="stats-bar">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value">22,000+</div>
+                <div class="stat-label">ICE Personnel</div>
+                <div class="stat-change">↑ 120% in 2025</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">65,735</div>
+                <div class="stat-label">Detainees</div>
+                <div class="stat-change">↑ 65% in 2025</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">$28.7B</div>
+                <div class="stat-label">FY2025 Budget</div>
+                <div class="stat-change">↑ 193% from FY2024</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">290,603</div>
+                <div class="stat-label">Removals (YTD)</div>
+                <div class="stat-change">↑ 7% from FY2024</div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <!-- Introduction -->
+        <section class="article-section">
+            <p class="lead-paragraph">The numbers don't add up the way you'd expect. Immigration and Customs Enforcement received a 193% budget increase, more than doubled its workforce, and expanded detention capacity by 65%—yet actual deportations increased just 7% year-over-year. The gap between infrastructure growth and operational output is the central puzzle of the 2025 ICE expansion, and understanding it requires looking past the headlines to the geographic and structural data underneath.</p>
+
+            <p>This report presents that data: where ICE operates, how enforcement varies dramatically by state, who is being detained, and how 2025's policy changes reshaped the entire system. The visualizations below are interactive—explore them to understand your state's position in this national picture.</p>
+        </section>
+
+        <!-- The Core Dichotomy -->
+        <section class="full-width-section">
+            <div class="inner">
+                <div class="section-header">
+                    <h2>The Enforcement-Detention Gap</h2>
+                    <p class="section-desc">The defining feature of the 2025 expansion isn't increased deportations—it's increased detention.</p>
+                </div>
+
+                <div class="dichotomy-visual">
+                    <div class="dichotomy-side">
+                        <div class="dichotomy-number red">+65%</div>
+                        <div class="dichotomy-label">Detention Population Growth</div>
+                        <div class="dichotomy-change up">39,703 → 65,735</div>
+                    </div>
+                    <div class="dichotomy-vs">vs</div>
+                    <div class="dichotomy-side">
+                        <div class="dichotomy-number muted">+7%</div>
+                        <div class="dichotomy-label">Deportation Growth</div>
+                        <div class="dichotomy-change flat">271,484 → 290,603</div>
+                    </div>
+                </div>
+
+                <div class="charts-grid" style="margin-top: 2rem;">
+                    <div class="chart-card">
+                        <h3>The Divergence</h3>
+                        <p class="chart-subtitle">Detention population vs. monthly removals, 2025</p>
+                        <div class="chart-container">
+                            <canvas id="divergenceChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Release-to-Removal Ratio</h3>
+                        <p class="chart-subtitle">For every person released, how many are deported?</p>
+                        <div class="chart-container">
+                            <canvas id="ratioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="article-section">
+            <div class="insight-box">
+                <div class="insight-label">Key Finding</div>
+                <div class="insight-text">The release-to-deportation ratio shifted from <strong>1:1.6</strong> in December 2024 to <strong>1:14.3</strong> by late 2025. For every person released pending a hearing, 14 are now deported directly from custody—or remain detained.</div>
+            </div>
+
+            <p>This gap suggests three possible interpretations. First, the system may be preparing for future capacity—building infrastructure now that will be utilized later. Second, detention itself may be functioning as policy, with prolonged confinement serving as deterrence independent of eventual removal. Third, bottlenecks elsewhere (immigration courts, receiving countries, transportation logistics) may be limiting throughput despite expanded capacity.</p>
+
+            <p>The data supports elements of all three, but the geographic distribution provides crucial context. Where detention is concentrated, who operates the facilities, and which states see the highest enforcement activity tells a story about political economy as much as immigration policy.</p>
+        </section>
+
+        <!-- Geographic Map Section -->
+        <section class="wide-section">
+            <div class="section-header">
+                <h2>Geography Is Policy</h2>
+                <p class="section-desc">Your exposure to ICE enforcement depends primarily on where you live—and your state government's political alignment.</p>
+            </div>
+
+            <div class="map-container">
+                <div class="map-controls">
+                    <button class="map-btn active" data-view="detention">Detention Population</button>
+                    <button class="map-btn" data-view="arrests">Arrest Rate (per 100k)</button>
+                    <button class="map-btn" data-view="facilities">Facility Count</button>
+                </div>
+                <div id="us-map"></div>
+                <div class="map-legend">
+                    <div class="legend-item">
+                        <div class="legend-gradient"></div>
+                        <span>Low → High</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #f4a261;"></div>
+                        <span>ERO Field Office</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #7b68ee;"></div>
+                        <span>Major Detention Facility</span>
+                    </div>
+                </div>
+            </div>
+            <div class="tooltip" id="tooltip"></div>
+
+            <div class="insight-box teal" style="margin-top: 1.5rem;">
+                <div class="insight-label">What the map reveals</div>
+                <div class="insight-text">Texas accounts for <strong>27% of all detainees</strong> and <strong>23% of all arrests</strong> despite having 8.5% of the U.S. population. The concentration isn't random—it maps onto states with mandatory local-federal cooperation, established private prison infrastructure, and political alignment with enforcement expansion.</div>
+            </div>
+        </section>
+
+        <section class="article-section">
+            <h3>Per-Capita Rates Tell the Real Story</h3>
+            <p>Total numbers obscure a crucial pattern. California has the third-highest arrest count, but its per-capita arrest rate is far lower than interior states like Tennessee, Utah, and Oklahoma. The difference? Sanctuary policies and limited jail cooperation.</p>
+            
+            <p>This creates radically different lived realities. An undocumented resident in Nashville faces a per-capita arrest rate of 45.9 per 100,000—more than double California's rate despite Tennessee having a far smaller undocumented population. Political geography, not demographic geography, determines enforcement intensity.</p>
+        </section>
+
+        <section class="full-width-section">
+            <div class="inner">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Detention by State</h3>
+                        <p class="chart-subtitle">Top 10 states by current detainee population</p>
+                        <div class="chart-container">
+                            <canvas id="stateDetentionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Arrest Rate Comparison</h3>
+                        <p class="chart-subtitle">Per 100,000 residents, Jan-Jun 2025</p>
+                        <div class="chart-container">
+                            <canvas id="arrestRateChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Criminal Status Shift -->
+        <section class="article-section">
+            <h2>The Vanishing Criminal Rationale</h2>
+            <p>For years, ICE justified its operations by emphasizing focus on public safety threats—those with criminal convictions. The 2025 data shows this framework has collapsed.</p>
+        </section>
+
+        <section class="full-width-section">
+            <div class="inner">
+                <div class="big-number-callout">
+                    <div class="big-number">73.6%</div>
+                    <div class="big-number-label">of current ICE detainees have no criminal conviction—up from 42% in January 2025</div>
+                </div>
+
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Detainee Criminal Status</h3>
+                        <p class="chart-subtitle">Share with vs. without criminal convictions</p>
+                        <div class="chart-container">
+                            <canvas id="criminalStatusChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Dallas Field Office Breakdown</h3>
+                        <p class="chart-subtitle">2025 arrests by criminal history</p>
+                        <div class="chart-container">
+                            <canvas id="dallasChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="article-section">
+            <p>The Dallas field office data is particularly revealing: 62% of those arrested in 2025 had no criminal conviction whatsoever. This isn't targeted removal of dangerous individuals—it's broad population enforcement. Whether one views this as appropriate policy or mission creep depends on priors, but the data itself is unambiguous about what's happening.</p>
+
+            <div class="insight-box orange">
+                <div class="insight-label">Policy Implication</div>
+                <div class="insight-text">The shift from criminal-priority to broad enforcement changes the fundamental character of ICE operations. The "dangerous criminals" framing that has historically justified the agency's existence no longer matches its operational reality.</div>
+            </div>
+        </section>
+
+        <!-- Private Prison Economics -->
+        <section class="article-section">
+            <h2>Follow the Money: Private Prison Geography</h2>
+            <p>The detention expansion flows through private contractors. Understanding who profits—and where—reveals the economic logic driving facility placement.</p>
+        </section>
+
+        <section class="full-width-section">
+            <div class="inner">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Facility Operators</h3>
+                        <p class="chart-subtitle">86% of detainees in for-profit facilities</p>
+                        <div class="chart-container">
+                            <canvas id="operatorChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Budget Allocation</h3>
+                        <p class="chart-subtitle">FY2025 $28.7B breakdown</p>
+                        <div class="chart-container">
+                            <canvas id="budgetChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="narrative-cards">
+                    <div class="narrative-card">
+                        <div class="narrative-card-header">
+                            <div class="narrative-icon">📍</div>
+                            <h4>GEO Group</h4>
+                        </div>
+                        <p>Operates 22,000+ beds across 20 facilities. Key contracts include South Texas IPC (Pearsall), Northwest IPC (Tacoma), and the recently reopened Delaney Hall in Newark under a <strong>$1.2 billion contract</strong>.</p>
+                    </div>
+                    <div class="narrative-card">
+                        <div class="narrative-card-header">
+                            <div class="narrative-icon">📍</div>
+                            <h4>CoreCivic</h4>
+                        </div>
+                        <p>Manages major facilities including Stewart Detention Center (GA), Adams County (MS), California City (CA), and the South Texas Family Residential Center in Dilley—the largest family detention facility at <strong>2,400 beds</strong>.</p>
+                    </div>
+                    <div class="narrative-card">
+                        <div class="narrative-card-header">
+                            <div class="narrative-icon">📍</div>
+                            <h4>LaSalle Corrections</h4>
+                        </div>
+                        <p>Dominates Louisiana detention with Winn Correctional Center (1,576 beds) and a newly opened facility at <strong>Angola</strong>—the infamous Louisiana State Penitentiary now also housing ICE detainees.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="article-section">
+            <p>The geographic concentration isn't coincidental. Texas, Louisiana, Georgia, and Mississippi—the states with the highest detention populations—share two characteristics: established private prison infrastructure and regulatory environments favorable to these contractors. The $45 billion detention allocation over four years flows disproportionately to these states and these companies.</p>
+
+            <div class="pull-quote">
+                <p>"The top 20 detention facilities hold 59% of all ICE detainees. The system is remarkably concentrated—a handful of private contractors in a handful of states control the majority of America's immigration detention capacity."</p>
+            </div>
+
+            <p>This creates infrastructure lock-in. Private prison contracts, facility construction, and personnel hiring generate institutional momentum that persists across administrations. The machinery being built in 2025 will exist for whoever holds power next—and the companies holding these contracts have strong incentives to ensure continued utilization.</p>
+        </section>
+
+        <!-- Historical Trend -->
+        <section class="full-width-section">
+            <div class="inner">
+                <div class="section-header">
+                    <h2>Historical Context</h2>
+                    <p class="section-desc">The 2025 expansion in the context of detention trends since 2020.</p>
+                </div>
+
+                <div class="chart-card chart-full">
+                    <h3>Detention Population Over Time</h3>
+                    <p class="chart-subtitle">Average daily population, 2020-2025. The January 2025 inflection point is visible.</p>
+                    <div class="chart-container">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="methodology">
+                    <h4>Reading This Chart</h4>
+                    <p>The COVID-era collapse (2020-2021), the gradual rebuild (2022-2024), and the 2025 surge are all visible. Note that the current population exceeds even the pre-COVID high of early 2020. The vertical dashed line marks January 2025—the inflection point when the current expansion began.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Nuancing Arguments -->
+        <section class="article-section">
+            <h2>What the Data Does (and Doesn't) Support</h2>
+            <p>Immigration enforcement generates strong claims across the political spectrum. The 2025 data complicates many of them—on all sides. Below, we examine common arguments against the evidence.</p>
+        </section>
+
+        <section class="wide-section">
+            <div class="argument-section">
+                <div class="argument-header" onclick="toggleArgument(this)">
+                    <h4><span class="argument-quote">"We're just enforcing existing laws"</span></h4>
+                    <span class="argument-toggle">+</span>
+                </div>
+                <div class="argument-content">
+                    <p>This framing presents enforcement levels as legally determined rather than policy choices. The data shows otherwise.</p>
+                    <div class="data-point">The same laws existed in 2023 when detention populations were 28,000. The 2025 expansion to 65,000+ reflects resource allocation decisions, not legal requirements.</div>
+                    <p>The Laken Riley Act created <em>new</em> mandatory detention categories. The expedited removal expansion changed <em>which</em> laws apply <em>where</em>. Law enforcement always involves discretionary choices about priorities and resources. The 193% budget increase wasn't mandated by statute—it was a policy choice about how much to spend on enforcement versus other priorities.</p>
+                    <p><strong>What's accurate:</strong> The legal authority for these actions exists. <strong>What's misleading:</strong> The implication that current enforcement levels are required rather than chosen.</p>
+                </div>
+            </div>
+
+            <div class="argument-section">
+                <div class="argument-header" onclick="toggleArgument(this)">
+                    <h4><span class="argument-quote">"ICE focuses on criminals and public safety threats"</span></h4>
+                    <span class="argument-toggle">+</span>
+                </div>
+                <div class="argument-content">
+                    <p>This was the explicit Biden-era priority framework, and it's demonstrably no longer operative.</p>
+                    <div class="data-point">73.6% of current detainees have no criminal conviction—up from 42% in January 2025. In the Dallas field office, 62% of 2025 arrests involved people with no criminal history.</div>
+                    <p>The shift is categorical. When nearly three-quarters of detainees have no criminal conviction, the "dangerous criminals" framing doesn't match operational reality. This doesn't necessarily mean current enforcement is illegitimate—one can argue for broad enforcement on other grounds—but it does mean the public justification has decoupled from actual practice.</p>
+                    <p><strong>What's accurate:</strong> ICE does arrest and deport people with criminal convictions. <strong>What's misleading:</strong> The suggestion that criminals are the primary or even majority target of current operations.</p>
+                </div>
+            </div>
+
+            <div class="argument-section">
+                <div class="argument-header" onclick="toggleArgument(this)">
+                    <h4><span class="argument-quote">"Sanctuary cities obstruct legitimate enforcement"</span></h4>
+                    <span class="argument-toggle">+</span>
+                </div>
+                <div class="argument-content">
+                    <p>The data shows sanctuary policies do reduce enforcement intensity—but "obstruction" implies something illegitimate.</p>
+                    <div class="data-point">California's per-capita arrest rate is roughly half that of cooperative interior states like Tennessee (45.9/100k) and Utah (47.0/100k), despite having larger undocumented populations.</div>
+                    <p>Sanctuary jurisdictions have made democratic choices about local resource allocation. They've decided not to use local police and jails to extend federal immigration enforcement. Whether this constitutes "obstruction" or "local autonomy" depends on one's view of federalism and enforcement priorities.</p>
+                    <p>The flip side: approximately 50% of ICE arrests still originate from local jails through cooperation programs. The states that have chosen cooperation see dramatically higher per-capita enforcement—their residents bear disproportionate exposure to federal immigration enforcement.</p>
+                    <p><strong>What's accurate:</strong> Sanctuary policies reduce ICE's operational effectiveness in those jurisdictions. <strong>What's contested:</strong> Whether local jurisdictions have the right to make those choices, and whether the variation constitutes "obstruction" or federalism working as designed.</p>
+                </div>
+            </div>
+
+            <div class="argument-section">
+                <div class="argument-header" onclick="toggleArgument(this)">
+                    <h4><span class="argument-quote">"Mass deportation is logistically impossible"</span></h4>
+                    <span class="argument-toggle">+</span>
+                </div>
+                <div class="argument-content">
+                    <p>The infrastructure scaling suggests serious preparation, even if current throughput lags.</p>
+                    <div class="data-point">Personnel doubled in 5 months. Bed capacity is targeting 107,000+. $75 billion has been allocated over 4 years. 33,000 federal employees from other agencies have been detailed to assist ICE.</div>
+                    <p>The question isn't raw capability but political sustainability and economic cost. The 7% increase in actual removals despite massive resource growth suggests bottlenecks exist—immigration courts, receiving countries willing to accept deportees, transportation logistics. But the detention infrastructure is being built regardless.</p>
+                    <p>Whether this infrastructure enables future mass removal, primarily serves as deterrence through detention, or represents wasteful over-building remains to be seen. But dismissing the possibility based on logistics underestimates the scale of resources now being deployed.</p>
+                    <p><strong>What's accurate:</strong> Current removal numbers haven't matched the infrastructure growth. <strong>What's uncertain:</strong> Whether this represents temporary bottlenecks or fundamental limits.</p>
+                </div>
+            </div>
+
+            <div class="argument-section">
+                <div class="argument-header" onclick="toggleArgument(this)">
+                    <h4><span class="argument-quote">"This is unprecedented authoritarianism"</span></h4>
+                    <span class="argument-toggle">+</span>
+                </div>
+                <div class="argument-content">
+                    <p>Historical context matters for this claim. Some aspects are genuinely novel; others have precedent.</p>
+                    <div class="data-point">Obama-era deportations peaked higher than current removal numbers. Detention populations hit similar levels in early 2020 before COVID.</div>
+                    <p>What <em>is</em> genuinely novel in 2025:</p>
+                    <ul style="margin: 1rem 0 1rem 1.5rem; color: var(--text-secondary);">
+                        <li>The <strong>speed</strong> of infrastructure scaling (workforce doubled in 5 months)</li>
+                        <li>The <strong>elimination of sensitive location protections</strong> (schools, churches, hospitals)</li>
+                        <li>The <strong>shift away from criminal prioritization</strong> to broad enforcement</li>
+                        <li>The <strong>use of 33,000+ detailees</strong> from other agencies</li>
+                        <li>The <strong>budget scale</strong> ($28.7B is nearly triple the prior baseline)</li>
+                    </ul>
+                    <p>"Unprecedented" requires specificity about which aspects. The machinery is more expansive than before, but the underlying legal authorities aren't new. Whether this represents a difference in degree or kind is a genuine question.</p>
+                    <p><strong>What's accurate:</strong> Several specific elements have no direct precedent. <strong>What's overstated:</strong> Claims that immigration enforcement itself is new or that current removal numbers exceed historical peaks.</p>
+                </div>
+            </div>
+
+            <div class="argument-section">
+                <div class="argument-header" onclick="toggleArgument(this)">
+                    <h4><span class="argument-quote">"Interior enforcement is a new development"</span></h4>
+                    <span class="argument-toggle">+</span>
+                </div>
+                <div class="argument-content">
+                    <p>Interior enforcement has always existed. What's changed is the balance.</p>
+                    <div class="data-point">Interior removals exceeded border deportations for the first time since 2014—a decade-long shift in enforcement geography.</div>
+                    <p>The policy question is about the <em>balance</em> between border and interior enforcement and what that balance signals about enforcement philosophy. Border-focused enforcement primarily affects new arrivals; interior-focused enforcement affects established residents, often with deep community ties, U.S. citizen children, and years of presence.</p>
+                    <p>The 2025 shift toward interior enforcement—enabled by the expanded expedited removal authority that now applies nationwide rather than just within 100 miles of the border—represents a change in who bears the enforcement burden. It's not that interior enforcement is new; it's that it's now dominant.</p>
+                    <p><strong>What's accurate:</strong> The interior-to-border ratio has shifted significantly. <strong>What's misleading:</strong> Suggestions that interior enforcement didn't previously exist.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Policy Timeline -->
+        <section class="article-section">
+            <h2>How We Got Here: The 2025 Policy Timeline</h2>
+            <p>The expansion didn't happen overnight. A series of policy changes, executive orders, and legislative actions created the current system.</p>
+        </section>
+
+        <section class="wide-section">
+            <div class="timeline-section">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">January 20, 2025</div>
+                        <div class="timeline-title">Executive Orders Signed</div>
+                        <div class="timeline-desc">Multiple immigration-focused executive orders signed on inauguration day, declaring a "national emergency" at the border and directing agency expansion.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">January 21, 2025</div>
+                        <div class="timeline-title">Sensitive Locations Policy Rescinded</div>
+                        <div class="timeline-desc">ICE ends decade-old protections limiting enforcement at schools, churches, hospitals, and courthouses. New policy relies on "agent discretion" rather than categorical limits.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">January 29, 2025</div>
+                        <div class="timeline-title">Laken Riley Act Signed</div>
+                        <div class="timeline-desc">Creates new mandatory detention categories for undocumented immigrants charged with theft, shoplifting, burglary, assault on law enforcement, or violent offenses.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">March 2025</div>
+                        <div class="timeline-title">Expedited Removal Expanded Nationwide</div>
+                        <div class="timeline-desc">Expedited removal now applies anywhere in the U.S. to anyone who cannot prove 2+ years of continuous presence. Eliminates the previous 100-mile border zone and 14-day arrival window.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">July 4, 2025</div>
+                        <div class="timeline-title">"One Big Beautiful Bill" Signed</div>
+                        <div class="timeline-desc">Allocates $75 billion over four years: $45B for detention expansion, $14B for transportation/removal, $8B for hiring. This is the funding mechanism for everything that followed.</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">July–November 2025</div>
+                        <div class="timeline-title">ICE Hiring Surge</div>
+                        <div class="timeline-desc">12,000+ officers hired in under 5 months through $50,000 signing bonuses, shortened 6-week training (down from 13), and eliminated age requirements (minimum lowered to 18, upper limit removed).</div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-date">October 2025</div>
+                        <div class="timeline-title">Interior Removals Exceed Border Deportations</div>
+                        <div class="timeline-desc">For the first time since 2014, removals from the U.S. interior outnumber border deportations—a fundamental shift in enforcement geography.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Workforce & Hiring -->
+        <section class="article-section">
+            <h2>The Workforce Question</h2>
+            <p>Doubling an agency's workforce in five months raises inevitable questions about quality, training, and institutional culture.</p>
+        </section>
+
+        <section class="full-width-section">
+            <div class="inner">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>Workforce Composition</h3>
+                        <p class="chart-subtitle">Personnel by division (2025-2026 estimates)</p>
+                        <div class="chart-container">
+                            <canvas id="workforceChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <h3>Hiring Surge Timeline</h3>
+                        <p class="chart-subtitle">Cumulative new hires, July-November 2025</p>
+                        <div class="chart-container">
+                            <canvas id="hiringChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="insight-box purple" style="margin-top: 1.5rem;">
+                    <div class="insight-label">Institutional Concern</div>
+                    <div class="insight-text">The House Homeland Security Committee has requested a GAO review of ICE hiring practices, citing concerns about reduced vetting standards. Training was cut from 13 weeks to 6 weeks; age requirements were eliminated; 85%+ of new hires came from law enforcement backgrounds, but institutional acculturation necessarily suffers at this pace.</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="article-section">
+            <p>Beyond direct ICE hires, approximately 33,000 federal employees from other agencies—DOJ, IRS, CBP, USCIS, DOD—have been detailed to support ICE operations. This effectively triples the available workforce when including detailees, but raises questions about expertise and mission alignment.</p>
+
+            <p>The hiring surge creates institutional facts that persist. These 12,000+ new officers will remain federal employees across administrations. The infrastructure being built—both physical and human—represents long-term commitments regardless of future policy direction.</p>
+        </section>
+
+        <!-- Field Offices & Facilities Tables -->
+        <section class="wide-section">
+            <div class="section-header">
+                <h2>The Infrastructure: Offices and Facilities</h2>
+                <p class="section-desc">The physical footprint of ICE operations across the United States.</p>
+            </div>
+
+            <div class="data-table-container" style="margin-bottom: 2rem;">
+                <div class="table-header">
+                    <h3>ERO Field Office Network (25 offices)</h3>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Office</th>
+                                <th>Location</th>
+                                <th>States/Territories Covered</th>
+                                <th>Region</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Atlanta</td><td>Atlanta, GA</td><td>Georgia, North Carolina, South Carolina</td><td>Southeast</td></tr>
+                            <tr><td>Baltimore</td><td>Baltimore, MD</td><td>Maryland</td><td>Northeast</td></tr>
+                            <tr><td>Boston</td><td>Boston, MA</td><td>CT, ME, MA, NH, RI, VT</td><td>Northeast</td></tr>
+                            <tr><td>Buffalo</td><td>Buffalo, NY</td><td>Upstate New York</td><td>Northeast</td></tr>
+                            <tr><td>Chicago</td><td>Chicago, IL</td><td>IL, IN, WI, MO, KS, KY</td><td>Midwest</td></tr>
+                            <tr><td>Dallas</td><td>Dallas, TX</td><td>North Texas, Oklahoma</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Denver</td><td>Denver, CO</td><td>Colorado, Wyoming</td><td>Mountain</td></tr>
+                            <tr><td>Detroit</td><td>Detroit, MI</td><td>Michigan, Ohio</td><td>Midwest</td></tr>
+                            <tr><td>El Paso</td><td>El Paso, TX</td><td>West Texas, New Mexico</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Harlingen</td><td>Harlingen, TX</td><td>Rio Grande Valley</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Houston</td><td>Houston, TX</td><td>Southeast Texas</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>Los Angeles</td><td>Los Angeles, CA</td><td>Southern California</td><td>West</td></tr>
+                            <tr><td>Miami</td><td>Miami, FL</td><td>Florida, Puerto Rico, USVI</td><td>Southeast</td></tr>
+                            <tr><td>Newark</td><td>Newark, NJ</td><td>New Jersey</td><td>Northeast</td></tr>
+                            <tr><td>New Orleans</td><td>New Orleans, LA</td><td>LA, AR, MS, AL, TN</td><td>Southeast</td></tr>
+                            <tr><td>New York City</td><td>New York, NY</td><td>NYC metro area</td><td>Northeast</td></tr>
+                            <tr><td>Philadelphia</td><td>Philadelphia, PA</td><td>PA, DE, WV</td><td>Northeast</td></tr>
+                            <tr><td>Phoenix</td><td>Phoenix, AZ</td><td>Arizona</td><td>Southwest</td></tr>
+                            <tr><td>Salt Lake City</td><td>Salt Lake City, UT</td><td>UT, ID, MT, NV</td><td>Mountain</td></tr>
+                            <tr><td>San Antonio</td><td>San Antonio, TX</td><td>Central Texas</td><td class="highlight-cell">Texas</td></tr>
+                            <tr><td>San Diego</td><td>San Diego, CA</td><td>San Diego & Imperial Counties</td><td>West</td></tr>
+                            <tr><td>San Francisco</td><td>San Francisco, CA</td><td>Northern CA, HI, Guam, Saipan</td><td>West</td></tr>
+                            <tr><td>Seattle</td><td>Seattle, WA</td><td>WA, OR, AK</td><td>Northwest</td></tr>
+                            <tr><td>St. Paul</td><td>St. Paul, MN</td><td>MN, ND, SD, IA, NE</td><td>Midwest</td></tr>
+                            <tr><td>Washington DC</td><td>Washington, DC</td><td>DC, Virginia</td><td>Northeast</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="data-table-container">
+                <div class="table-header">
+                    <h3>Major Detention Facilities (Top 15 by population)</h3>
+                </div>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Facility Name</th>
+                                <th>Location</th>
+                                <th>Operator</th>
+                                <th>Avg. Daily Pop.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>Camp East Montana</td><td>El Paso, TX</td><td>ICE/DOD</td><td class="highlight-cell">2,774</td></tr>
+                            <tr><td>California City DC</td><td>California City, CA</td><td>CoreCivic</td><td class="highlight-cell">2,560</td></tr>
+                            <tr><td>South Texas FRC</td><td>Dilley, TX</td><td>CoreCivic</td><td class="highlight-cell">2,400</td></tr>
+                            <tr><td>Adams County DC</td><td>Natchez, MS</td><td>CoreCivic</td><td class="highlight-cell">2,224</td></tr>
+                            <tr><td>Stewart DC</td><td>Lumpkin, GA</td><td>CoreCivic</td><td class="highlight-cell">2,044</td></tr>
+                            <tr><td>Adelanto IPC</td><td>Adelanto, CA</td><td>GEO Group</td><td class="highlight-cell">1,940</td></tr>
+                            <tr><td>South Texas IPC</td><td>Pearsall, TX</td><td>GEO Group</td><td class="highlight-cell">1,904</td></tr>
+                            <tr><td>Winn CC</td><td>Winnfield, LA</td><td>LaSalle</td><td class="highlight-cell">1,576</td></tr>
+                            <tr><td>Northwest IPC</td><td>Tacoma, WA</td><td>GEO Group</td><td class="highlight-cell">1,575</td></tr>
+                            <tr><td>Otay Mesa DC</td><td>San Diego, CA</td><td>CoreCivic</td><td class="highlight-cell">1,482</td></tr>
+                            <tr><td>Port Isabel SPC</td><td>Los Fresnos, TX</td><td>ICE-owned</td><td class="highlight-cell">1,200</td></tr>
+                            <tr><td>Krome North SPC</td><td>Miami, FL</td><td>ICE-owned</td><td class="highlight-cell">1,000</td></tr>
+                            <tr><td>Karnes County RC</td><td>Karnes City, TX</td><td>GEO Group</td><td class="highlight-cell">830</td></tr>
+                            <tr><td>Broward TC</td><td>Pompano Beach, FL</td><td>GEO Group</td><td class="highlight-cell">700</td></tr>
+                            <tr><td>Delaney Hall</td><td>Newark, NJ</td><td>GEO Group</td><td class="highlight-cell">400</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Conclusion -->
+        <section class="article-section">
+            <h2>What This Means</h2>
+            <p>The 2025 ICE expansion is real, substantial, and concentrated in specific geographies. The data supports several conclusions regardless of one's policy preferences:</p>
+
+            <p><strong>Resource allocation reveals priorities.</strong> A 193% budget increase and 120% workforce expansion represent an enormous commitment of public resources. The $28.7 billion FY2025 budget exceeds the entire Department of Justice federal prison system. Where governments spend money tells us what they actually prioritize, independent of rhetoric.</p>
+
+            <p><strong>Infrastructure creates lock-in.</strong> Private prison contracts, facility construction, and 12,000+ new federal employees generate institutional momentum that persists across administrations. The machinery being built in 2025 will exist—and require utilization or expensive dismantling—regardless of future policy direction.</p>
+
+            <p><strong>Geography determines exposure.</strong> Immigration enforcement is not experienced uniformly. The five Texas field offices, the Louisiana-Mississippi-Georgia detention corridor, and the per-capita enforcement rates that vary by a factor of four between states create radically different lived realities for immigrant communities depending on state-level political decisions.</p>
+
+            <p><strong>The metrics mismatch matters.</strong> The gap between detention growth (65%) and removal growth (7%) is the most analytically interesting tension in this data. Either the system is inefficient, detention itself is the policy goal, or external bottlenecks are binding. Each interpretation has different implications for what comes next.</p>
+
+            <div class="insight-box" style="margin-top: 2rem;">
+                <div class="insight-label">The Bottom Line</div>
+                <div class="insight-text">The 2025 data shows a system optimized for detention rather than removal, concentrated in politically cooperative states, operated primarily by private contractors, and increasingly focused on non-criminal populations. Whether one views this as appropriate enforcement or problematic overreach, the data itself is clear about what's actually happening on the ground.</div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="sources">
+                <h4>Data Sources</h4>
+                <ul>
+                    <li><a href="https://tracreports.org" target="_blank">TRAC Immigration Reports</a></li>
+                    <li><a href="https://www.ice.gov/statistics" target="_blank">ICE Official Statistics</a></li>
+                    <li><a href="https://www.vera.org" target="_blank">Vera Institute</a></li>
+                    <li><a href="https://www.brennancenter.org" target="_blank">Brennan Center for Justice</a></li>
+                    <li><a href="https://www.americanimmigrationcouncil.org" target="_blank">American Immigration Council</a></li>
+                    <li><a href="https://www.prisonpolicy.org" target="_blank">Prison Policy Initiative</a></li>
+                </ul>
+            </div>
+            <p>Report compiled February 2026 • Data through November 2025</p>
+            <p style="margin-top: 0.5rem; font-size: 0.8rem;">Interactive visualizations built with D3.js and Chart.js</p>
+        </div>
+    </footer>
+
+    <script>
+        // Chart.js Global Config
+        Chart.defaults.color = '#a0a0b0';
+        Chart.defaults.borderColor = '#2a2a3a';
+        Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif";
+
+        // State Data
+        const stateData = {
+            'TX': { detention: 17696, arrests: 26341, arrestRate: 86.6, facilities: 69, name: 'Texas' },
+            'LA': { detention: 7096, arrests: 3200, arrestRate: 68.5, facilities: 12, name: 'Louisiana' },
+            'CA': { detention: 5711, arrests: 8460, arrestRate: 21.5, facilities: 8, name: 'California' },
+            'FL': { detention: 4217, arrests: 12982, arrestRate: 55.9, facilities: 6, name: 'Florida' },
+            'GA': { detention: 3973, arrests: 4500, arrestRate: 41.2, facilities: 5, name: 'Georgia' },
+            'AZ': { detention: 3200, arrests: 3000, arrestRate: 46.8, facilities: 7, name: 'Arizona' },
+            'NJ': { detention: 1800, arrests: 2100, arrestRate: 22.8, facilities: 3, name: 'New Jersey' },
+            'CO': { detention: 1650, arrests: 1800, arrestRate: 30.5, facilities: 4, name: 'Colorado' },
+            'NM': { detention: 1400, arrests: 1200, arrestRate: 56.2, facilities: 3, name: 'New Mexico' },
+            'PA': { detention: 1200, arrests: 1500, arrestRate: 11.5, facilities: 3, name: 'Pennsylvania' },
+            'MS': { detention: 2500, arrests: 800, arrestRate: 26.8, facilities: 2, name: 'Mississippi' },
+            'AL': { detention: 800, arrests: 1200, arrestRate: 23.5, facilities: 2, name: 'Alabama' },
+            'WA': { detention: 1575, arrests: 1100, arrestRate: 14.2, facilities: 2, name: 'Washington' },
+            'NC': { detention: 900, arrests: 2800, arrestRate: 26.1, facilities: 3, name: 'North Carolina' },
+            'NY': { detention: 600, arrests: 1800, arrestRate: 9.2, facilities: 2, name: 'New York' },
+            'IL': { detention: 400, arrests: 1600, arrestRate: 12.5, facilities: 2, name: 'Illinois' },
+            'VA': { detention: 700, arrests: 1400, arrestRate: 16.1, facilities: 2, name: 'Virginia' },
+            'TN': { detention: 600, arrests: 3200, arrestRate: 45.9, facilities: 2, name: 'Tennessee' },
+            'OK': { detention: 500, arrests: 1800, arrestRate: 44.7, facilities: 2, name: 'Oklahoma' },
+            'UT': { detention: 450, arrests: 1600, arrestRate: 47.0, facilities: 2, name: 'Utah' }
+        };
+
+        // Field Offices coordinates
+        const fieldOffices = [
+            { name: 'Dallas', lat: 32.78, lon: -96.80 },
+            { name: 'Houston', lat: 29.76, lon: -95.37 },
+            { name: 'San Antonio', lat: 29.42, lon: -98.49 },
+            { name: 'El Paso', lat: 31.76, lon: -106.49 },
+            { name: 'Harlingen', lat: 26.19, lon: -97.69 },
+            { name: 'Los Angeles', lat: 34.05, lon: -118.24 },
+            { name: 'San Diego', lat: 32.72, lon: -117.16 },
+            { name: 'San Francisco', lat: 37.77, lon: -122.42 },
+            { name: 'Phoenix', lat: 33.45, lon: -112.07 },
+            { name: 'Denver', lat: 39.74, lon: -104.99 },
+            { name: 'Salt Lake City', lat: 40.76, lon: -111.89 },
+            { name: 'Seattle', lat: 47.61, lon: -122.33 },
+            { name: 'Chicago', lat: 41.88, lon: -87.63 },
+            { name: 'Detroit', lat: 42.33, lon: -83.05 },
+            { name: 'St. Paul', lat: 44.95, lon: -93.09 },
+            { name: 'Atlanta', lat: 33.75, lon: -84.39 },
+            { name: 'Miami', lat: 25.76, lon: -80.19 },
+            { name: 'New Orleans', lat: 29.95, lon: -90.07 },
+            { name: 'Boston', lat: 42.36, lon: -71.06 },
+            { name: 'New York City', lat: 40.71, lon: -74.01 },
+            { name: 'Newark', lat: 40.74, lon: -74.17 },
+            { name: 'Philadelphia', lat: 39.95, lon: -75.17 },
+            { name: 'Baltimore', lat: 39.29, lon: -76.61 },
+            { name: 'Washington DC', lat: 38.91, lon: -77.04 },
+            { name: 'Buffalo', lat: 42.89, lon: -78.88 }
+        ];
+
+        // Major Facilities
+        const facilities = [
+            { name: 'Camp East Montana', lat: 31.76, lon: -106.49, pop: 2774 },
+            { name: 'Adams County DC', lat: 31.56, lon: -91.39, pop: 2224 },
+            { name: 'Stewart DC', lat: 32.00, lon: -85.05, pop: 2044 },
+            { name: 'California City DC', lat: 35.13, lon: -117.99, pop: 2560 },
+            { name: 'South Texas FRC', lat: 28.67, lon: -99.17, pop: 2400 },
+            { name: 'South Texas IPC', lat: 28.89, lon: -99.10, pop: 1904 },
+            { name: 'Adelanto IPC', lat: 34.58, lon: -117.43, pop: 1940 },
+            { name: 'Northwest IPC', lat: 47.25, lon: -122.44, pop: 1575 },
+            { name: 'Winn CC', lat: 31.92, lon: -92.64, pop: 1576 },
+            { name: 'Port Isabel', lat: 26.07, lon: -97.22, pop: 1200 }
+        ];
+
+        // Toggle argument sections
+        function toggleArgument(header) {
+            const section = header.parentElement;
+            section.classList.toggle('open');
+        }
+
+        // Create US Map
+        async function createMap() {
+            const container = document.getElementById('us-map');
+            const width = container.clientWidth;
+            const height = 500;
+
+            const svg = d3.select('#us-map')
+                .append('svg')
+                .attr('viewBox', `0 0 ${width} ${height}`)
+                .attr('preserveAspectRatio', 'xMidYMid meet');
+
+            const projection = d3.geoAlbersUsa()
+                .scale(width * 1.1)
+                .translate([width / 2, height / 2]);
+
+            const path = d3.geoPath().projection(projection);
+
+            const colorScale = d3.scaleSequential()
+                .domain([0, 18000])
+                .interpolator(t => d3.interpolateRgb('#1a1a24', '#e63946')(t));
+
+            const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json');
+
+            svg.selectAll('path')
+                .data(topojson.feature(us, us.objects.states).features)
+                .enter()
+                .append('path')
+                .attr('d', path)
+                .attr('fill', d => {
+                    const abbrev = getStateAbbrev(d.properties.name);
+                    const data = stateData[abbrev];
+                    return data ? colorScale(data.detention) : '#1a1a24';
+                })
+                .attr('stroke', '#2a2a3a')
+                .attr('stroke-width', 0.5)
+                .attr('class', 'state')
+                .style('cursor', 'pointer')
+                .on('mouseover', function(event, d) {
+                    d3.select(this).attr('stroke', '#f4a261').attr('stroke-width', 2);
+                    showTooltip(event, d);
+                })
+                .on('mousemove', moveTooltip)
+                .on('mouseout', function() {
+                    d3.select(this).attr('stroke', '#2a2a3a').attr('stroke-width', 0.5);
+                    hideTooltip();
+                });
+
+            svg.selectAll('.office-marker')
+                .data(fieldOffices)
+                .enter()
+                .append('circle')
+                .attr('class', 'office-marker')
+                .attr('cx', d => { const c = projection([d.lon, d.lat]); return c ? c[0] : -100; })
+                .attr('cy', d => { const c = projection([d.lon, d.lat]); return c ? c[1] : -100; })
+                .attr('r', 4)
+                .on('mouseover', function(event, d) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.innerHTML = `<div class="tooltip-title">${d.name} Field Office</div><div class="tooltip-row"><span class="tooltip-label">Type</span><span class="tooltip-value">ERO</span></div>`;
+                    tooltip.classList.add('visible');
+                    moveTooltip(event);
+                })
+                .on('mousemove', moveTooltip)
+                .on('mouseout', hideTooltip);
+
+            svg.selectAll('.facility-marker')
+                .data(facilities)
+                .enter()
+                .append('circle')
+                .attr('class', 'facility-marker')
+                .attr('cx', d => { const c = projection([d.lon, d.lat]); return c ? c[0] : -100; })
+                .attr('cy', d => { const c = projection([d.lon, d.lat]); return c ? c[1] : -100; })
+                .attr('r', d => Math.sqrt(d.pop / 200))
+                .on('mouseover', function(event, d) {
+                    const tooltip = document.getElementById('tooltip');
+                    tooltip.innerHTML = `<div class="tooltip-title">${d.name}</div><div class="tooltip-row"><span class="tooltip-label">Avg. Daily Pop.</span><span class="tooltip-value">${d.pop.toLocaleString()}</span></div>`;
+                    tooltip.classList.add('visible');
+                    moveTooltip(event);
+                })
+                .on('mousemove', moveTooltip)
+                .on('mouseout', hideTooltip);
+
+            // Map view switching
+            document.querySelectorAll('.map-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.map-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const view = this.dataset.view;
+                    
+                    let maxVal, accessor;
+                    if (view === 'detention') { maxVal = 18000; accessor = d => d.detention; }
+                    else if (view === 'arrests') { maxVal = 90; accessor = d => d.arrestRate; }
+                    else { maxVal = 70; accessor = d => d.facilities; }
+                    
+                    const newScale = d3.scaleSequential().domain([0, maxVal]).interpolator(t => d3.interpolateRgb('#1a1a24', '#e63946')(t));
+                    
+                    svg.selectAll('.state').transition().duration(500).attr('fill', d => {
+                        const abbrev = getStateAbbrev(d.properties.name);
+                        const data = stateData[abbrev];
+                        return data ? newScale(accessor(data)) : '#1a1a24';
+                    });
+                });
+            });
+        }
+
+        function getStateAbbrev(name) {
+            const abbrevs = { 'Texas': 'TX', 'Louisiana': 'LA', 'California': 'CA', 'Florida': 'FL', 'Georgia': 'GA', 'Arizona': 'AZ', 'New Jersey': 'NJ', 'Colorado': 'CO', 'New Mexico': 'NM', 'Pennsylvania': 'PA', 'Mississippi': 'MS', 'Alabama': 'AL', 'Washington': 'WA', 'North Carolina': 'NC', 'New York': 'NY', 'Illinois': 'IL', 'Virginia': 'VA', 'Tennessee': 'TN', 'Oklahoma': 'OK', 'Utah': 'UT' };
+            return abbrevs[name] || null;
+        }
+
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            const abbrev = getStateAbbrev(d.properties.name);
+            const data = stateData[abbrev];
+            
+            if (data) {
+                tooltip.innerHTML = `<div class="tooltip-title">${d.properties.name}</div><div class="tooltip-row"><span class="tooltip-label">Detention Pop.</span><span class="tooltip-value">${data.detention.toLocaleString()}</span></div><div class="tooltip-row"><span class="tooltip-label">Arrests (Jan-Jun)</span><span class="tooltip-value">${data.arrests.toLocaleString()}</span></div><div class="tooltip-row"><span class="tooltip-label">Rate/100k</span><span class="tooltip-value">${data.arrestRate}</span></div><div class="tooltip-row"><span class="tooltip-label">Facilities</span><span class="tooltip-value">${data.facilities}</span></div>`;
+            } else {
+                tooltip.innerHTML = `<div class="tooltip-title">${d.properties.name}</div><div class="tooltip-row"><span class="tooltip-label">Data</span><span class="tooltip-value">Limited</span></div>`;
+            }
+            tooltip.classList.add('visible');
+        }
+
+        function moveTooltip(event) {
+            const tooltip = document.getElementById('tooltip');
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY - 10) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
+        // Divergence Chart
+        new Chart(document.getElementById('divergenceChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                datasets: [{
+                    label: 'Detention Population (thousands)',
+                    data: [39.7, 42, 45, 48, 52, 55, 58, 60, 62, 64, 65.7],
+                    borderColor: '#e63946',
+                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                }, {
+                    label: 'Monthly Removals (thousands)',
+                    data: [24, 25, 26, 26.5, 27, 27, 26.5, 26, 27, 27.5, 28],
+                    borderColor: '#457b9d',
+                    borderDash: [5, 5],
+                    tension: 0.3,
+                    yAxisID: 'y'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { intersect: false, mode: 'index' },
+                plugins: { legend: { position: 'bottom' } },
+                scales: {
+                    x: { grid: { color: '#2a2a3a' } },
+                    y: { grid: { color: '#2a2a3a' }, min: 0, max: 70 }
+                }
+            }
+        });
+
+        // Ratio Chart
+        new Chart(document.getElementById('ratioChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Dec 2024', 'Mar 2025', 'Jun 2025', 'Sep 2025', 'Nov 2025'],
+                datasets: [{
+                    label: 'Deportations per release',
+                    data: [1.6, 4.2, 8.1, 11.5, 14.3],
+                    backgroundColor: ['#457b9d', '#2a9d8f', '#f4a261', '#e63946', '#e63946'],
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false } },
+                    y: { grid: { color: '#2a2a3a' }, title: { display: true, text: 'Ratio', color: '#606070' } }
+                }
+            }
+        });
+
+        // State Detention Chart
+        new Chart(document.getElementById('stateDetentionChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Texas', 'Louisiana', 'California', 'Florida', 'Georgia', 'Arizona', 'Mississippi', 'New Jersey', 'Colorado', 'Washington'],
+                datasets: [{ data: [17696, 7096, 5711, 4217, 3973, 3200, 2500, 1800, 1650, 1575], backgroundColor: '#e63946', borderRadius: 4 }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: '#2a2a3a' }, ticks: { callback: v => v.toLocaleString() } }, y: { grid: { display: false } } }
+            }
+        });
+
+        // Arrest Rate Chart
+        new Chart(document.getElementById('arrestRateChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Texas', 'Louisiana', 'Florida', 'New Mexico', 'Utah', 'Arizona', 'Tennessee', 'Oklahoma', 'Georgia', 'California'],
+                datasets: [{ data: [86.6, 68.5, 55.9, 56.2, 47.0, 46.8, 45.9, 44.7, 41.2, 21.5], backgroundColor: d => d.raw > 50 ? '#e63946' : d.raw > 30 ? '#f4a261' : '#2a9d8f', borderRadius: 4 }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: '#2a2a3a' }, title: { display: true, text: 'Arrests per 100k residents', color: '#606070' } }, y: { grid: { display: false } } }
+            }
+        });
+
+        // Criminal Status Chart
+        new Chart(document.getElementById('criminalStatusChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['No Criminal Conviction', 'Criminal Conviction'],
+                datasets: [{ data: [73.6, 26.4], backgroundColor: ['#e63946', '#457b9d'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Dallas Chart
+        new Chart(document.getElementById('dallasChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['No Criminal History', 'Prior Conviction'],
+                datasets: [{ data: [62, 38], backgroundColor: ['#e63946', '#457b9d'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        });
+
+        // Operator Chart
+        new Chart(document.getElementById('operatorChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['GEO Group', 'CoreCivic', 'LaSalle', 'ICE-Owned', 'County Jails', 'Other'],
+                datasets: [{ data: [32, 28, 12, 8, 12, 8], backgroundColor: ['#e63946', '#f4a261', '#2a9d8f', '#457b9d', '#7b68ee', '#a0a0b0'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 12 } } } }
+        });
+
+        // Budget Chart
+        new Chart(document.getElementById('budgetChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Detention ($14B)', 'Personnel ($5B)', 'Transport ($3.5B)', 'Facilities ($4B)', 'Other ($2.2B)'],
+                datasets: [{ data: [14, 5, 3.5, 4, 2.2], backgroundColor: ['#e63946', '#f4a261', '#2a9d8f', '#7b68ee', '#457b9d'] }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { padding: 12 } } } }
+        });
+
+        // Trend Chart
+        new Chart(document.getElementById('trendChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jan 20', 'Jul 20', 'Jan 21', 'Jul 21', 'Jan 22', 'Jul 22', 'Jan 23', 'Jul 23', 'Jan 24', 'Jul 24', 'Jan 25', 'Apr 25', 'Jul 25', 'Nov 25'],
+                datasets: [{
+                    label: 'Avg. Daily Population',
+                    data: [38000, 20000, 15000, 22000, 21000, 27000, 28000, 38000, 35000, 37000, 39703, 48000, 58000, 65735],
+                    borderColor: '#e63946',
+                    backgroundColor: 'rgba(230, 57, 70, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: '#2a2a3a' } }, y: { grid: { color: '#2a2a3a' }, ticks: { callback: v => (v/1000) + 'k' } } }
+            }
+        });
+
+        // Workforce Chart
+        new Chart(document.getElementById('workforceChart'), {
+            type: 'bar',
+            data: {
+                labels: ['ERO Officers', 'HSI Agents', 'HSI Support', 'Admin/Legal', 'Detailees'],
+                datasets: [{ data: [6000, 6900, 3400, 5700, 33000], backgroundColor: ['#e63946', '#f4a261', '#f4a261', '#457b9d', '#7b68ee'], borderRadius: 4 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { display: false } }, y: { grid: { color: '#2a2a3a' }, ticks: { callback: v => (v/1000) + 'k' } } }
+            }
+        });
+
+        // Hiring Chart
+        new Chart(document.getElementById('hiringChart'), {
+            type: 'line',
+            data: {
+                labels: ['Jul', 'Aug', 'Sep', 'Oct', 'Nov'],
+                datasets: [{
+                    label: 'Cumulative Hires',
+                    data: [2000, 5000, 8000, 10500, 12000],
+                    borderColor: '#2a9d8f',
+                    backgroundColor: 'rgba(42, 157, 143, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#2a9d8f'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: { x: { grid: { color: '#2a2a3a' } }, y: { grid: { color: '#2a2a3a' }, ticks: { callback: v => (v/1000) + 'k' } } }
+            }
+        });
+
+        // Initialize
+        createMap();
+    </script>
+</body>
+</html>

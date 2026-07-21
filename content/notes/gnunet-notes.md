@@ -1,0 +1,79 @@
+---
+title: GNUnet notes
+tags:
+  - gnunet
+  - distributed-systems
+---
+## The Architecture of the GNUnet: 45 Subsystems in 45 Minutes (2015)
+- notes on video from [this page](https://www.gnunet.org/en/video.html)
+
+He gives 45 things you can do with GNUnet (in 2015) that try to emphasize current capabilities. He does not go into _how_ they work
+
+- all processes managed around a systemd-like process called ARM (automated Restart Manager)
+- lowest level is transport. Below we don't care (TCP, UDP, Bluetooth, whatever)
+	- unreliable, out-of-order packet delivery semantics
+	- enforces connection restrictions
+	- has an ATS (automated Transport Selection) to decide which connections to establish
+		- allocates bandwidth to peers by network topology
+		- allows other subsystems to specify preferences
+- CORE: off-the-record link encryption between peers
+- HOSTLIST: allows for bootstrapping -> multiple methods for this
+- Network Size Estimate (NSE): byzantine fault tolerant (HOW??)
+	- all peers converge to same network size estimate
+- DHT:  
+	- Tolerates small-world underlay topology
+	- optionally track path key-values took in the network
+	- key difference is that it does make the assumption that every peer can talk to every other peer
+	- plugins to verify integrity of key-value pairs as there can be multiple values for a given key
+		- e.g. this key should be hash of value
+- Confidential Ad-Hoc Decentralized E2E Transport
+	- AXOLOTL-encrypted E2E comms
+	- reliable or unreliable
+	- in or out of order
+	- low-lat or buffered
+- Identity (management)
+	- public key pairs as "egos" to identify users
+	- each user can have multiple alter-egos
+	- separate from peer identities (network addresses)
+- GNU Name System (GNU): secure memorable names
+	- interoperable with DNS
+	- **key:** achieves query and response privacy (HOW???)
+- Zone management: labels and record types 
+- Key revocation protocol:
+	- revocation messages can be prepped and stored off-line -> highly efficient
+- Set: compute set union or set intersection 
+	- surprisingly low bandwidth required
+- Scalarproduct service (SMC): secure multiparty computation
+	- if one party lies, result is garbage
+- Random Peer Sampling: BFT, decentralized, (Braums???)
+- Multicast (WiP):
+	- source not required to key-exchange with each group member (must trust members of each group)
+- PSYC2: runs over Multicast -> extensible messaging format
+- Social (Network Applications): runs over PSYC2 with GNS
+	- key concepts: nym, place, host, guest
+	- SecuShare (example of this)
+- Statistics: collect numeric run-time info
+- TestBed infrastructure to run controlled experiments to collect Statistics
+- Conversation: User application for phone calls (E2E encrypted)
+- File-"sharing": prefer to call it "publishing", lol
+	- Merkle tree of blocksk from a file
+	- peers caching cannot view contents
+	- multi-source download
+	- keyword search (???)
+	- file meta-data available as part of search result
+	- can share directories and mount via FUSE
+- Search by REgular EXpression
+	- fully decentralized, uses $R^5 N$ DHT
+	- trivial api, but very non-trivial theory
+- can use this to do DNS translation
+	- or IP-over-GNUnet
+- BFT Consensus
+	- synchronous
+	- compute global union over a set of initial elements distributed across n-k honest participants
+	- all honest end up with exact same set
+	- final set is super-set of union of initial elements at honest peers
+- using this, get electronic voting
+	- implemented Cramer'97-style e-voting
+		- correctness, secrecy, indi verif, univ veri, fairness, robustness, ~~coercion res~~.
+		- participants: supervisor, authorities, voter
+- RESTful APIs (WiP):

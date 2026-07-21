@@ -1,0 +1,23 @@
+- Explaining abstraction interfaces through development libraries
+	- using `matplotlib` as an example -> `seaborn` and `pandas` as a more constrained but easier package to work with
+	- play between optionality and difficulty of use
+- The struggle between complexity of information vs virality of it
+	- tie back to [[nexus-book|Nexus Book]]'s description of myths and how they much change as the growth of the information network increases.
+- The struggle between the bureaucracy that holds together an information network and the myths that drive it forward, also pulling off [[nexus-book|Nexus Book]].
+- The requirements of a successful open source project that make it more difficult but also more resilient
+	- you can't control those that build on it, so expectation setting is paramount
+	- benefit of giving all the "correct" information up front
+	- ideal communication is a PR that doesn't require back and forth for acceptance
+	- what -> when -> how -> who??
+		- FURPS -> Roadmap ($\Delta$ FURPS) -> Specs -> developer commitments (grants??)
+- The Developer experience and the feedback loop to engineers
+- Developing your Software Architect skills and their future use in AI development
+- Tokenomics as an ecology and how introducing new mechanisms is akin to introducing a new species into a niche that ruins it because it has no natural predators
+- The concept of scaling and the work/communication paradigm
+	- how this is altered from an HPC environment to an adversarial distributed systems environment
+- The Socratic method and how doing interviews has helped me build this skill
+- The perfect note taking/writing application requirements
+	- local first
+	- collaborative
+	- publishable
+	- private/public domains

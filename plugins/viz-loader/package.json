@@ -1,0 +1,41 @@
+{
+  "name": "viz-loader",
+  "version": "1.0.0",
+  "description": "Lazy-loads interactive visualization modules from /static/viz/<name>.js for [data-viz] elements",
+  "type": "module",
+  "license": "MIT",
+  "author": "Corey Petty",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "files": ["dist", "README.md"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "quartz": {
+    "name": "viz-loader",
+    "displayName": "Viz Loader",
+    "category": "component",
+    "version": "1.0.0",
+    "quartzVersion": ">=5.0.0",
+    "dependencies": [],
+    "defaultOrder": 50,
+    "defaultEnabled": true,
+    "defaultOptions": {},
+    "components": {
+      "VizLoader": {
+        "displayName": "Viz Loader",
+        "defaultPosition": "afterBody",
+        "defaultPriority": 30
+      }
+    }
+  }
+}
