@@ -206,7 +206,7 @@ plugins:
       repoId: R_kgDOKhSqHQ
       category: Announcements
       categoryId: DIC_kwDOKhSqHc4CweqT
-      apiBase: ""
+      apiBase: https://inline-comments.bs-comments.workers.dev
       mapping: url
     layout:
       position: afterBody
