@@ -196,8 +196,8 @@
     "quartz-inline-comments": {
       "source": "github:corpetty/quartz-inline-comments",
       "resolved": "https://github.com/corpetty/quartz-inline-comments.git",
-      "commit": "c6cc6042a33e9f4be74d7ff43748be492efc521a",
-      "installedAt": "2026-07-21T13:56:24.988Z"
+      "commit": "2af8a2deb2477481570a4a726c77bde72256a266",
+      "installedAt": "2026-07-22T00:00:00.000Z"
     },
     "reader-mode": {
       "source": "github:quartz-community/reader-mode",
