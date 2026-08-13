@@ -41,8 +41,11 @@ Content is written in Markdown and stored in the `/content/` directory. Quartz s
 
 When writing content (blog posts, articles, analysis) that represents Corey's voice:
 
-- **Profile:** `.claude/voice-profile.md`
+- **Profile:** `.claude/voice-profile.md` (operational summary)
+- **Full measured profiles:** `content/voice/` — see `profile-personal.md`, `profile-professional.md`, and `voice-baseline.md` for the stylometry the numbers come from
+- **Re-measure:** `python3 scripts/voice-stylometry.py "Label=path/glob"`
 - **When to use:** Any content that will be published or represents Corey's voice
+- **Pick the register first:** personal (essays, this site) vs professional (security work, specs, org-branded). Same voice, person dial inverted.
 - **Key principles:**
   - Show the thinking process, admit uncertainty
   - Data first, opinions clearly marked
@@ -50,13 +53,14 @@ When writing content (blog posts, articles, analysis) that represents Corey's vo
   - Strategic informality (cusses when warranted, not for shock)
   - Avoid AI-isms: over-hedging, generic transitions, sanitized language
 
-Quick voice check - reject output that contains:
-- "It's worth noting that..."
-- "Furthermore" / "Moreover" / "Additionally"
-- "Incredibly" / "Absolutely" / "Remarkably"
-- Excessive em-dashes (2-3 max per piece; use commas, periods, colons instead)
-- "It's not X. It's Y." rhetorical inversions (1 max per piece)
-- Generic conclusions that could apply to anything
+Quick voice check, ordered by measured impact:
+1. **Em-dashes: max 1 per 1,000 words of prose (zero for professional).** Verify with `grep -o "—" file | wc -l`. Baseline is 0.00-0.54; AI drafts run 9.4 and have hit 19.1. This is the loudest tell by far.
+2. **Sentence length: mean 21-23 words, max 15% under 10 words, at least 18% over 30.** Do NOT add burstiness — AI drafts overshoot and chop into fragments. Join sentences back together.
+3. **Hold the rhythm constant across topics.** Consistency is most of what "sounds like Corey" means.
+4. "It's not X. It's Y." rhetorical inversions (1 max per piece)
+5. Emphasis via ALL CAPS, not bold and not em-dashes
+6. Generic conclusions that could apply to anything; summary closings
+7. The banned word list ("It's worth noting that," "Furthermore," "Moreover," "Incredibly," "Remarkably," delve/pivotal/robust/leverage) — enforce it, but it is NOT where drafts go wrong. Don't spend time here.
 
 ## grepai - Semantic Code Search
 

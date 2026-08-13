@@ -19,6 +19,7 @@ New to the site? A few reasonable entry points:
 - [Posts](/posts): longer, self-contained writing meant to land a specific point
 - [Notes](/notes): rougher thinking that may or may not grow into a post
 - [Reports](/reports): data-journalism style deep dives on things I think are important, often with interactive visualizations to let you explore the data yourself
+- [Writing Voice](/voice): an open lab for keeping my writing sounding like me while using AI to write more of it, with measured baselines and the profiles I actually run
 - [Future articles](/notes/future-articles): things I want to write about eventually
 
 ## The rest of the site
