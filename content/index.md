@@ -40,4 +40,11 @@ I've done a lot of media. If you're looking for where to hear me talk:
 - Logos Podcast
 - BlockChannel
 
+## Other work
+
+Two things I've been building outside the garden:
+
+- [Lossy](https://lossybook.com) — a book I'm working on about why complex ideas have a hard time traveling through modern media: how they get compressed, filtered, and twisted on the way to you
+- [Love Landscape](https://love-landscape.com) — an interactive tool for mapping your own landscape of intimacy, built from [The Shape of Intimacy](/posts/the-shape-of-intimacy)
+
 Not sure where to start? You can search with `ctrl + k`.
