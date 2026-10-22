@@ -25,7 +25,7 @@ Think about someone you've loved for a long time. Their body has changed. Maybe 
 
 Spinoza argued that beauty is the name we give to the way something affects us, and that we don't desire things because they're good so much as call them good because we desire them.[^e-beauty] Harry Frankfurt made a similar case about love itself. We don't love people because we weighed them up and found them valuable. The love comes first, and the value follows from it.[^frankfurt] Whatever beauty we see in the people we love, our love helped put it there.
 
-There's something that doesn't explain, though. Love makes beauty, but it seems it doesn't reliably make desire. Spinoza defined the two separately, and I think he was right to.[^e-defs] You can look at someone with real tenderness, see everything good in them, and still not want them. Esther Perel argues that love and desire often want opposite things. Love wants closeness and knowing, and desire tends to feed on distance and the unknown, so the same years of safety that deepen one can quietly starve the other.[^perel] I've learned some of this the hard way this year. It doesn't make the idea wrong. It means the beauty love gives us isn't the only kind there is.
+There's something that doesn't explain, though. Love makes beauty, but it seems it doesn't reliably make desire. Spinoza defined the two separately, and I think he was right to.[^e-defs] You can look at someone with real tenderness, see everything good in them, and still not want them. Esther Perel argues that love and desire often want opposite things. Love wants closeness and knowing, and desire tends to feed on distance and the unknown, so the same years of safety that deepen one can quietly starve the other.[^perel] None of that makes the idea wrong. It means the beauty love gives us isn't the only kind there is.
 
 So where does love come from in the first place?
 
@@ -63,7 +63,7 @@ One caring response is a kindness. Hundreds of them, over years, become a place 
 
 This is my answer to his worry about hope. A bid does start out fragile, but when it's caught again and again it settles into something you can stand on. Once it does, we bid more, and braver. We start saying the things we used to [[asking-for-desire-resonance|keep folded up and put away]], because we've learned they'll be held.
 
-Security still has to be looked after. The people looking after it are tired and distracted and still changing, and the person you built trust with fifteen years ago isn't quite the person beside you now. You aren't quite the same either.
+Security still has to be looked after. The people looking after it are tired and distracted and still changing, and the person you built trust with years ago isn't quite the person beside you now. You aren't quite the same either.
 
 ## One door opens others
 
