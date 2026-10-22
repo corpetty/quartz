@@ -1,15 +1,23 @@
 # Quartz Project
 
-This is a Quartz v4 digital garden / static site generator project.
+This is a Quartz v5 digital garden / static site generator project, published at https://bayesianpersuasion.com.
 
 ## Project Overview
 
-Quartz transforms Markdown content into a static website. It's built with TypeScript and uses modern web technologies.
+Quartz transforms Markdown content into a static website. It's built with TypeScript and uses modern web technologies. In v5, most features (markdown transforms, components, emitters) are plugins pulled from Git repos rather than code built into `/quartz/`.
+
+## Branches and Deploy
+
+- `v5` is the default branch and the one that deploys. Pushing to `v5` triggers `.github/workflows/deploy.yml`, which builds and publishes to GitHub Pages.
+- `v4` is the pre-migration branch and is no longer deployed. Don't commit content there.
+- Other workflows (`deploy-v5.yaml`, `ci.yaml`, `docker-build-push.yaml`) only run on the upstream `jackyzha0/quartz` repo and show as skipped here.
 
 ## Key Commands
 
-- `npx quartz build` - Build the static site
-- `npx quartz serve` - Serve the site locally with hot reload
+- `npm ci` then `npx quartz plugin install` - Install dependencies and the plugins pinned in `quartz.lock.json` (needed after a fresh clone or branch switch)
+- `npx quartz build` - Build the static site into `/public/`
+- `npx quartz build --serve` - Build and serve locally with hot reload
+- `npx quartz plugin list` / `add <source>` / `remove <name>` - Manage plugins
 - `npm run check` - Run TypeScript checks and Prettier formatting check
 - `npm run format` - Format code with Prettier
 - `npm run test` - Run tests
@@ -17,25 +25,30 @@ Quartz transforms Markdown content into a static website. It's built with TypeSc
 ## Project Structure
 
 - `/quartz/` - Core Quartz framework code (TypeScript)
-- `/content/` - Markdown content for the site
-- `/quartz.config.ts` - Main configuration file
-- `/quartz.layout.ts` - Layout configuration
+- `/content/` - Markdown content for the site (`posts/`, `notes/`, `poetry/`, `pubs/`, `reports/`, `voice/`)
+- `/quartz.config.yaml` - Main configuration: site settings, the plugin list with per-plugin options, and the `layout:` section (replaces v4's `quartz.config.ts` and `quartz.layout.ts`)
+- `/quartz.lock.json` - Pinned commit for every installed plugin
+- `/.quartz/plugins/` - Where plugins get installed (gitignored)
+- `/plugins/` - Local plugins referenced from the config by path, e.g. `./plugins/viz-loader`
+- `/docs/` - Upstream Quartz v5 documentation (see `docs/cli/plugin.md` for the plugin CLI)
 
 ## Development Notes
 
-- Node.js 20+ or 22+ required
+- Node.js 22+ required (npm 10.9.2+)
 - Uses ESM modules (`"type": "module"`)
 - TypeScript for type safety
 - Prettier for code formatting
 
 ## Content
 
-Content is written in Markdown and stored in the `/content/` directory. Quartz supports:
+Content is written in Markdown and stored in the `/content/` directory. The enabled plugins provide:
 - Obsidian-style wikilinks
 - Frontmatter metadata
-- LaTeX math (KaTeX/MathJax)
+- LaTeX math (KaTeX)
 - Code syntax highlighting (Shiki)
-- Citations (rehype-citation)
+- Interactive visualizations via `<div data-viz="name">`, loaded from `quartz/static/viz/<name>.js` (see `plugins/viz-loader/README.md`)
+
+Citations are installed but disabled in `quartz.config.yaml`.
 
 ## Writing Voice Profile
 
