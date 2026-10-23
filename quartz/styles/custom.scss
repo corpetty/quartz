@@ -1,3 +1,13 @@
 @use "./variables.scss" as *;
 
 // put your custom CSS here!
+
+// Mobile explorer drawer: an open folder sets `visibility: visible`, which
+// overrides the closed drawer's `visibility: hidden`. The drawer sits only
+// 100vw to the left of the page padding, so its right edge leaks onto the
+// screen as stray characters. Make open folders follow the drawer state.
+@media all and (max-width: 800px) {
+  .explorer.collapsed > .explorer-content .folder-outer.open {
+    visibility: inherit;
+  }
+}
